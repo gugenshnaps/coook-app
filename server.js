@@ -53,6 +53,29 @@ const server = http.createServer((req, res) => {
     });
 });
 
+// API endpoint для получения всех городов
+server.get('/api/cities', (req, res) => {
+    try {
+        // Читаем файл с городами
+        const citiesData = fs.readFileSync('cities.json', 'utf8');
+        const cities = JSON.parse(citiesData);
+        
+        // Возвращаем только названия городов для приложения
+        const cityNames = cities.map(city => city.name);
+        
+        res.json({
+            success: true,
+            cities: cityNames
+        });
+    } catch (error) {
+        console.error('❌ Error loading cities:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to load cities'
+        });
+    }
+});
+
 // Start server
 server.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);

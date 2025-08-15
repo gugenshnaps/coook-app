@@ -146,9 +146,53 @@ function createMockTelegramAPI() {
     }, 500);
 }
 
+// Load cities from API
+async function loadCities() {
+    try {
+        const response = await fetch('/api/cities');
+        const data = await response.json();
+        
+        if (data.success && data.cities) {
+            populateCitySelect(data.cities);
+            console.log('🔧 Cities loaded from API:', data.cities);
+        } else {
+            console.error('❌ Failed to load cities:', data.error);
+            // Fallback to default cities
+            populateCitySelect(['São Paulo', 'Rio de Janeiro', 'Brasília']);
+        }
+    } catch (error) {
+        console.error('❌ Error loading cities:', error);
+        // Fallback to default cities
+        populateCitySelect(['São Paulo', 'Rio de Janeiro', 'Brasília']);
+    }
+}
+
+// Populate city select dropdown
+function populateCitySelect(cities) {
+    const citySelect = document.getElementById('citySelect');
+    if (!citySelect) return;
+    
+    // Clear existing options
+    citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
+    
+    // Add cities from API
+    cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+    });
+    
+    // Restore saved city selection if exists
+    if (currentCity && cities.includes(currentCity)) {
+        citySelect.value = currentCity;
+    }
+}
+
 // Initialize the application
 function initializeApp() {
     loadSavedCity(); // Load saved city first
+    loadCities(); // Load cities from API
     loadData();
     setupEventListeners();
     setupTelegramIntegration();
