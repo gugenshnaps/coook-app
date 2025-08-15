@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Coook</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>🔐 Admin Panel - Coook</h1>
+            <p>Gerencie cafés e cidades</p>
+        </header>
+
+        <main class="admin-main">
+            <!-- Cities Management Section -->
+            <section class="admin-section" id="cities-section">
+                <h2>🏙️ Gerenciar Cidades</h2>
+                
+                <div class="form-group">
+                    <label for="newCityName">Nome da Cidade:</label>
+                    <input type="text" id="newCityName" placeholder="Ex: Belo Horizonte">
+                    <button onclick="addNewCity()" class="btn btn-primary">➕ Adicionar Cidade</button>
+                </div>
+
+                <div class="cities-list">
+                    <h3>Cidades Existentes:</h3>
+                    <div id="citiesList" class="items-grid">
+                        <!-- Cities will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cafes Management Section -->
+            <section class="admin-section" id="cafes-section">
+                <h2>☕ Gerenciar Cafés</h2>
+                
+                <div class="form-group">
+                    <label for="cafeCity">Cidade:</label>
+                    <select id="cafeCity" onchange="filterCafes()">
+                        <option value="">Todas as cidades</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cafeSearch">Buscar:</label>
+                    <input type="text" id="cafeSearch" placeholder="Nome do café..." oninput="filterCafes()">
+                </div>
+
+                <div class="cafes-list">
+                    <h3>Cafés Existentes:</h3>
+                    <div id="cafesList" class="items-grid">
+                        <!-- Cafes will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="add-cafe-form">
+                    <h3>➕ Adicionar Novo Café</h3>
+                    <form id="addCafeForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cafeName">Nome do Café:</label>
+                                <input type="text" id="cafeName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cafeCitySelect">Cidade:</label>
+                                <select id="cafeCitySelect" required>
+                                    <!-- Cities will be loaded here -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cafeDescription">Descrição:</label>
+                            <textarea id="cafeDescription" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cafeHours">Horário de Funcionamento:</label>
+                            <textarea id="cafeHours" rows="3" required placeholder="Ex: Segunda a Sexta: 7h às 20h&#10;Sábado e Domingo: 8h às 22h"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cafeImage">URL da Imagem:</label>
+                            <input type="url" id="cafeImage" required placeholder="https://example.com/image.jpg">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">💾 Salvar Café</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer class="admin-footer">
+            <p>🔄 Dados são sincronizados automaticamente com o aplicativo principal</p>
+            <button onclick="refreshData()" class="btn btn-secondary">🔄 Atualizar Dados</button>
+        </footer>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

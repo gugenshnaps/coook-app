@@ -1,0 +1,33 @@
+{
+  "name": "coook-app",
+  "version": "1.0.0",
+  "description": "A Telegram Mini App for finding cafes in Brazilian cities",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "telegram",
+    "webapp",
+    "cafe",
+    "brazil",
+    "mobile",
+    "miniapp"
+  ],
+  "author": "gugenshnaps",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gugenshnaps/coook-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gugenshnaps/coook-app/issues"
+  },
+  "homepage": "https://gugenshnaps.github.io/coook-app/"
+}
+
