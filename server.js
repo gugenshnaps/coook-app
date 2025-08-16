@@ -53,41 +53,19 @@ const server = http.createServer((req, res) => {
     });
 });
 
-// API endpoint для получения всех городов
-server.get('/api/cities', (req, res) => {
-    try {
-        // Читаем файл с городами
-        const citiesData = fs.readFileSync('cities.json', 'utf8');
-        const cities = JSON.parse(citiesData);
-        
-        // Возвращаем только названия городов для приложения
-        const cityNames = cities.map(city => city.name);
-        
-        res.json({
-            success: true,
-            cities: cityNames
-        });
-    } catch (error) {
-        console.error('❌ Error loading cities:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to load cities'
-        });
-    }
-});
-
 // Start server
 server.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-    console.log(`📱 Aplicação Coook está pronta para uso!`);
-    console.log(`🔐 Admin Panel: http://localhost:${PORT}/admin`);
-    console.log(`📱 Telegram Version: http://localhost:${PORT}/telegram`);
-    console.log(`🌍 Cidades disponíveis: São Paulo, Rio de Janeiro, Brasília`);
-    console.log(`📋 Instruções:`);
-    console.log(`   • Usuários: http://localhost:${PORT}`);
-    console.log(`   • Administradores: http://localhost:${PORT}/admin`);
-    console.log(`   • Telegram: http://localhost:${PORT}/telegram`);
-    console.log(`   • Изменения в админ панели автоматически синхронизируются с основным приложением`);
+    console.log('📱 Aplicação Caaafe está pronta para uso!');
+    
+    // Load cities data
+    try {
+        const citiesData = fs.readFileSync('cities.json', 'utf8');
+        const cities = JSON.parse(citiesData);
+        console.log('🌍 Cidades disponíveis:', cities.map(c => c.name).join(', '));
+    } catch (error) {
+        console.log('⚠️ Não foi possível carregar cities.json');
+    }
 });
 
 // Graceful shutdown
