@@ -25,17 +25,23 @@ function saveSelectedCity(city) {
 
 // Load cities from static file
 async function loadCities() {
+    console.log('🔧 Starting to load cities...');
     try {
         const response = await fetch('./cities.json');
+        console.log('🔧 Response status:', response.status);
+        console.log('🔧 Response URL:', response.url);
+        
         const cities = await response.json();
+        console.log('🔧 Raw cities data:', cities);
         
         if (cities && cities.length > 0) {
             // Extract city names from the array
             const cityNames = cities.map(city => city.name);
+            console.log('🔧 City names extracted:', cityNames);
             populateCitySelect(cityNames);
             console.log('🔧 Cities loaded from cities.json:', cityNames);
         } else {
-            console.error('❌ Failed to load cities from cities.json');
+            console.error('❌ Failed to load cities from cities.json - empty or invalid data');
             // Fallback to default cities
             populateCitySelect(['São Paulo', 'Rio de Janeiro', 'Brasília']);
         }
