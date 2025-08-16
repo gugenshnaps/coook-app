@@ -10,6 +10,7 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
+    overflow-x: hidden;
 }
 
 /* Header styles */
@@ -305,8 +306,8 @@ body {
     font-size: 14px;
 }
 
-/* Telegram WebApp specific styles */
-@media (max-width: 480px) {
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
     .app-header {
         padding: 12px 16px;
     }
