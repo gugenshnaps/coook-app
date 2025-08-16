@@ -32,7 +32,7 @@ function saveSelectedCity(city) {
     console.log('🔧 Saved city selection:', city);
 }
 
-// Load cities from static file
+// Load cities from API
 async function loadCities() {
     console.log('🔍 === COOK APP DEBUG INFO ===');
     console.log('🔍 User Agent:', navigator.userAgent);
@@ -42,29 +42,27 @@ async function loadCities() {
     console.log('🔍 Current URL:', window.location.href);
     console.log('🔍 === END DEBUG INFO ===');
     
-    console.log('🔧 Starting to load cities...');
+    console.log('🔧 Starting to load cities from API...');
     try {
-        const response = await fetch('./cities.json');
+        const response = await fetch('/api/cities');
         console.log('🔧 Response status:', response.status);
         console.log('🔧 Response URL:', response.url);
         
-        const cities = await response.json();
-        console.log('🔧 Raw cities data:', cities);
+        const data = await response.json();
+        console.log('🔧 API response:', data);
         
-        if (cities && cities.length > 0) {
+        if (data.success && data.cities && data.cities.length > 0) {
             // Extract city names from the array
-            const cityNames = cities.map(city => city.name);
+            const cityNames = data.cities.map(city => city.name);
             console.log('🔧 City names extracted:', cityNames);
             populateCitySelect(cityNames);
-            console.log('🔧 Cities loaded from cities.json:', cityNames);
+            console.log('🔧 Cities loaded from API:', cityNames);
         } else {
-            console.error('❌ Failed to load cities from cities.json - empty or invalid data');
-            // NO FALLBACK - show error message
+            console.error('❌ Failed to load cities from API - empty or invalid data');
             showCitiesError();
         }
     } catch (error) {
-        console.error('❌ Error loading cities from cities.json:', error);
-        // NO FALLBACK - show error message
+        console.error('❌ Error loading cities from API:', error);
         showCitiesError();
     }
 }
@@ -188,7 +186,7 @@ function createMockUserInfo() {
     }
 }
 
-// Load data from server
+// Load data from API
 async function loadData() {
     try {
         const response = await fetch('/api/cafes');
@@ -196,14 +194,14 @@ async function loadData() {
         
         if (data.success) {
             cafesData = data.cafes;
-            citiesData = data.cities;
-            console.log('✅ Data loaded successfully');
+            console.log('✅ Cafes loaded from API:', cafesData);
             displayCafes();
         } else {
-            console.error('❌ Failed to load data:', data.error);
+            console.error('❌ Failed to load cafes from API:', data.error);
+            loadMockData();
         }
     } catch (error) {
-        console.error('❌ Error loading data:', error);
+        console.error('❌ Error loading cafes from API:', error);
         // Load mock data for development
         loadMockData();
     }
