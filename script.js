@@ -34,6 +34,14 @@ function saveSelectedCity(city) {
 
 // Load cities from static file
 async function loadCities() {
+    console.log('🔍 === COOK APP DEBUG INFO ===');
+    console.log('🔍 User Agent:', navigator.userAgent);
+    console.log('🔍 Platform:', navigator.platform);
+    console.log('🔍 Screen size:', window.innerWidth, 'x', window.innerHeight);
+    console.log('🔍 Telegram WebApp available:', !!(window.Telegram && window.Telegram.WebApp));
+    console.log('🔍 Current URL:', window.location.href);
+    console.log('🔍 === END DEBUG INFO ===');
+    
     console.log('🔧 Starting to load cities...');
     try {
         const response = await fetch('./cities.json');
@@ -51,13 +59,13 @@ async function loadCities() {
             console.log('🔧 Cities loaded from cities.json:', cityNames);
         } else {
             console.error('❌ Failed to load cities from cities.json - empty or invalid data');
-            // Fallback to default cities
-            populateCitySelect(['São Paulo', 'Rio de Janeiro', 'Brasília']);
+            // NO FALLBACK - show error message
+            showCitiesError();
         }
     } catch (error) {
         console.error('❌ Error loading cities from cities.json:', error);
-        // Fallback to default cities
-        populateCitySelect(['São Paulo', 'Rio de Janeiro', 'Brasília']);
+        // NO FALLBACK - show error message
+        showCitiesError();
     }
 }
 
@@ -80,6 +88,19 @@ function populateCitySelect(cities) {
     // Restore saved city selection if exists
     if (currentCity && cities.includes(currentCity)) {
         citySelect.value = currentCity;
+    }
+}
+
+// Show error when cities can't be loaded
+function showCitiesError() {
+    const citySelect = document.getElementById('citySelect');
+    if (citySelect) {
+        citySelect.innerHTML = '<option value="">Erro ao carregar cidades</option>';
+    }
+    
+    const cafesList = document.getElementById('cafesList');
+    if (cafesList) {
+        cafesList.innerHTML = '<div class="loading">Erro ao carregar cidades. Tente recarregar a página.</div>';
     }
 }
 
