@@ -146,22 +146,24 @@ function createMockTelegramAPI() {
     }, 500);
 }
 
-// Load cities from API
+// Load cities from static file
 async function loadCities() {
     try {
-        const response = await fetch('/api/cities');
-        const data = await response.json();
+        const response = await fetch('./cities.json');
+        const cities = await response.json();
         
-        if (data.success && data.cities) {
-            populateCitySelect(data.cities);
-            console.log('🔧 Cities loaded from API:', data.cities);
+        if (cities && cities.length > 0) {
+            // Extract city names from the array
+            const cityNames = cities.map(city => city.name);
+            populateCitySelect(cityNames);
+            console.log('🔧 Cities loaded from cities.json:', cityNames);
         } else {
-            console.error('❌ Failed to load cities:', data.error);
+            console.error('❌ Failed to load cities from cities.json');
             // Fallback to default cities
             populateCitySelect(['São Paulo', 'Rio de Janeiro', 'Brasília']);
         }
     } catch (error) {
-        console.error('❌ Error loading cities:', error);
+        console.error('❌ Error loading cities from cities.json:', error);
         // Fallback to default cities
         populateCitySelect(['São Paulo', 'Rio de Janeiro', 'Brasília']);
     }
