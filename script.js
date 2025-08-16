@@ -1,6 +1,15 @@
 // Coook Application Logic - Universal Version
 // This file handles the main functionality for Coook - works everywhere
 
+// Debug information
+console.log('🔍 === COOK APP DEBUG INFO ===');
+console.log('🔍 User Agent:', navigator.userAgent);
+console.log('🔍 Platform:', navigator.platform);
+console.log('🔍 Screen size:', window.innerWidth, 'x', window.innerHeight);
+console.log('🔍 Telegram WebApp available:', !!(window.Telegram && window.Telegram.WebApp));
+console.log('🔍 Current URL:', window.location.href);
+console.log('🔍 === END DEBUG INFO ===');
+
 // Global variables
 let cafesData = [];
 let citiesData = [];
