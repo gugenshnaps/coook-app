@@ -1,12 +1,12 @@
-// Coook Application Logic - Universal Version
-// This file handles the main functionality for Coook - works everywhere
+// Coook Application Logic - Firebase Version
+// This file handles the main functionality for Coook using Firebase
 
 // Debug information
 console.log('🔍 === COOK APP DEBUG INFO ===');
 console.log('🔍 User Agent:', navigator.userAgent);
 console.log('🔍 Platform:', navigator.platform);
 console.log('🔍 Screen size:', window.innerWidth, 'x', window.innerHeight);
-console.log('🔍 Telegram WebApp available:', !!(window.Telegram && window.Telegram.WebApp));
+console.log('🔍 Firebase available:', !!(window.firebase && window.firebase.db));
 console.log('🔍 Current URL:', window.location.href);
 console.log('🔍 === END DEBUG INFO ===');
 
@@ -15,6 +15,20 @@ let cafesData = [];
 let citiesData = [];
 let currentCity = null;
 let currentCafe = null;
+
+// Firebase imports
+import { 
+    collection, 
+    getDocs, 
+    addDoc, 
+    updateDoc, 
+    deleteDoc, 
+    doc, 
+    onSnapshot,
+    query,
+    where,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Load saved city from localStorage
 function loadSavedCity() {
@@ -32,39 +46,80 @@ function saveSelectedCity(city) {
     console.log('🔧 Saved city selection:', city);
 }
 
-// Load cities from API
+// Load cities from Firebase
 async function loadCities() {
-    console.log('🔍 === COOK APP DEBUG INFO ===');
-    console.log('🔍 User Agent:', navigator.userAgent);
-    console.log('🔍 Platform:', navigator.platform);
-    console.log('🔍 Screen size:', window.innerWidth, 'x', window.innerHeight);
-    console.log('🔍 Telegram WebApp available:', !!(window.Telegram && window.Telegram.WebApp));
-    console.log('🔍 Current URL:', window.location.href);
-    console.log('🔍 === END DEBUG INFO ===');
+    console.log('🔧 Starting to load cities from Firebase...');
     
-    console.log('🔧 Starting to load cities from API...');
+    if (!window.firebase || !window.firebase.db) {
+        console.error('❌ Firebase not initialized');
+        showCitiesError();
+        return;
+    }
+    
     try {
-        const response = await fetch('/api/cities');
-        console.log('🔧 Response status:', response.status);
-        console.log('🔧 Response URL:', response.url);
+        const citiesRef = collection(window.firebase.db, 'cities');
+        const citiesSnapshot = await getDocs(citiesRef);
         
-        const data = await response.json();
-        console.log('🔧 API response:', data);
-        
-        if (data.success && data.cities && data.cities.length > 0) {
-            // Extract city names from the array
-            const cityNames = data.cities.map(city => city.name);
-            console.log('🔧 City names extracted:', cityNames);
-            populateCitySelect(cityNames);
-            console.log('🔧 Cities loaded from API:', cityNames);
+        if (!citiesSnapshot.empty) {
+            const cities = citiesSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            console.log('🔧 Cities loaded from Firebase:', cities);
+            populateCitySelect(cities.map(city => city.name));
+            
+            // Set up real-time listener for cities
+            setupCitiesListener();
         } else {
-            console.error('❌ Failed to load cities from API - empty or invalid data');
-            showCitiesError();
+            console.log('🔧 No cities found, creating default cities...');
+            await createDefaultCities();
         }
     } catch (error) {
-        console.error('❌ Error loading cities from API:', error);
+        console.error('❌ Error loading cities from Firebase:', error);
         showCitiesError();
     }
+}
+
+// Create default cities if none exist
+async function createDefaultCities() {
+    const defaultCities = [
+        { name: 'São Paulo', id: 'sao-paulo' },
+        { name: 'Rio de Janeiro', id: 'rio-de-janeiro' },
+        { name: 'Brasília', id: 'brasilia' },
+        { name: 'Salvador', id: 'salvador' }
+    ];
+    
+    try {
+        const citiesRef = collection(window.firebase.db, 'cities');
+        for (const city of defaultCities) {
+            await addDoc(citiesRef, city);
+        }
+        console.log('✅ Default cities created');
+        
+        // Load cities again
+        await loadCities();
+    } catch (error) {
+        console.error('❌ Error creating default cities:', error);
+    }
+}
+
+// Set up real-time listener for cities
+function setupCitiesListener() {
+    if (!window.firebase || !window.firebase.db) return;
+    
+    const citiesRef = collection(window.firebase.db, 'cities');
+    const q = query(citiesRef, orderBy('name'));
+    
+    onSnapshot(q, (snapshot) => {
+        const cities = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        console.log('🔄 Cities updated in real-time:', cities);
+        populateCitySelect(cities.map(city => city.name));
+    });
 }
 
 // Populate city select dropdown
@@ -75,7 +130,7 @@ function populateCitySelect(cities) {
     // Clear existing options
     citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
     
-    // Add cities from API
+    // Add cities from Firebase
     cities.forEach(city => {
         const option = document.createElement('option');
         option.value = city;
@@ -89,32 +144,123 @@ function populateCitySelect(cities) {
     }
 }
 
-// Show error when cities can't be loaded
-function showCitiesError() {
-    const citySelect = document.getElementById('citySelect');
-    if (citySelect) {
-        citySelect.innerHTML = '<option value="">Erro ao carregar cidades</option>';
+// Load cafes from Firebase
+async function loadCafes() {
+    console.log('🔧 Starting to load cafes from Firebase...');
+    
+    if (!window.firebase || !window.firebase.db) {
+        console.error('❌ Firebase not initialized');
+        loadMockData();
+        return;
     }
     
-    const cafesList = document.getElementById('cafesList');
-    if (cafesList) {
-        cafesList.innerHTML = '<div class="loading">Erro ao carregar cidades. Tente recarregar a página.</div>';
+    try {
+        const cafesRef = collection(window.firebase.db, 'cafes');
+        const cafesSnapshot = await getDocs(cafesRef);
+        
+        if (!cafesSnapshot.empty) {
+            cafesData = cafesSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            console.log('✅ Cafes loaded from Firebase:', cafesData);
+            displayCafes();
+            
+            // Set up real-time listener for cafes
+            setupCafesListener();
+        } else {
+            console.log('🔧 No cafes found, creating default cafes...');
+            await createDefaultCafes();
+        }
+    } catch (error) {
+        console.error('❌ Error loading cafes from Firebase:', error);
+        loadMockData();
     }
+}
+
+// Create default cafes if none exist
+async function createDefaultCafes() {
+    const defaultCafes = [
+        {
+            name: 'Café Central',
+            city: 'São Paulo',
+            description: 'Um café acolhedor no coração da cidade com os melhores grãos brasileiros.',
+            image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400'
+        },
+        {
+            name: 'Bella Vista',
+            city: 'Rio de Janeiro',
+            description: 'Café com vista panorâmica e ambiente sofisticado para momentos especiais.',
+            image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400'
+        }
+    ];
+    
+    try {
+        const cafesRef = collection(window.firebase.db, 'cafes');
+        for (const cafe of defaultCafes) {
+            await addDoc(cafesRef, cafe);
+        }
+        console.log('✅ Default cafes created');
+        
+        // Load cafes again
+        await loadCafes();
+    } catch (error) {
+        console.error('❌ Error creating default cafes:', error);
+    }
+}
+
+// Set up real-time listener for cafes
+function setupCafesListener() {
+    if (!window.firebase || !window.firebase.db) return;
+    
+    const cafesRef = collection(window.firebase.db, 'cafes');
+    const q = query(cafesRef, orderBy('name'));
+    
+    onSnapshot(q, (snapshot) => {
+        cafesData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        console.log('🔄 Cafes updated in real-time:', cafesData);
+        displayCafes();
+    });
+}
+
+// Load mock data for development (fallback)
+function loadMockData() {
+    cafesData = [
+        {
+            id: 'cafe-central',
+            name: 'Café Central',
+            city: 'São Paulo',
+            description: 'Um café acolhedor no coração da cidade com os melhores grãos brasileiros.',
+            image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400'
+        },
+        {
+            id: 'bella-vista',
+            name: 'Bella Vista',
+            city: 'Rio de Janeiro',
+            description: 'Café com vista panorâmica e ambiente sofisticado para momentos especiais.',
+            image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400'
+        }
+    ];
+    
+    console.log('🔧 Mock data loaded for development');
+    displayCafes();
 }
 
 // Initialize the application
 function initializeApp() {
     loadSavedCity(); // Load saved city first
-    loadCities(); // Load cities from cities.json
-    loadData();
+    loadCities(); // Load cities from Firebase
+    loadCafes(); // Load cafes from Firebase
     setupEventListeners();
     setupUniversalIntegration();
     initMobileGestures();
     
-    // Auto-refresh data every 5 seconds
-    setInterval(refreshData, 5000);
-    
-    console.log('✅ Coook Universal App initialized successfully!');
+    console.log('✅ Coook Firebase App initialized successfully!');
 }
 
 // Setup universal integration (works everywhere)
@@ -184,50 +330,6 @@ function createMockUserInfo() {
     if (userNameElement) {
         userNameElement.textContent = 'Visitante';
     }
-}
-
-// Load data from API
-async function loadData() {
-    try {
-        const response = await fetch('/api/cafes');
-        const data = await response.json();
-        
-        if (data.success) {
-            cafesData = data.cafes;
-            console.log('✅ Cafes loaded from API:', cafesData);
-            displayCafes();
-        } else {
-            console.error('❌ Failed to load cafes from API:', data.error);
-            loadMockData();
-        }
-    } catch (error) {
-        console.error('❌ Error loading cafes from API:', error);
-        // Load mock data for development
-        loadMockData();
-    }
-}
-
-// Load mock data for development
-function loadMockData() {
-    cafesData = [
-        {
-            id: 'cafe-central',
-            name: 'Café Central',
-            city: 'São Paulo',
-            description: 'Um café acolhedor no coração da cidade com os melhores grãos brasileiros.',
-            image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400'
-        },
-        {
-            id: 'bella-vista',
-            name: 'Bella Vista',
-            city: 'Rio de Janeiro',
-            description: 'Café com vista panorâmica e ambiente sofisticado para momentos especiais.',
-            image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400'
-        }
-    ];
-    
-    console.log('🔧 Mock data loaded for development');
-    displayCafes();
 }
 
 // Setup event listeners
@@ -339,7 +441,20 @@ function closeModal() {
 
 // Refresh data
 function refreshData() {
-    loadData();
+    loadCafes();
+}
+
+// Show error when cities can't be loaded
+function showCitiesError() {
+    const citySelect = document.getElementById('citySelect');
+    if (citySelect) {
+        citySelect.innerHTML = '<option value="">Erro ao carregar cidades</option>';
+    }
+    
+    const cafesList = document.getElementById('cafesList');
+    if (cafesList) {
+        cafesList.innerHTML = '<div class="loading">Erro ao carregar cidades. Tente recarregar a página.</div>';
+    }
 }
 
 // Initialize mobile gestures
@@ -368,6 +483,21 @@ function initMobileGestures() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Coook Universal App starting...');
-    initializeApp();
+    console.log('🚀 Coook Firebase App starting...');
+    
+    // Wait for Firebase to be initialized
+    const checkFirebase = setInterval(() => {
+        if (window.firebase && window.firebase.db) {
+            clearInterval(checkFirebase);
+            initializeApp();
+        }
+    }, 100);
+    
+    // Timeout after 5 seconds
+    setTimeout(() => {
+        if (!window.firebase || !window.firebase.db) {
+            console.error('❌ Firebase initialization timeout');
+            clearInterval(checkFirebase);
+        }
+    }, 5000);
 });
