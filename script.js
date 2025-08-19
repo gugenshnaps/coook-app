@@ -16,20 +16,6 @@ let citiesData = [];
 let currentCity = null;
 let currentCafe = null;
 
-// Firebase imports
-import { 
-    collection, 
-    getDocs, 
-    addDoc, 
-    updateDoc, 
-    deleteDoc, 
-    doc, 
-    onSnapshot,
-    query,
-    where,
-    orderBy
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
 // Load saved city from localStorage
 function loadSavedCity() {
     const savedCity = localStorage.getItem('coook_selected_city');
@@ -57,17 +43,17 @@ async function loadCities() {
     }
     
     try {
-        const citiesRef = collection(window.firebase.db, 'cities');
-        const citiesSnapshot = await getDocs(citiesRef);
+        const citiesRef = window.firebase.collection(window.firebase.db, 'cities');
+        const citiesSnapshot = await window.firebase.getDocs(citiesRef);
         
         if (!citiesSnapshot.empty) {
-            const cities = citiesSnapshot.docs.map(doc => ({
+            citiesData = citiesSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
             
-            console.log('🔧 Cities loaded from Firebase:', cities);
-            populateCitySelect(cities.map(city => city.name));
+            console.log('🔧 Cities loaded from Firebase:', citiesData);
+            populateCitySelect(citiesData.map(city => city.name));
             
             // Set up real-time listener for cities
             setupCitiesListener();
@@ -91,9 +77,9 @@ async function createDefaultCities() {
     ];
     
     try {
-        const citiesRef = collection(window.firebase.db, 'cities');
+        const citiesRef = window.firebase.collection(window.firebase.db, 'cities');
         for (const city of defaultCities) {
-            await addDoc(citiesRef, city);
+            await window.firebase.addDoc(citiesRef, city);
         }
         console.log('✅ Default cities created');
         
@@ -101,46 +87,30 @@ async function createDefaultCities() {
         await loadCities();
     } catch (error) {
         console.error('❌ Error creating default cities:', error);
+        showCitiesError();
     }
 }
 
 // Set up real-time listener for cities
 function setupCitiesListener() {
-    if (!window.firebase || !window.firebase.db) return;
-    
-    const citiesRef = collection(window.firebase.db, 'cities');
-    const q = query(citiesRef, orderBy('name'));
-    
-    onSnapshot(q, (snapshot) => {
-        const cities = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+    try {
+        console.log('🔧 Setting up cities listener...');
+        const citiesRef = window.firebase.collection(window.firebase.db, 'cities');
+        const citiesQuery = window.firebase.query(citiesRef, window.firebase.orderBy('name'));
         
-        console.log('🔄 Cities updated in real-time:', cities);
-        populateCitySelect(cities.map(city => city.name));
-    });
-}
-
-// Populate city select dropdown
-function populateCitySelect(cities) {
-    const citySelect = document.getElementById('citySelect');
-    if (!citySelect) return;
-    
-    // Clear existing options
-    citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
-    
-    // Add cities from Firebase
-    cities.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city;
-        option.textContent = city;
-        citySelect.appendChild(option);
-    });
-    
-    // Restore saved city selection if exists
-    if (currentCity && cities.includes(currentCity)) {
-        citySelect.value = currentCity;
+        window.firebase.onSnapshot(citiesQuery, (snapshot) => {
+            console.log('🔧 Cities updated in real-time');
+            citiesData = [];
+            snapshot.forEach((doc) => {
+                citiesData.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            populateCitySelect(citiesData.map(city => city.name));
+        });
+    } catch (error) {
+        console.error('❌ Error setting up cities listener:', error);
     }
 }
 
@@ -150,13 +120,13 @@ async function loadCafes() {
     
     if (!window.firebase || !window.firebase.db) {
         console.error('❌ Firebase not initialized');
-        loadMockData();
+        showCafesError();
         return;
     }
     
     try {
-        const cafesRef = collection(window.firebase.db, 'cafes');
-        const cafesSnapshot = await getDocs(cafesRef);
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
+        const cafesSnapshot = await window.firebase.getDocs(cafesRef);
         
         if (!cafesSnapshot.empty) {
             cafesData = cafesSnapshot.docs.map(doc => ({
@@ -164,7 +134,7 @@ async function loadCafes() {
                 ...doc.data()
             }));
             
-            console.log('✅ Cafes loaded from Firebase:', cafesData);
+            console.log('🔧 Cafes loaded from Firebase:', cafesData);
             displayCafes();
             
             // Set up real-time listener for cafes
@@ -175,7 +145,7 @@ async function loadCafes() {
         }
     } catch (error) {
         console.error('❌ Error loading cafes from Firebase:', error);
-        loadMockData();
+        showCafesError();
     }
 }
 
@@ -185,21 +155,15 @@ async function createDefaultCafes() {
         {
             name: 'Café Central',
             city: 'São Paulo',
-            description: 'Um café acolhedor no coração da cidade com os melhores grãos brasileiros.',
-            image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400'
-        },
-        {
-            name: 'Bella Vista',
-            city: 'Rio de Janeiro',
-            description: 'Café com vista panorâmica e ambiente sofisticado para momentos especiais.',
-            image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400'
+            description: 'Уютное кафе в центре города',
+            hours: '8:00 - 22:00'
         }
     ];
     
     try {
-        const cafesRef = collection(window.firebase.db, 'cafes');
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
         for (const cafe of defaultCafes) {
-            await addDoc(cafesRef, cafe);
+            await window.firebase.addDoc(cafesRef, cafe);
         }
         console.log('✅ Default cafes created');
         
@@ -207,297 +171,206 @@ async function createDefaultCafes() {
         await loadCafes();
     } catch (error) {
         console.error('❌ Error creating default cafes:', error);
+        showCafesError();
     }
 }
 
 // Set up real-time listener for cafes
 function setupCafesListener() {
-    if (!window.firebase || !window.firebase.db) return;
-    
-    const cafesRef = collection(window.firebase.db, 'cafes');
-    const q = query(cafesRef, orderBy('name'));
-    
-    onSnapshot(q, (snapshot) => {
-        cafesData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+    try {
+        console.log('🔧 Setting up cafes listener...');
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
+        const cafesQuery = window.firebase.query(cafesRef, window.firebase.orderBy('name'));
         
-        console.log('🔄 Cafes updated in real-time:', cafesData);
-        displayCafes();
-    });
-}
-
-// Load mock data for development (fallback)
-function loadMockData() {
-    cafesData = [
-        {
-            id: 'cafe-central',
-            name: 'Café Central',
-            city: 'São Paulo',
-            description: 'Um café acolhedor no coração da cidade com os melhores grãos brasileiros.',
-            image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400'
-        },
-        {
-            id: 'bella-vista',
-            name: 'Bella Vista',
-            city: 'Rio de Janeiro',
-            description: 'Café com vista panorâmica e ambiente sofisticado para momentos especiais.',
-            image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400'
-        }
-    ];
-    
-    console.log('🔧 Mock data loaded for development');
-    displayCafes();
-}
-
-// Initialize the application
-function initializeApp() {
-    loadSavedCity(); // Load saved city first
-    loadCities(); // Load cities from Firebase
-    loadCafes(); // Load cafes from Firebase
-    setupEventListeners();
-    setupUniversalIntegration();
-    initMobileGestures();
-    
-    console.log('✅ Coook Firebase App initialized successfully!');
-}
-
-// Setup universal integration (works everywhere)
-function setupUniversalIntegration() {
-    // Check if we're in Telegram WebApp
-    if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        
-        // Set app theme
-        tg.setHeaderColor('#4A90E2');
-        tg.setBackgroundColor('#ffffff');
-        
-        // Expand to fullscreen
-        tg.expand();
-        
-        // Load user info from Telegram
-        loadUserInfo(tg);
-        
-        // Set up main button for cafe details
-        tg.mainButton.setText('Ver Detalhes');
-        tg.mainButton.setColor('#4A90E2');
-        tg.mainButton.setTextColor('#ffffff');
-        
-        // Set up back button
-        tg.backButton.onClick(function() {
-            closeModal();
-        });
-        
-        console.log('🔧 Telegram WebApp integration configured');
-    } else {
-        // Running in browser - create mock user info
-        createMockUserInfo();
-        console.log('🔧 Browser mode - using mock user info');
-    }
-}
-
-// Load user info from Telegram
-function loadUserInfo(tg) {
-    const user = tg.initDataUnsafe?.user;
-    const userNameElement = document.getElementById('userName');
-    const userAvatarElement = document.getElementById('userAvatar');
-    
-    if (user) {
-        // Set username
-        if (userNameElement) {
-            userNameElement.textContent = user.first_name || 'Usuário';
-        }
-        
-        // Set avatar
-        if (userAvatarElement && user.photo_url) {
-            userAvatarElement.src = user.photo_url;
-        }
-        
-        console.log('🔧 User info loaded from Telegram:', user.first_name);
-    } else {
-        // Fallback if no user data
-        if (userNameElement) {
-            userNameElement.textContent = 'Visitante';
-        }
-        console.log('🔧 No Telegram user data available, using fallback');
-    }
-}
-
-// Create mock user info for browser mode
-function createMockUserInfo() {
-    const userNameElement = document.getElementById('userName');
-    if (userNameElement) {
-        userNameElement.textContent = 'Visitante';
-    }
-}
-
-// Setup event listeners
-function setupEventListeners() {
-    const citySelect = document.getElementById('citySelect');
-    if (citySelect) {
-        citySelect.addEventListener('change', function() {
-            saveSelectedCity(this.value);
+        window.firebase.onSnapshot(cafesQuery, (snapshot) => {
+            console.log('🔧 Cafes updated in real-time');
+            cafesData = [];
+            snapshot.forEach((doc) => {
+                cafesData.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
             displayCafes();
         });
+    } catch (error) {
+        console.error('❌ Error setting up cafes listener:', error);
+    }
+}
+
+// Populate city select dropdown
+function populateCitySelect(cities) {
+    const citySelect = document.getElementById('citySelect');
+    if (!citySelect) {
+        console.error('❌ City select element not found');
+        return;
     }
     
-    // Modal close button
-    const closeBtn = document.querySelector('.close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeModal);
-    }
+    citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
     
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('cafeModal');
-        if (event.target === modal) {
-            closeModal();
-        }
+    cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
     });
+    
+    console.log('🔧 City select populated with:', cities);
 }
 
 // Display cafes based on selected city
 function displayCafes() {
     const cafesList = document.getElementById('cafesList');
-    const noCafes = document.getElementById('noCafes');
-    
-    if (!cafesList) return;
-    
-    if (!currentCity) {
-        cafesList.innerHTML = '<div class="loading">Selecione uma cidade para ver os cafés</div>';
-        if (noCafes) noCafes.style.display = 'none';
+    if (!cafesList) {
+        console.error('❌ Cafes list element not found');
         return;
     }
     
-    // Set selected city in dropdown
-    const citySelect = document.getElementById('citySelect');
-    if (citySelect) {
-        citySelect.value = currentCity;
+    if (!currentCity) {
+        cafesList.innerHTML = `
+            <div class="no-cafes">
+                <p>Selecione uma cidade para ver os cafés</p>
+                <div class="loading"></div>
+            </div>
+        `;
+        return;
     }
     
     const cityCafes = cafesData.filter(cafe => cafe.city === currentCity);
     
     if (cityCafes.length === 0) {
-        cafesList.innerHTML = '';
-        if (noCafes) noCafes.style.display = 'block';
-        return;
+        cafesList.innerHTML = `
+            <div class="no-cafes">
+                <p>Nenhum café encontrado em ${currentCity}</p>
+            </div>
+        `;
+    } else {
+        cafesList.innerHTML = cityCafes.map(cafe => `
+            <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
+                <div class="cafe-info">
+                    <h3>${cafe.name}</h3>
+                    <p class="cafe-city">${cafe.city}</p>
+                    <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
+                    <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
+                </div>
+            </div>
+        `).join('');
     }
     
-    if (noCafes) noCafes.style.display = 'none';
-    
-    const cafesHTML = cityCafes.map(cafe => `
-        <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
-            <img src="${cafe.image}" alt="${cafe.name}" class="cafe-image">
-            <div class="cafe-info">
-                <div class="cafe-name">${cafe.name}</div>
-                <div class="cafe-location">${cafe.city}</div>
-                <div class="cafe-description">${cafe.description}</div>
-            </div>
-        </div>
-    `).join('');
-    
-    cafesList.innerHTML = cafesHTML;
+    console.log('🔧 Cafes displayed for city:', currentCity, 'Count:', cityCafes.length);
 }
 
 // Show cafe details in modal
 function showCafeDetails(cafeId) {
     const cafe = cafesData.find(c => c.id === cafeId);
-    if (!cafe) return;
+    if (!cafe) {
+        console.error('❌ Cafe not found:', cafeId);
+        return;
+    }
     
     currentCafe = cafe;
     
-    const modal = document.getElementById('cafeModal');
+    const modal = document.getElementById('modal');
     const modalContent = document.getElementById('modalContent');
     
-    if (!modal || !modalContent) return;
-    
-    modalContent.innerHTML = `
-        <img src="${cafe.image}" alt="${cafe.name}" class="cafe-detail-image">
-        <div class="cafe-detail-info">
-            <h2 class="cafe-detail-name">${cafe.name}</h2>
-            <div class="cafe-detail-city">${cafe.city}</div>
-            <p class="cafe-detail-description">${cafe.description}</p>
-            <div class="cafe-detail-hours">
-                <h3>Horário de Funcionamento</h3>
-                <p>Segunda a Sexta: 7h às 22h</p>
-                <p>Sábado e Domingo: 8h às 23h</p>
+    if (modal && modalContent) {
+        modalContent.innerHTML = `
+            <div class="cafe-detail-image">
+                <div class="coffee-icon">☕</div>
             </div>
-        </div>
-    `;
-    
-    modal.style.display = 'block';
-    
-    console.log('🔧 Cafe details modal opened for:', cafe.name);
+            <div class="cafe-detail-info">
+                <h2 class="cafe-detail-name">${cafe.name}</h2>
+                <p class="cafe-detail-city">${cafe.city}</p>
+                <p class="cafe-detail-description">${cafe.description || 'Sem descrição'}</p>
+                <p class="cafe-detail-hours">${cafe.hours || 'Horário não informado'}</p>
+            </div>
+        `;
+        
+        modal.style.display = 'flex';
+        console.log('🔧 Cafe details shown:', cafe);
+    }
 }
 
 // Close modal
 function closeModal() {
-    const modal = document.getElementById('cafeModal');
+    const modal = document.getElementById('modal');
     if (modal) {
         modal.style.display = 'none';
+        currentCafe = null;
+        console.log('🔧 Modal closed');
     }
 }
 
-// Refresh data
-function refreshData() {
-    loadCafes();
-}
-
-// Show error when cities can't be loaded
+// Show cities error
 function showCitiesError() {
     const citySelect = document.getElementById('citySelect');
     if (citySelect) {
         citySelect.innerHTML = '<option value="">Erro ao carregar cidades</option>';
     }
-    
+    console.error('❌ Cities loading failed');
+}
+
+// Show cafes error
+function showCafesError() {
     const cafesList = document.getElementById('cafesList');
     if (cafesList) {
-        cafesList.innerHTML = '<div class="loading">Erro ao carregar cidades. Tente recarregar a página.</div>';
+        cafesList.innerHTML = '<div class="no-cafes"><p>Erro ao carregar cafés</p></div>';
+    }
+    console.error('❌ Cafes loading failed');
+}
+
+// Initialize app
+async function initializeApp() {
+    console.log('🔧 Initializing Coook app...');
+    
+    try {
+        // Load saved city
+        loadSavedCity();
+        
+        // Load cities and cafes from Firebase
+        await loadCities();
+        await loadCafes();
+        
+        console.log('✅ App initialized successfully');
+    } catch (error) {
+        console.error('❌ Error initializing app:', error);
     }
 }
 
-// Initialize mobile gestures
-function initMobileGestures() {
-    // Add touch gestures for mobile
-    let startY = 0;
-    let startX = 0;
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🔧 DOM loaded, setting up event listeners...');
     
-    document.addEventListener('touchstart', function(e) {
-        startY = e.touches[0].clientY;
-        startX = e.touches[0].clientX;
-    });
+    // City selection
+    const citySelect = document.getElementById('citySelect');
+    if (citySelect) {
+        citySelect.addEventListener('change', (e) => {
+            const selectedCity = e.target.value;
+            if (selectedCity) {
+                saveSelectedCity(selectedCity);
+                displayCafes();
+                console.log('🔧 City selected:', selectedCity);
+            }
+        });
+    }
     
-    document.addEventListener('touchend', function(e) {
-        const endY = e.changedTouches[0].clientY;
-        const endX = e.changedTouches[0].clientX;
-        const diffY = startY - endY;
-        const diffX = startX - endX;
-        
-        // Swipe up to refresh
-        if (diffY > 50 && Math.abs(diffX) < 50) {
-            refreshData();
-        }
-    });
-}
+    // Modal close
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+    
+    // Initialize app
+    initializeApp();
+});
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Coook Firebase App starting...');
-    
-    // Wait for Firebase to be initialized
-    const checkFirebase = setInterval(() => {
-        if (window.firebase && window.firebase.db) {
-            clearInterval(checkFirebase);
-            initializeApp();
-        }
-    }, 100);
-    
-    // Timeout after 5 seconds
-    setTimeout(() => {
-        if (!window.firebase || !window.firebase.db) {
-            console.error('❌ Firebase initialization timeout');
-            clearInterval(checkFirebase);
-        }
-    }, 5000);
+// Close modal with escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
 });
