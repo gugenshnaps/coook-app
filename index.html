@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coook - Cafés Brasileiros</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBv4tfDPHboApf6CXtUqLIReQA4KzjQJg",
+            authDomain: "coook-app.firebaseapp.com",
+            projectId: "coook-app",
+            storageBucket: "coook-app.firebasestorage.app",
+            messagingSenderId: "1027223490741",
+            appId: "1:1027223490741:web:a56a826d5d16d517f2aefc",
+            measurementId: "G-1XZV0W4QPR"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Make Firebase available globally
+        window.firebase = { app, db, auth };
+        
+        console.log('🔥 Firebase initialized successfully!');
+    </script>
+</head>
+<body>
+    <!-- Header с аватаром и выбором города -->
+    <header class="app-header">
+        <!-- Левая часть - аватар и никнейм -->
+        <div class="user-info">
+            <div class="user-avatar">
+                <img id="userAvatar" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM0QTkwRTIiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiBmaWxsPSJub25lIj4KPHBhdGggZD0iTTggMTJDMTAuMjA5MSAxMiAxMiAxMC4yMDkxIDEyIDhDMTIgNS43OTA5IDEwLjIwOTEgNCA4IDRDNS43OTA5IDQgNCA1Ljc5MDkgNCA4QzQgMTAuMjA5MSA1Ljc5MDkgNCA4IDRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOCAxNEMxMC4yMDkxIDE0IDEyIDEyLjIwOTEgMTIgMTBDMTIgOS43OTA5IDEwLjIwOTEgOCA4IDhDNi4yMDkxIDggNCA5Ljc5MDkgNCAxMkM0IDEyLjIwOTEgNi4yMDkxIDE0IDggMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+" alt="Avatar">
+            </div>
+            <div class="user-details">
+                <div id="userName" class="user-name">Carregando...</div>
+                <div class="user-status">Online</div>
+            </div>
+        </div>
+        
+        <!-- Правая часть - выбор города -->
+        <div class="city-selector">
+            <select id="citySelect" class="city-select">
+                <option value="">Carregando cidades...</option>
+            </select>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <!-- Заголовок приложения -->
+        <div class="app-title">
+            <div class="coffee-icon">☕</div>
+            <h1>Coook</h1>
+        </div>
+        
+        <!-- Список кафе -->
+        <div id="cafesList" class="cafes-list">
+            <div class="loading">Selecione uma cidade para ver os cafés</div>
+        </div>
+        
+        <!-- Сообщение об отсутствии кафе -->
+        <div id="noCafes" class="no-cafes" style="display: none;">
+            <p>Nenhum café encontrado nesta cidade</p>
+        </div>
+    </main>
+
+    <!-- Модальное окно с деталями кафе -->
+    <div id="cafeModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

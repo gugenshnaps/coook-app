@@ -1,0 +1,18 @@
+[
+  {
+    "id": "sao-paulo",
+    "name": "São Paulo"
+  },
+  {
+    "id": "rio-de-janeiro", 
+    "name": "Rio de Janeiro"
+  },
+  {
+    "id": "brasilia",
+    "name": "Brasília"
+  },
+  {
+    "id": "salvador",
+    "name": "Salvador"
+  }
+]

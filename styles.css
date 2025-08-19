@@ -1,0 +1,375 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* Header styles */
+.app-header {
+    background: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* User info section (left side) */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #4A90E2;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+}
+
+.user-status {
+    font-size: 12px;
+    color: #4A90E2;
+    font-weight: 500;
+}
+
+/* City selector (right side) */
+.city-selector {
+    position: relative;
+}
+
+.city-select {
+    padding: 10px 16px;
+    border: 2px solid #4A90E2;
+    border-radius: 25px;
+    background: white;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    min-width: 160px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A90E2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.city-select:focus {
+    border-color: #357ABD;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.city-select option {
+    padding: 8px;
+}
+
+/* Main content */
+.main-content {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* App title */
+.app-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+.coffee-icon {
+    font-size: 32px;
+    animation: steam 2s ease-in-out infinite;
+}
+
+@keyframes steam {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-5px) scale(1.1); }
+}
+
+.app-title h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Cafes list */
+.cafes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.loading {
+    text-align: center;
+    color: white;
+    font-size: 18px;
+    padding: 40px 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+}
+
+/* Cafe card */
+.cafe-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.cafe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+}
+
+.cafe-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.cafe-info {
+    padding: 20px;
+}
+
+.cafe-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.cafe-location {
+    font-size: 16px;
+    color: #4A90E2;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.cafe-description {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* No cafes message */
+.no-cafes {
+    text-align: center;
+    color: white;
+    padding: 40px 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.no-cafes p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.close:hover {
+    color: #333;
+}
+
+/* Cafe detail styles in modal */
+.cafe-detail-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 20px 20px 0 0;
+}
+
+.cafe-detail-info {
+    padding: 24px;
+}
+
+.cafe-detail-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.cafe-detail-city {
+    display: inline-block;
+    background: #4A90E2;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.cafe-detail-description {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.cafe-detail-hours {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 16px;
+    border-left: 4px solid #4A90E2;
+}
+
+.cafe-detail-hours h3 {
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.cafe-detail-hours p {
+    color: #666;
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+    .app-header {
+        padding: 12px 16px;
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .user-name {
+        font-size: 14px;
+    }
+    
+    .city-select {
+        min-width: 140px;
+        font-size: 13px;
+        padding: 8px 14px;
+        padding-right: 35px;
+    }
+    
+    .main-content {
+        padding: 16px;
+    }
+    
+    .app-title h1 {
+        font-size: 28px;
+    }
+    
+    .coffee-icon {
+        font-size: 28px;
+    }
+}
+
+/* Animation for cafe cards */
+.cafe-card {
+    animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading animation */
+.loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
