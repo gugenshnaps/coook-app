@@ -11,32 +11,49 @@ body {
     color: #333;
     overflow-x: hidden;
     position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
 }
 
-/* Animated background canvas */
-.background-canvas {
+/* Animated gradient background */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Add subtle floating particles */
+body::before {
+    content: '';
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
     z-index: -1;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* Header styles */
 .app-header {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
     padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
     position: sticky;
     top: 0;
     z-index: 100;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    margin: 16px;
 }
 
 /* User info section (left side) */
@@ -51,8 +68,9 @@ body {
     height: 40px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid #4A90E2;
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
 }
 
 .user-avatar img {
@@ -69,12 +87,13 @@ body {
 .user-name {
     font-weight: 600;
     font-size: 16px;
-    color: #333;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .user-status {
     font-size: 12px;
-    color: #4A90E2;
+    color: rgba(255, 255, 255, 0.8);
     font-weight: 500;
 }
 
@@ -85,17 +104,17 @@ body {
 
 .city-select {
     padding: 12px 20px;
-    border: 2px solid #4A90E2;
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 25px;
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     outline: none;
     min-width: 160px;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A90E2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 16px;
@@ -135,18 +154,41 @@ body {
     gap: 16px;
     margin-bottom: 40px;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    padding: 24px;
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
+    padding: 30px;
+    border-radius: 30px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.app-title::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
 }
 
 .coffee-icon {
     font-size: 36px;
     animation: steam 3s ease-in-out infinite;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
 }
 
 @keyframes steam {
@@ -180,17 +222,30 @@ body {
     color: white;
     font-size: 18px;
     padding: 40px 20px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 20px;
-    backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.1));
+    border-radius: 25px;
+    backdrop-filter: blur(25px);
     border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 3s infinite;
 }
 
 /* Cafe card */
 .cafe-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 12px 40px rgba(0,0,0,0.15);
@@ -202,6 +257,8 @@ body {
 .cafe-card:hover {
     transform: translateY(-8px) scale(1.02);
     box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .cafe-image {
@@ -217,40 +274,39 @@ body {
 .cafe-name {
     font-size: 26px;
     font-weight: 700;
-    color: #333;
+    color: white;
     margin-bottom: 12px;
-    background: linear-gradient(135deg, #4A90E2, #357ABD);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .cafe-city {
     font-size: 16px;
-    color: #4A90E2;
+    color: white;
     font-weight: 600;
     margin-bottom: 16px;
     display: inline-block;
-    background: rgba(74, 144, 226, 0.1);
-    padding: 6px 12px;
-    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
 }
 
 .cafe-description {
     font-size: 15px;
-    color: #666;
+    color: rgba(255, 255, 255, 0.9);
     line-height: 1.6;
     margin-bottom: 16px;
 }
 
 .cafe-hours {
     font-size: 14px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.8);
     font-weight: 500;
-    background: rgba(74, 144, 226, 0.05);
+    background: rgba(255, 255, 255, 0.1);
     padding: 8px 12px;
     border-radius: 8px;
-    border-left: 3px solid #4A90E2;
+    border-left: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 /* No cafes message */
@@ -258,11 +314,24 @@ body {
     text-align: center;
     color: white;
     padding: 40px 20px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 20px;
-    backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.1));
+    border-radius: 25px;
+    backdrop-filter: blur(25px);
     border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.no-cafes::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 3s infinite;
 }
 
 .no-cafes p {
@@ -284,8 +353,8 @@ body {
 }
 
 .modal-content {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
     margin: 5% auto;
     padding: 0;
     border-radius: 24px;
@@ -299,7 +368,7 @@ body {
 }
 
 .close {
-    color: #aaa;
+    color: rgba(255, 255, 255, 0.8);
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -312,76 +381,98 @@ body {
 }
 
 .close:hover {
-    color: #333;
+    color: white;
 }
 
 /* Cafe detail styles in modal */
 .cafe-detail-image {
     width: 100%;
     height: 250px;
-    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 24px 24px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.cafe-detail-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    animation: shimmer 2s infinite;
 }
 
 .coffee-icon {
     font-size: 80px;
     color: white;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
 }
 
 .cafe-detail-info {
     padding: 28px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-radius: 0 0 24px 24px;
 }
 
 .cafe-detail-name {
     font-size: 32px;
     font-weight: 800;
-    color: #333;
+    color: white;
     margin-bottom: 16px;
-    background: linear-gradient(135deg, #4A90E2, #357ABD);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .cafe-detail-city {
     display: inline-block;
-    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
     color: white;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 25px;
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .cafe-detail-description {
     font-size: 16px;
-    color: #666;
+    color: rgba(255, 255, 255, 0.9);
     line-height: 1.7;
     margin-bottom: 28px;
 }
 
 .cafe-detail-hours {
-    background: rgba(74, 144, 226, 0.05);
+    background: rgba(255, 255, 255, 0.1);
     padding: 24px;
     border-radius: 16px;
-    border-left: 4px solid #4A90E2;
+    border-left: 4px solid rgba(255, 255, 255, 0.3);
 }
 
 .cafe-detail-hours h3 {
-    color: #333;
+    color: white;
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 16px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .cafe-detail-hours p {
-    color: #666;
+    color: rgba(255, 255, 255, 0.8);
     margin: 10px 0;
     font-size: 14px;
 }
@@ -460,4 +551,35 @@ body {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* Beautiful gradient buttons */
+.btn {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced glassmorphism effects */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
