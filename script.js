@@ -362,6 +362,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModal();
             }
         });
+        
+        // Close button click
+        const closeBtn = modal.querySelector('.close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
     }
     
     // Initialize app

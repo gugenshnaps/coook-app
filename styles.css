@@ -353,7 +353,7 @@ body::before {
 }
 
 .modal-content {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(25px);
     margin: 5% auto;
     padding: 0;
@@ -364,11 +364,11 @@ body::before {
     overflow-y: auto;
     position: relative;
     box-shadow: 0 25px 80px rgba(0,0,0,0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .close {
-    color: rgba(255, 255, 255, 0.8);
+    color: #666;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -381,7 +381,7 @@ body::before {
 }
 
 .close:hover {
-    color: white;
+    color: #333;
 }
 
 /* Cafe detail styles in modal */
@@ -423,56 +423,52 @@ body::before {
 
 .cafe-detail-info {
     padding: 28px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    background: white;
     border-radius: 0 0 24px 24px;
 }
 
 .cafe-detail-name {
     font-size: 32px;
     font-weight: 800;
-    color: white;
+    color: #333;
     margin-bottom: 16px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .cafe-detail-city {
     display: inline-block;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
     color: white;
     padding: 12px 24px;
     border-radius: 25px;
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
 }
 
 .cafe-detail-description {
     font-size: 16px;
-    color: rgba(255, 255, 255, 0.9);
+    color: #666;
     line-height: 1.7;
     margin-bottom: 28px;
 }
 
 .cafe-detail-hours {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(74, 144, 226, 0.05);
     padding: 24px;
     border-radius: 16px;
-    border-left: 4px solid rgba(255, 255, 255, 0.3);
+    border-left: 4px solid #4A90E2;
 }
 
 .cafe-detail-hours h3 {
-    color: white;
+    color: #333;
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 16px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .cafe-detail-hours p {
-    color: rgba(255, 255, 255, 0.8);
+    color: #666;
     margin: 10px 0;
     font-size: 14px;
 }
