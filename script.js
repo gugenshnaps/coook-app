@@ -227,15 +227,35 @@ function displayCafes() {
     }
     
     if (!currentCity) {
-        cafesList.innerHTML = `
-            <div class="no-cafes">
-                <p>Selecione uma cidade para ver os cafés</p>
-                <div class="loading"></div>
-            </div>
-        `;
+        // Show ALL cafes when no city is selected
+        if (cafesData.length === 0) {
+            cafesList.innerHTML = `
+                <div class="no-cafes">
+                    <p>Carregando cafés...</p>
+                    <div class="loading"></div>
+                </div>
+            `;
+        } else {
+            cafesList.innerHTML = `
+                <div class="cafe-section">
+                    <h3>Todos os cafés (${cafesData.length})</h3>
+                    ${cafesData.map(cafe => `
+                        <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
+                            <div class="cafe-info">
+                                <h3>${cafe.name}</h3>
+                                <p class="cafe-city">${cafe.city}</p>
+                                <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
+                                <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
         return;
     }
     
+    // Show cafes for selected city
     const cityCafes = cafesData.filter(cafe => cafe.city === currentCity);
     
     if (cityCafes.length === 0) {
@@ -245,16 +265,21 @@ function displayCafes() {
             </div>
         `;
     } else {
-        cafesList.innerHTML = cityCafes.map(cafe => `
-            <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
-                <div class="cafe-info">
-                    <h3>${cafe.name}</h3>
-                    <p class="cafe-city">${cafe.city}</p>
-                    <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
-                    <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
-                </div>
+        cafesList.innerHTML = `
+            <div class="cafe-section">
+                <h3>Cafés em ${currentCity} (${cityCafes.length})</h3>
+                ${cityCafes.map(cafe => `
+                    <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
+                        <div class="cafe-info">
+                            <h3>${cafe.name}</h3>
+                            <p class="cafe-city">${cafe.city}</p>
+                            <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
+                            <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
+                        </div>
+                    </div>
+                `).join('')}
             </div>
-        `).join('');
+        `;
     }
     
     console.log('🔧 Cafes displayed for city:', currentCity, 'Count:', cityCafes.length);
@@ -324,6 +349,9 @@ async function initializeApp() {
     console.log('🔧 Initializing Coook app...');
     
     try {
+        // Initialize Telegram WebApp if available
+        initializeTelegramWebApp();
+        
         // Load saved city
         loadSavedCity();
         
@@ -334,6 +362,39 @@ async function initializeApp() {
         console.log('✅ App initialized successfully');
     } catch (error) {
         console.error('❌ Error initializing app:', error);
+    }
+}
+
+// Initialize Telegram WebApp
+function initializeTelegramWebApp() {
+    if (window.Telegram && window.Telegram.WebApp) {
+        console.log('🔧 Telegram WebApp detected, initializing...');
+        
+        // Initialize Telegram WebApp
+        window.Telegram.WebApp.ready();
+        
+        // Set up user info
+        const user = window.Telegram.WebApp.initDataUnsafe?.user;
+        if (user) {
+            // Update user avatar
+            const userAvatar = document.getElementById('userAvatar');
+            if (userAvatar && user.photo_url) {
+                userAvatar.src = user.photo_url;
+                userAvatar.alt = `${user.first_name} ${user.last_name || ''}`;
+            }
+            
+            // Update user name
+            const userName = document.getElementById('userName');
+            if (userName) {
+                userName.textContent = `${user.first_name} ${user.last_name || ''}`;
+            }
+            
+            console.log('✅ Telegram user info loaded:', user);
+        } else {
+            console.log('ℹ️ No Telegram user data available');
+        }
+    } else {
+        console.log('ℹ️ Not running in Telegram WebApp');
     }
 }
 
