@@ -1,346 +1,331 @@
-// Global variables
-let cafesData = [];
-let citiesData = [];
+// Firebase Admin Panel for Coook App
+let cities = [];
+let cafes = [];
+
+// Wait for Firebase to initialize
+function waitForFirebase() {
+    if (window.firebase && window.firebase.db) {
+        console.log('Firebase ready, initializing admin panel...');
+        initializeAdminPanel();
+    } else {
+        console.log('Waiting for Firebase...');
+        setTimeout(waitForFirebase, 100);
+    }
+}
 
 // Initialize admin panel
-document.addEventListener('DOMContentLoaded', function() {
-    loadData();
-    setupEventListeners();
-    
-    // Auto-refresh data every 3 seconds
-    setInterval(refreshData, 3000);
-});
-
-// Load data from localStorage
-function loadData() {
-    loadCafesData();
-    loadCitiesData();
-    updateCityDropdowns();
-    displayCities();
-    displayCafes();
-}
-
-// Load cafes data
-function loadCafesData() {
-    const stored = localStorage.getItem('cafesData');
-    if (stored) {
-        cafesData = JSON.parse(stored);
-    } else {
-        cafesData = [];
+async function initializeAdminPanel() {
+    try {
+        console.log('Initializing admin panel...');
+        
+        // Load cities and cafes from Firebase
+        await loadCities();
+        await loadCafes();
+        
+        // Set up real-time listeners
+        setupCitiesListener();
+        setupCafesListener();
+        
+        // Populate city selector
+        populateCitySelector();
+        
+        console.log('Admin panel initialized successfully!');
+    } catch (error) {
+        console.error('Error initializing admin panel:', error);
+        showError('Erro ao inicializar painel admin: ' + error.message);
     }
 }
 
-// Load cities data
-function loadCitiesData() {
-    const stored = localStorage.getItem('citiesData');
-    if (stored) {
-        citiesData = JSON.parse(stored);
-    } else {
-        // Default cities
-        citiesData = [
-            { id: "sao-paulo", name: "São Paulo" },
-            { id: "rio-de-janeiro", name: "Rio de Janeiro" },
-            { id: "brasilia", name: "Brasília" }
-        ];
-        localStorage.setItem('citiesData', JSON.stringify(citiesData));
+// Load cities from Firebase
+async function loadCities() {
+    try {
+        console.log('Loading cities from Firebase...');
+        const citiesRef = window.firebase.collection(window.firebase.db, 'cities');
+        const citiesSnapshot = await window.firebase.getDocs(citiesRef);
+        
+        cities = [];
+        citiesSnapshot.forEach((doc) => {
+            cities.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        
+        console.log('Cities loaded:', cities);
+        displayCities();
+    } catch (error) {
+        console.error('Error loading cities:', error);
+        showError('Erro ao carregar cidades: ' + error.message);
     }
 }
 
-// Update all city dropdowns
-function updateCityDropdowns() {
-    updateCityDropdown('cafeCity');
-    updateCityDropdown('cafeCitySelect');
-}
-
-// Update specific city dropdown
-function updateCityDropdown(selectId) {
-    const select = document.getElementById(selectId);
-    if (!select) return;
-    
-    // Keep current selection
-    const currentValue = select.value;
-    
-    select.innerHTML = '<option value="">Selecione uma cidade</option>';
-    
-    citiesData.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city.id;
-        option.textContent = city.name;
-        select.appendChild(option);
-    });
-    
-    // Restore selection if it still exists
-    if (currentValue && citiesData.find(c => c.id === currentValue)) {
-        select.value = currentValue;
+// Load cafes from Firebase
+async function loadCafes() {
+    try {
+        console.log('Loading cafes from Firebase...');
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
+        const cafesSnapshot = await window.firebase.getDocs(cafesRef);
+        
+        cafes = [];
+        cafesSnapshot.forEach((doc) => {
+            cafes.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        
+        console.log('Cafes loaded:', cafes);
+        displayCafes();
+    } catch (error) {
+        console.error('Error loading cafes:', error);
+        showError('Erro ao carregar cafés: ' + error.message);
     }
 }
 
-// Setup event listeners
-function setupEventListeners() {
-    // Add cafe form
-    const addCafeForm = document.getElementById('addCafeForm');
-    if (addCafeForm) {
-        addCafeForm.addEventListener('submit', handleAddCafe);
+// Set up real-time listener for cities
+function setupCitiesListener() {
+    try {
+        console.log('Setting up cities listener...');
+        const citiesRef = window.firebase.collection(window.firebase.db, 'cities');
+        const citiesQuery = window.firebase.query(citiesRef, window.firebase.orderBy('name'));
+        
+        window.firebase.onSnapshot(citiesQuery, (snapshot) => {
+            console.log('Cities updated in real-time');
+            cities = [];
+            snapshot.forEach((doc) => {
+                cities.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            displayCities();
+            populateCitySelector();
+        });
+    } catch (error) {
+        console.error('Error setting up cities listener:', error);
     }
 }
 
-// Handle add cafe form submission
-function handleAddCafe(e) {
-    e.preventDefault();
+// Set up real-time listener for cafes
+function setupCafesListener() {
+    try {
+        console.log('Setting up cafes listener...');
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
+        const cafesQuery = window.firebase.query(cafesRef, window.firebase.orderBy('name'));
+        
+        window.firebase.onSnapshot(cafesQuery, (snapshot) => {
+            console.log('Cafes updated in real-time');
+            cafes = [];
+            snapshot.forEach((doc) => {
+                cafes.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            displayCafes();
+        });
+    } catch (error) {
+        console.error('Error setting up cafes listener:', error);
+    }
+}
+
+// Display cities in the UI
+function displayCities() {
+    const citiesList = document.getElementById('citiesList');
     
-    const cafe = {
-        name: document.getElementById('cafeName').value.trim(),
-        city: document.getElementById('cafeCitySelect').value,
-        description: document.getElementById('cafeDescription').value.trim(),
-        hours: document.getElementById('cafeHours').value.trim(),
-        image: document.getElementById('cafeImage').value.trim()
-    };
-    
-    // Validation
-    if (!cafe.name || !cafe.city || !cafe.description || !cafe.hours || !cafe.image) {
-        showMessage('Por favor, preencha todos os campos obrigatórios.', 'error');
+    if (cities.length === 0) {
+        citiesList.innerHTML = '<div class="no-items">Nenhuma cidade cadastrada</div>';
         return;
     }
     
-    // Get city name
-    const cityObj = citiesData.find(c => c.id === cafe.city);
-    if (cityObj) {
-        cafe.cityName = cityObj.name;
-    }
-    
-    // Add cafe
-    addCafe(cafe);
-    
-    // Reset form
-    e.target.reset();
-    
-    showMessage('Café adicionado com sucesso!', 'success');
+    citiesList.innerHTML = cities.map(city => `
+        <div class="city-item">
+            <div class="city-info">
+                <h3>${city.name}</h3>
+                <p>ID: ${city.id}</p>
+            </div>
+            <button onclick="deleteCity('${city.id}')" class="delete-btn">🗑️</button>
+        </div>
+    `).join('');
 }
 
-// Add new cafe
-function addCafe(cafe) {
-    cafe.id = Date.now();
-    cafe.gallery = [cafe.image]; // Use main image as first gallery image
+// Display cafes in the UI
+function displayCafes() {
+    const cafesList = document.getElementById('cafesList');
     
-    cafesData.push(cafe);
-    localStorage.setItem('cafesData', JSON.stringify(cafesData));
+    if (cafes.length === 0) {
+        cafesList.innerHTML = '<div class="no-items">Nenhum café cadastrado</div>';
+        return;
+    }
     
-    displayCafes();
+    cafesList.innerHTML = cafes.map(cafe => `
+        <div class="cafe-item">
+            <div class="cafe-info">
+                <h3>${cafe.name}</h3>
+                <p><strong>Cidade:</strong> ${cafe.city}</p>
+                <p><strong>Descrição:</strong> ${cafe.description || 'Sem descrição'}</p>
+                <p><strong>Horário:</strong> ${cafe.hours || 'Não informado'}</p>
+            </div>
+            <div class="cafe-actions">
+                <button onclick="editCafe('${cafe.id}')" class="edit-btn">✏️</button>
+                <button onclick="deleteCafe('${cafe.id}')" class="delete-btn">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Populate city selector
+function populateCitySelector() {
+    const citySelect = document.getElementById('cafeCity');
+    
+    citySelect.innerHTML = '<option value="">Selecione uma cidade</option>' +
+        cities.map(city => `<option value="${city.name}">${city.name}</option>`).join('');
 }
 
 // Add new city
-function addNewCity() {
-    const cityNameInput = document.getElementById('newCityName');
+async function addCity() {
+    const cityNameInput = document.getElementById('cityName');
     const cityName = cityNameInput.value.trim();
     
     if (!cityName) {
-        showMessage('Por favor, digite o nome da cidade.', 'error');
+        showError('Por favor, insira o nome da cidade');
         return;
     }
     
-    // Check if city already exists
-    if (citiesData.find(c => c.name.toLowerCase() === cityName.toLowerCase())) {
-        showMessage('Esta cidade já existe.', 'error');
+    try {
+        console.log('Adding city:', cityName);
+        
+        // Check if city already exists
+        if (cities.some(city => city.name.toLowerCase() === cityName.toLowerCase())) {
+            showError('Cidade já existe!');
+            return;
+        }
+        
+        // Create city object
+        const cityData = {
+            name: cityName,
+            id: cityName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+        };
+        
+        // Add to Firebase
+        const citiesRef = window.firebase.collection(window.firebase.db, 'cities');
+        await window.firebase.addDoc(citiesRef, cityData);
+        
+        // Clear input
+        cityNameInput.value = '';
+        
+        showSuccess('Cidade adicionada com sucesso!');
+        console.log('City added successfully');
+    } catch (error) {
+        console.error('Error adding city:', error);
+        showError('Erro ao adicionar cidade: ' + error.message);
+    }
+}
+
+// Add new cafe
+async function addCafe() {
+    const cafeNameInput = document.getElementById('cafeName');
+    const cafeCitySelect = document.getElementById('cafeCity');
+    const cafeDescriptionInput = document.getElementById('cafeDescription');
+    
+    const cafeName = cafeNameInput.value.trim();
+    const cafeCity = cafeCitySelect.value;
+    const cafeDescription = cafeDescriptionInput.value.trim();
+    
+    if (!cafeName || !cafeCity) {
+        showError('Por favor, preencha nome e cidade do café');
         return;
     }
     
-    const city = {
-        id: cityName.toLowerCase().replace(/\s+/g, '-'),
-        name: cityName
-    };
-    
-    citiesData.push(city);
-    localStorage.setItem('citiesData', JSON.stringify(citiesData));
-    
-    updateCityDropdowns();
-    displayCities();
-    
-    // Reset input
-    cityNameInput.value = '';
-    
-    showMessage(`Cidade "${cityName}" adicionada com sucesso!`, 'success');
-}
-
-// Display cities
-function displayCities() {
-    const citiesList = document.getElementById('citiesList');
-    if (!citiesList) return;
-    
-    if (citiesData.length === 0) {
-        citiesList.innerHTML = '<div class="empty-state"><p>Nenhuma cidade cadastrada</p></div>';
-        return;
-    }
-    
-    citiesList.innerHTML = citiesData.map(city => `
-        <div class="item-card">
-            <div class="item-header">
-                <span class="item-name">${city.name}</span>
-                <div class="item-actions">
-                    <button onclick="deleteCity('${city.id}')" class="btn btn-danger btn-small">🗑️</button>
-                </div>
-            </div>
-            <div class="item-city">
-                <strong>ID:</strong> ${city.id}
-            </div>
-        </div>
-    `).join('');
-}
-
-// Display cafes
-function displayCafes() {
-    const cafesList = document.getElementById('cafesList');
-    if (!cafesList) return;
-    
-    if (cafesData.length === 0) {
-        cafesList.innerHTML = '<div class="empty-state"><p>Nenhum café cadastrado</p></div>';
-        return;
-    }
-    
-    cafesList.innerHTML = cafesData.map(cafe => `
-        <div class="item-card">
-            <div class="item-header">
-                <span class="item-name">${cafe.name}</span>
-                <div class="item-actions">
-                    <button onclick="editCafe(${cafe.id})" class="btn btn-primary btn-small">✏️</button>
-                    <button onclick="deleteCafe(${cafe.id})" class="btn btn-danger btn-small">🗑️</button>
-                </div>
-            </div>
-            <div class="item-city">
-                <strong>Cidade:</strong> ${cafe.cityName || 'N/A'}
-            </div>
-            <div class="item-description">${cafe.description}</div>
-        </div>
-    `).join('');
-}
-
-// Filter cafes
-function filterCafes() {
-    const cityFilter = document.getElementById('cafeCity').value;
-    const searchFilter = document.getElementById('cafeSearch').value.toLowerCase();
-    
-    let filteredCafes = cafesData;
-    
-    // Filter by city
-    if (cityFilter) {
-        filteredCafes = filteredCafes.filter(cafe => cafe.city === cityFilter);
-    }
-    
-    // Filter by search
-    if (searchFilter) {
-        filteredCafes = filteredCafes.filter(cafe => 
-            cafe.name.toLowerCase().includes(searchFilter) ||
-            cafe.description.toLowerCase().includes(searchFilter)
-        );
-    }
-    
-    displayFilteredCafes(filteredCafes);
-}
-
-// Display filtered cafes
-function displayFilteredCafes(filteredCafes) {
-    const cafesList = document.getElementById('cafesList');
-    if (!cafesList) return;
-    
-    if (filteredCafes.length === 0) {
-        cafesList.innerHTML = '<div class="empty-state"><p>Nenhum café encontrado com os filtros aplicados</p></div>';
-        return;
-    }
-    
-    cafesList.innerHTML = filteredCafes.map(cafe => `
-        <div class="item-card">
-            <div class="item-header">
-                <span class="item-name">${cafe.name}</span>
-                <div class="item-actions">
-                    <button onclick="editCafe(${cafe.id})" class="btn btn-primary btn-small">✏️</button>
-                    <button onclick="deleteCafe(${cafe.id})" class="btn btn-danger btn-small">🗑️</button>
-                </div>
-            </div>
-            <div class="item-city">
-                <strong>Cidade:</strong> ${cafe.cityName || 'N/A'}
-            </div>
-            <div class="item-description">${cafe.description}</div>
-        </div>
-    `).join('');
-}
-
-// Edit cafe
-function editCafe(cafeId) {
-    const cafe = cafesData.find(c => c.id === cafeId);
-    if (!cafe) return;
-    
-    // For now, just show a simple edit form
-    // In a real app, you'd want a proper modal or form
-    const newName = prompt('Novo nome do café:', cafe.name);
-    if (newName && newName.trim()) {
-        cafe.name = newName.trim();
-        localStorage.setItem('cafesData', JSON.stringify(cafesData));
-        displayCafes();
-        showMessage('Café atualizado com sucesso!', 'success');
-    }
-}
-
-// Delete cafe
-function deleteCafe(cafeId) {
-    if (confirm('Tem certeza que deseja excluir este café?')) {
-        cafesData = cafesData.filter(c => c.id !== cafeId);
-        localStorage.setItem('cafesData', JSON.stringify(cafesData));
-        displayCafes();
-        showMessage('Café excluído com sucesso!', 'success');
+    try {
+        console.log('Adding cafe:', { name: cafeName, city: cafeCity, description: cafeDescription });
+        
+        // Create cafe object
+        const cafeData = {
+            name: cafeName,
+            city: cafeCity,
+            description: cafeDescription,
+            hours: '8:00 - 22:00' // Default hours
+        };
+        
+        // Add to Firebase
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
+        await window.firebase.addDoc(cafesRef, cafeData);
+        
+        // Clear inputs
+        cafeNameInput.value = '';
+        cafeCitySelect.value = '';
+        cafeDescriptionInput.value = '';
+        
+        showSuccess('Café adicionado com sucesso!');
+        console.log('Cafe added successfully');
+    } catch (error) {
+        console.error('Error adding cafe:', error);
+        showError('Erro ao adicionar café: ' + error.message);
     }
 }
 
 // Delete city
-function deleteCity(cityId) {
-    // Check if city has cafes
-    const cafesInCity = cafesData.filter(c => c.city === cityId);
-    if (cafesInCity.length > 0) {
-        showMessage(`Não é possível excluir esta cidade. Ela possui ${cafesInCity.length} café(s) cadastrado(s).`, 'error');
+async function deleteCity(cityId) {
+    if (!confirm('Tem certeza que deseja excluir esta cidade?')) {
         return;
     }
     
-    if (confirm('Tem certeza que deseja excluir esta cidade?')) {
-        citiesData = citiesData.filter(c => c.id !== cityId);
-        localStorage.setItem('citiesData', JSON.stringify(citiesData));
-        updateCityDropdowns();
-        displayCities();
-        showMessage('Cidade excluída com sucesso!', 'success');
-    }
-}
-
-// Refresh data
-function refreshData() {
-    loadData();
-}
-
-// Show message
-function showMessage(message, type = 'success') {
-    // Remove existing messages
-    const existingMessages = document.querySelectorAll('.message');
-    existingMessages.forEach(msg => msg.remove());
-    
-    // Create new message
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = message;
-    
-    // Insert at top of admin container
-    const adminContainer = document.querySelector('.admin-container');
-    if (adminContainer) {
-        adminContainer.insertBefore(messageDiv, adminContainer.firstChild);
+    try {
+        console.log('Deleting city:', cityId);
         
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.remove();
-            }
-        }, 5000);
+        // Delete from Firebase
+        const cityRef = window.firebase.doc(window.firebase.db, 'cities', cityId);
+        await window.firebase.deleteDoc(cityRef);
+        
+        showSuccess('Cidade excluída com sucesso!');
+        console.log('City deleted successfully');
+    } catch (error) {
+        console.error('Error deleting city:', error);
+        showError('Erro ao excluir cidade: ' + error.message);
     }
 }
 
-// Export functions for global access
-window.addNewCity = addNewCity;
-window.filterCafes = filterCafes;
-window.editCafe = editCafe;
-window.deleteCafe = deleteCafe;
-window.deleteCity = deleteCity;
-window.refreshData = refreshData;
+// Delete cafe
+async function deleteCafe(cafeId) {
+    if (!confirm('Tem certeza que deseja excluir este café?')) {
+        return;
+    }
+    
+    try {
+        console.log('Deleting cafe:', cafeId);
+        
+        // Delete from Firebase
+        const cafeRef = window.firebase.doc(window.firebase.db, 'cafes', cafeId);
+        await window.firebase.deleteDoc(cafeRef);
+        
+        showSuccess('Café excluído com sucesso!');
+        console.log('Cafe deleted successfully');
+    } catch (error) {
+        console.error('Error deleting cafe:', error);
+        showError('Erro ao excluir café: ' + error.message);
+    }
+}
+
+// Edit cafe (placeholder for future implementation)
+function editCafe(cafeId) {
+    showError('Edição de cafés será implementada em breve!');
+}
+
+// Show success message
+function showSuccess(message) {
+    // Simple success message (can be enhanced with toast notifications)
+    alert('✅ ' + message);
+}
+
+// Show error message
+function showError(message) {
+    // Simple error message (can be enhanced with toast notifications)
+    alert('❌ ' + message);
+}
+
+// Start initialization when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Admin panel DOM loaded, waiting for Firebase...');
+    waitForFirebase();
+});

@@ -3,101 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Coook</title>
+    <title>Admin Panel - Coook App</title>
     <link rel="stylesheet" href="admin.css">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBv4tfDPHboApf6CXtUqLIReQA4KzjQJg",
+            authDomain: "coook-app.firebaseapp.com",
+            projectId: "coook-app",
+            storageBucket: "coook-app.firebasestorage.app",
+            messagingSenderId: "1027223490741",
+            appId: "1:1027223490741:web:a56a826d5d16d517f2aefc",
+            measurementId: "G-1XZV0W4QPR"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.firebase = { db, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy };
+    </script>
 </head>
 <body>
     <div class="admin-container">
-        <header class="admin-header">
-            <h1>🔐 Admin Panel - Coook</h1>
-            <p>Gerencie cafés e cidades</p>
-        </header>
-
-        <main class="admin-main">
-            <!-- Cities Management Section -->
-            <section class="admin-section" id="cities-section">
-                <h2>🏙️ Gerenciar Cidades</h2>
-                
-                <div class="form-group">
-                    <label for="newCityName">Nome da Cidade:</label>
-                    <input type="text" id="newCityName" placeholder="Ex: Belo Horizonte">
-                    <button onclick="addNewCity()" class="btn btn-primary">➕ Adicionar Cidade</button>
+        <div class="admin-header">
+            <h1>Admin Panel - Coook App</h1>
+            <p>Управление городами и кафе через Firebase</p>
+        </div>
+        
+        <div class="admin-content">
+            <div class="admin-section">
+                <h2>Gerenciar Cidades</h2>
+                <div class="input-group">
+                    <input type="text" id="cityName" placeholder="Ex: Belo Horizonte">
+                    <button onclick="addCity()">+ Adicionar Cidade</button>
                 </div>
-
-                <div class="cities-list">
-                    <h3>Cidades Existentes:</h3>
-                    <div id="citiesList" class="items-grid">
-                        <!-- Cities will be loaded here -->
-                    </div>
+                <div class="cities-list" id="citiesList">
+                    <div class="loading">Carregando cidades...</div>
                 </div>
-            </section>
-
-            <!-- Cafes Management Section -->
-            <section class="admin-section" id="cafes-section">
-                <h2>☕ Gerenciar Cafés</h2>
-                
-                <div class="form-group">
-                    <label for="cafeCity">Cidade:</label>
-                    <select id="cafeCity" onchange="filterCafes()">
-                        <option value="">Todas as cidades</option>
+            </div>
+            
+            <div class="admin-section">
+                <h2>Gerenciar Cafés</h2>
+                <div class="input-group">
+                    <input type="text" id="cafeName" placeholder="Nome do café">
+                    <select id="cafeCity">
+                        <option value="">Selecione uma cidade</option>
                     </select>
+                    <textarea id="cafeDescription" placeholder="Descrição do café"></textarea>
+                    <button onclick="addCafe()">+ Adicionar Café</button>
                 </div>
-
-                <div class="form-group">
-                    <label for="cafeSearch">Buscar:</label>
-                    <input type="text" id="cafeSearch" placeholder="Nome do café..." oninput="filterCafes()">
+                <div class="cafes-list" id="cafesList">
+                    <div class="loading">Carregando cafés...</div>
                 </div>
-
-                <div class="cafes-list">
-                    <h3>Cafés Existentes:</h3>
-                    <div id="cafesList" class="items-grid">
-                        <!-- Cafes will be loaded here -->
-                    </div>
-                </div>
-
-                <div class="add-cafe-form">
-                    <h3>➕ Adicionar Novo Café</h3>
-                    <form id="addCafeForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="cafeName">Nome do Café:</label>
-                                <input type="text" id="cafeName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="cafeCitySelect">Cidade:</label>
-                                <select id="cafeCitySelect" required>
-                                    <!-- Cities will be loaded here -->
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="cafeDescription">Descrição:</label>
-                            <textarea id="cafeDescription" rows="3" required></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="cafeHours">Horário de Funcionamento:</label>
-                            <textarea id="cafeHours" rows="3" required placeholder="Ex: Segunda a Sexta: 7h às 20h&#10;Sábado e Domingo: 8h às 22h"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="cafeImage">URL da Imagem:</label>
-                            <input type="url" id="cafeImage" required placeholder="https://example.com/image.jpg">
-                        </div>
-                        
-                        <button type="submit" class="btn btn-success">💾 Salvar Café</button>
-                    </form>
-                </div>
-            </section>
-        </main>
-
-        <footer class="admin-footer">
-            <p>🔄 Dados são sincronizados automaticamente com o aplicativo principal</p>
-            <button onclick="refreshData()" class="btn btn-secondary">🔄 Atualizar Dados</button>
-        </footer>
+            </div>
+        </div>
     </div>
-
+    
     <script src="admin.js"></script>
 </body>
 </html>
