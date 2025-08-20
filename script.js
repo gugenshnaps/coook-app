@@ -431,11 +431,19 @@ function initializeTelegramWebApp() {
     console.log('🔧 window.Telegram?.WebApp:', window.Telegram?.WebApp);
     console.log('🔧 window.location.href:', window.location.href);
     console.log('🔧 window.location.search:', window.location.search);
+    console.log('🔧 User agent:', navigator.userAgent);
     
     // Check for Telegram WebApp in URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const tgWebAppData = urlParams.get('tgWebAppData');
     console.log('🔧 tgWebAppData from URL:', tgWebAppData);
+    
+    // Check if we're in Telegram browser
+    const isTelegramBrowser = navigator.userAgent.includes('TelegramWebApp') || 
+                             navigator.userAgent.includes('Telegram') ||
+                             window.location.href.includes('tgWebAppData');
+    
+    console.log('🔧 Is Telegram browser:', isTelegramBrowser);
     
     if (window.Telegram && window.Telegram.WebApp) {
         console.log('🔧 Telegram WebApp detected, initializing...');
@@ -465,8 +473,9 @@ function initializeTelegramWebApp() {
                 // Update user name
                 const userName = document.getElementById('userName');
                 if (userName) {
-                    userName.textContent = `${user.first_name} ${user.last_name || ''}`;
-                    console.log('✅ User name updated:', userName.textContent);
+                    const fullName = user.last_name ? `${user.first_name} ${user.last_name}` : user.first_name;
+                    userName.textContent = fullName;
+                    console.log('✅ User name updated:', fullName);
                 } else {
                     console.log('❌ User name element not found');
                 }
@@ -487,36 +496,73 @@ function initializeTelegramWebApp() {
         } catch (error) {
             console.error('❌ Error initializing Telegram WebApp:', error);
         }
-    } else {
-        console.log('ℹ️ Not running in Telegram WebApp');
+    } else if (isTelegramBrowser) {
+        console.log('🔧 Telegram browser detected, but WebApp API not available');
+        console.log('🔧 This might be a BotFather configuration issue');
         console.log('🔧 Available global objects:', Object.keys(window).filter(key => key.toLowerCase().includes('telegram')));
-        console.log('🔧 User agent:', navigator.userAgent);
         
-        // Check if we're in Telegram browser
-        const isTelegram = navigator.userAgent.includes('TelegramWebApp') || 
-                          navigator.userAgent.includes('Telegram') ||
-                          window.location.href.includes('tgWebAppData');
-        
-        if (isTelegram) {
-            console.log('🔧 Telegram browser detected, but WebApp API not available');
-            console.log('🔧 This might be a BotFather configuration issue');
+        // Try to detect Telegram WebApp in other ways
+        if (window.TelegramWebApp) {
+            console.log('🔧 Found window.TelegramWebApp, trying to use it...');
+            try {
+                window.TelegramWebApp.ready();
+                console.log('✅ TelegramWebApp ready');
+                
+                const user = window.TelegramWebApp.initDataUnsafe?.user;
+                if (user) {
+                    updateUserInfo(user);
+                }
+            } catch (error) {
+                console.error('❌ Error with TelegramWebApp:', error);
+            }
         }
         
         // Fallback: Set default user info for testing
-        console.log('🔧 Setting fallback user info for testing...');
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
+        setFallbackUserInfo();
+    } else {
+        console.log('ℹ️ Not running in Telegram WebApp');
+        console.log('🔧 Available global objects:', Object.keys(window).filter(key => key.toLowerCase().includes('telegram')));
         
-        if (userAvatar) {
-            userAvatar.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM0QTkwRTIiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiBmaWxsPSJub25lIj4KPHBhdGggZD0iTTggMTJDMTAuMjA5MSAxMiAxMiAxMC4yMDkxIDEyIDhDMTIgNS43OTA5IDEwLjIwOTEgNCA4IDRDNS43OTA5IDQgNCA1Ljc5MDkgNCA4QzQgMTAuMjA5MSA1Ljc5MDkgNCA4IDRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOCAxNEMxMC4yMDkxIDE0IDEyIDEyLjIwOTEgMTIgMTBDMTIgOS43OTA5IDEwLjIwOTEgOCA4IDhDNi4yMDkxIDggNCA5Ljc5MDkgNCAxMkM0IDEyLjIwOTEgNi4yMDkxIDE0IDggMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+';
-            userAvatar.alt = 'Default User';
-            console.log('✅ Fallback avatar set');
-        }
-        
-        if (userName) {
-            userName.textContent = 'Usuário Teste';
-            console.log('✅ Fallback user name set');
-        }
+        // Fallback: Set default user info for testing
+        setFallbackUserInfo();
+    }
+}
+
+// Update user info with Telegram data
+function updateUserInfo(user) {
+    console.log('🔧 Updating user info with:', user);
+    
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    
+    if (userAvatar && user.photo_url) {
+        userAvatar.src = user.photo_url;
+        userAvatar.alt = `${user.first_name} ${user.last_name || ''}`;
+        console.log('✅ Avatar updated:', user.photo_url);
+    }
+    
+    if (userName) {
+        const fullName = user.last_name ? `${user.first_name} ${user.last_name}` : user.first_name;
+        userName.textContent = fullName;
+        console.log('✅ User name updated:', fullName);
+    }
+}
+
+// Set fallback user info
+function setFallbackUserInfo() {
+    console.log('🔧 Setting fallback user info for testing...');
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    
+    if (userAvatar) {
+        userAvatar.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM0QTkwRTIiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiBmaWxsPSJub25lIj4KPHBhdGggZD0iTTggMTJDMTAuMjA5MSAxMiAxMiAxMC4yMDkxIDEyIDhDMTIgNS43OTA5IDEwLjIwOTEgNCA4IDRDNS43OTA5IDQgNCA1Ljc5MDkgNCA4QzQgMTAuMjA5MSA1Ljc5MDkgNCA4IDRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOCAxNEMxMC4yMDkxIDE0IDEyIDEyLjIwOTEgMTIgMTBDMTIgOS43OTA5IDEwLjIwOTEgOCA4IDhDNi4yMDkxIDggNCA5Ljc5MDkgNCAxMkM0IDEyLjIwOTEgNi4yMDkxIDE0IDggMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+';
+        userAvatar.alt = 'Default User';
+        console.log('✅ Fallback avatar set');
+    }
+    
+    if (userName) {
+        userName.textContent = 'Usuário Teste';
+        console.log('✅ Fallback user name set');
     }
 }
 
