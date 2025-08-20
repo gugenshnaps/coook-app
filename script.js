@@ -275,8 +275,8 @@ function displayCafes() {
             `;
         } else {
             cafesList.innerHTML = `
-                <div class="cafe-section">
-                    <h3>Todos os cafés (${cafesData.length})</h3>
+                <h3 class="cafe-section-header">Todos os cafés (${cafesData.length})</h3>
+                <div class="cafes-grid">
                     ${cafesData.map(cafe => `
                         <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
                             <div class="cafe-info">
@@ -306,8 +306,8 @@ function displayCafes() {
         `;
     } else {
         cafesList.innerHTML = `
-            <div class="cafe-section">
-                <h3>Cafés em ${currentCity} (${cityCafes.length})</h3>
+            <h3 class="cafe-section-header">Cafés em ${currentCity} (${cityCafes.length})</h3>
+            <div class="cafes-grid">
                 ${cityCafes.map(cafe => `
                     <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
                         <div class="cafe-info">
