@@ -204,34 +204,20 @@ body::before {
     100% { left: 100%; }
 }
 
-.coffee-icon {
-    font-size: 36px;
-    animation: steam 3s ease-in-out infinite;
+.app-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: none;
 }
 
-@keyframes steam {
-    0%, 100% { 
-        transform: translateY(0) scale(1) rotate(0deg); 
-        opacity: 1;
-    }
-    50% { 
-        transform: translateY(-8px) scale(1.1) rotate(5deg); 
-        opacity: 0.8;
-    }
-}
+/* Logo animation removed */
 
-.app-title h1 {
-    font-size: 42px;
-    font-weight: 800;
-    color: white;
-    text-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    letter-spacing: 2px;
+.app-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
 }
 
 /* Cafes list container */
