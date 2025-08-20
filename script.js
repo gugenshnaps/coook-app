@@ -19,16 +19,25 @@ let currentCafe = null;
 // Load saved city from localStorage
 function loadSavedCity() {
     const savedCity = localStorage.getItem('coook_selected_city');
+    console.log('🔧 loadSavedCity called, savedCity from localStorage:', savedCity);
+    
     if (savedCity) {
         currentCity = savedCity;
         console.log('🔧 Loaded saved city:', currentCity);
+    } else {
+        console.log('🔧 No saved city found, currentCity remains:', currentCity);
     }
 }
 
 // Save selected city to localStorage
 function saveSelectedCity(city) {
+    console.log('🔧 saveSelectedCity called with:', city);
+    console.log('🔧 Previous currentCity:', currentCity);
+    
     currentCity = city;
     localStorage.setItem('coook_selected_city', city);
+    
+    console.log('🔧 New currentCity:', currentCity);
     console.log('🔧 Saved city selection:', city);
 }
 
@@ -226,7 +235,13 @@ function displayCafes() {
         return;
     }
     
+    console.log('🔧 displayCafes called with:');
+    console.log('🔧 currentCity:', currentCity);
+    console.log('🔧 cafesData length:', cafesData.length);
+    console.log('🔧 cafesData:', cafesData);
+    
     if (!currentCity) {
+        console.log('🔧 No city selected, showing ALL cafes');
         // Show ALL cafes when no city is selected
         if (cafesData.length === 0) {
             cafesList.innerHTML = `
@@ -255,8 +270,10 @@ function displayCafes() {
         return;
     }
     
+    console.log('🔧 City selected, filtering cafes for:', currentCity);
     // Show cafes for selected city
     const cityCafes = cafesData.filter(cafe => cafe.city === currentCity);
+    console.log('🔧 Filtered cafes:', cityCafes);
     
     if (cityCafes.length === 0) {
         cafesList.innerHTML = `
@@ -367,34 +384,53 @@ async function initializeApp() {
 
 // Initialize Telegram WebApp
 function initializeTelegramWebApp() {
+    console.log('🔧 Checking Telegram WebApp availability...');
+    console.log('🔧 window.Telegram:', window.Telegram);
+    console.log('🔧 window.Telegram?.WebApp:', window.Telegram?.WebApp);
+    
     if (window.Telegram && window.Telegram.WebApp) {
         console.log('🔧 Telegram WebApp detected, initializing...');
         
-        // Initialize Telegram WebApp
-        window.Telegram.WebApp.ready();
-        
-        // Set up user info
-        const user = window.Telegram.WebApp.initDataUnsafe?.user;
-        if (user) {
-            // Update user avatar
-            const userAvatar = document.getElementById('userAvatar');
-            if (userAvatar && user.photo_url) {
-                userAvatar.src = user.photo_url;
-                userAvatar.alt = `${user.first_name} ${user.last_name || ''}`;
-            }
+        try {
+            // Initialize Telegram WebApp
+            window.Telegram.WebApp.ready();
+            console.log('✅ Telegram WebApp ready');
             
-            // Update user name
-            const userName = document.getElementById('userName');
-            if (userName) {
-                userName.textContent = `${user.first_name} ${user.last_name || ''}`;
-            }
+            // Set up user info
+            const user = window.Telegram.WebApp.initDataUnsafe?.user;
+            console.log('🔧 User data:', user);
             
-            console.log('✅ Telegram user info loaded:', user);
-        } else {
-            console.log('ℹ️ No Telegram user data available');
+            if (user) {
+                // Update user avatar
+                const userAvatar = document.getElementById('userAvatar');
+                if (userAvatar && user.photo_url) {
+                    userAvatar.src = user.photo_url;
+                    userAvatar.alt = `${user.first_name} ${user.last_name || ''}`;
+                    console.log('✅ Avatar updated:', user.photo_url);
+                } else {
+                    console.log('❌ Avatar element not found or no photo_url');
+                }
+                
+                // Update user name
+                const userName = document.getElementById('userName');
+                if (userName) {
+                    userName.textContent = `${user.first_name} ${user.last_name || ''}`;
+                    console.log('✅ User name updated:', userName.textContent);
+                } else {
+                    console.log('❌ User name element not found');
+                }
+                
+                console.log('✅ Telegram user info loaded:', user);
+            } else {
+                console.log('ℹ️ No Telegram user data available');
+                console.log('🔧 initDataUnsafe:', window.Telegram.WebApp.initDataUnsafe);
+            }
+        } catch (error) {
+            console.error('❌ Error initializing Telegram WebApp:', error);
         }
     } else {
         console.log('ℹ️ Not running in Telegram WebApp');
+        console.log('🔧 Available global objects:', Object.keys(window).filter(key => key.toLowerCase().includes('telegram')));
     }
 }
 
