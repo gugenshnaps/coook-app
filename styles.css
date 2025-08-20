@@ -11,47 +11,24 @@ body {
     color: #333;
     overflow-x: hidden;
     position: relative;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
+    background: white;
 }
 
-/* Animated gradient background */
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Add subtle floating particles */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: -1;
-}
+/* White background - no animation needed */
 
 /* Header styles */
 .app-header {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(25px);
     padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     position: sticky;
     top: 0;
     z-index: 100;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 20px;
     margin: 16px;
 }
@@ -87,13 +64,12 @@ body::before {
 .user-name {
     font-weight: 600;
     font-size: 16px;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    color: #333;
 }
 
 .user-status {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
+    color: #666;
     font-weight: 500;
 }
 
@@ -218,6 +194,11 @@ body::before {
     justify-content: center;
     align-items: center;
     padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    margin: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Cafes list container */
@@ -228,17 +209,18 @@ body::before {
 
 /* Cafe section header */
 .cafe-section-header {
-    color: white;
+    color: #333;
     font-size: 20px;
     font-weight: 600;
     margin-bottom: 16px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.9);
     padding: 12px 20px;
     border-radius: 20px;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     width: 100%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
 /* Cafes grid */
@@ -284,14 +266,14 @@ body::before {
 
 /* Cafe card */
 .cafe-card {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(25px);
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .cafe-card:hover {
@@ -314,9 +296,8 @@ body::before {
 .cafe-name {
     font-size: 22px;
     font-weight: 700;
-    color: white;
+    color: #333;
     margin-bottom: 10px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .cafe-city {
@@ -334,7 +315,7 @@ body::before {
 
 .cafe-description {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
+    color: #666;
     line-height: 1.5;
     margin-bottom: 12px;
     display: -webkit-box;
@@ -345,12 +326,12 @@ body::before {
 
 .cafe-hours {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+    color: #666;
     font-weight: 500;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
     padding: 6px 10px;
     border-radius: 8px;
-    border-left: 3px solid rgba(255, 255, 255, 0.3);
+    border-left: 3px solid #ddd;
 }
 
 /* No cafes message */
