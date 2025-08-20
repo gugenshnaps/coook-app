@@ -167,9 +167,8 @@ async function loadCafes() {
             }));
             
             console.log('🔧 Cafes loaded from Firebase:', cafesData);
-            displayCafes();
             
-            // Set up real-time listener for cafes
+            // Set up real-time listener for cafes (this will also display cafes)
             setupCafesListener();
         } else {
             console.log('🔧 No cafes found, creating default cafes...');
