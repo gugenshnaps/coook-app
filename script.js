@@ -433,10 +433,14 @@ function initializeTelegramWebApp() {
     console.log('🔧 window.location.search:', window.location.search);
     console.log('🔧 User agent:', navigator.userAgent);
     
-    // Check for Telegram WebApp in URL parameters
+    // Check for Telegram WebApp in URL parameters (both search and hash)
     const urlParams = new URLSearchParams(window.location.search);
-    const tgWebAppData = urlParams.get('tgWebAppData');
-    console.log('🔧 tgWebAppData from URL:', tgWebAppData);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1)); // Remove # from hash
+    
+    const tgWebAppData = urlParams.get('tgWebAppData') || hashParams.get('tgWebAppData');
+    console.log('🔧 tgWebAppData from search:', urlParams.get('tgWebAppData'));
+    console.log('🔧 tgWebAppData from hash:', hashParams.get('tgWebAppData'));
+    console.log('🔧 Final tgWebAppData:', tgWebAppData);
     
     // Check if we're in Telegram browser
     const isTelegramBrowser = navigator.userAgent.includes('TelegramWebApp') || 
@@ -517,6 +521,21 @@ function initializeTelegramWebApp() {
             }
         }
         
+        // Try to parse Telegram data from hash if available
+        if (tgWebAppData) {
+            console.log('🔧 Found tgWebAppData in hash, trying to parse...');
+            try {
+                const parsedData = parseTelegramWebAppData(tgWebAppData);
+                if (parsedData && parsedData.user) {
+                    console.log('✅ Parsed Telegram user data:', parsedData.user);
+                    updateUserInfo(parsedData.user);
+                    return; // Don't set fallback if we got user data
+                }
+            } catch (error) {
+                console.error('❌ Error parsing tgWebAppData:', error);
+            }
+        }
+        
         // Fallback: Set default user info for testing
         setFallbackUserInfo();
     } else {
@@ -525,6 +544,39 @@ function initializeTelegramWebApp() {
         
         // Fallback: Set default user info for testing
         setFallbackUserInfo();
+    }
+}
+
+// Parse Telegram WebApp data from hash
+function parseTelegramWebAppData(tgWebAppData) {
+    console.log('🔧 Parsing tgWebAppData:', tgWebAppData);
+    
+    try {
+        // Parse the URL-encoded data
+        const decodedData = decodeURIComponent(tgWebAppData);
+        console.log('🔧 Decoded data:', decodedData);
+        
+        // Extract user data from the query string
+        const userMatch = decodedData.match(/user=([^&]+)/);
+        if (userMatch) {
+            const userData = userMatch[1];
+            console.log('🔧 User data string:', userData);
+            
+            // Parse the user JSON (it's double-encoded)
+            const userJson = decodeURIComponent(userData);
+            console.log('🔧 User JSON string:', userJson);
+            
+            const user = JSON.parse(userJson);
+            console.log('🔧 Parsed user object:', user);
+            
+            return { user };
+        }
+        
+        console.log('❌ No user data found in tgWebAppData');
+        return null;
+    } catch (error) {
+        console.error('❌ Error parsing tgWebAppData:', error);
+        return null;
     }
 }
 
