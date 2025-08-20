@@ -263,8 +263,8 @@ body::before {
     width: 100%;
 }
 
-/* Responsive grid for mobile */
-@media (max-width: 480px) {
+/* Responsive grid for mobile - only very small phones get 1 column */
+@media (max-width: 350px) {
     .cafes-grid {
         grid-template-columns: 1fr;
         gap: 16px;
