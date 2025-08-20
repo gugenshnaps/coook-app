@@ -10,6 +10,11 @@ console.log('🔍 Firebase available:', !!(window.firebase && window.firebase.db
 console.log('🔍 Current URL:', window.location.href);
 console.log('🔍 === END DEBUG INFO ===');
 
+// Wait for Firebase to be available before proceeding
+if (!window.firebase || !window.firebase.db) {
+    console.log('⏳ Firebase not ready yet, waiting...');
+}
+
 // Global variables
 let cafesData = [];
 let citiesData = [];
@@ -413,6 +418,22 @@ async function initializeApp() {
         
         // Load saved city
         loadSavedCity();
+        
+        // Wait for Firebase to be ready
+        let retryCount = 0;
+        const maxRetries = 10;
+        
+        while (!window.firebase || !window.firebase.db) {
+            if (retryCount >= maxRetries) {
+                console.error('❌ Firebase not available after retries');
+                return;
+            }
+            console.log(`🔧 Waiting for Firebase... (${retryCount + 1}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            retryCount++;
+        }
+        
+        console.log('✅ Firebase is ready, loading data...');
         
         // Load cities and cafes from Firebase
         await loadCities();
