@@ -24,8 +24,20 @@ function loadSavedCity() {
     if (savedCity) {
         currentCity = savedCity;
         console.log('🔧 Loaded saved city:', currentCity);
+        
+        // Show "Show all" button if city is selected
+        const showAllBtn = document.getElementById('showAllCafes');
+        if (showAllBtn) {
+            showAllBtn.style.display = 'block';
+        }
     } else {
         console.log('🔧 No saved city found, currentCity remains:', currentCity);
+        
+        // Hide "Show all" button if no city is selected
+        const showAllBtn = document.getElementById('showAllCafes');
+        if (showAllBtn) {
+            showAllBtn.style.display = 'none';
+        }
     }
 }
 
@@ -36,6 +48,12 @@ function saveSelectedCity(city) {
     
     currentCity = city;
     localStorage.setItem('coook_selected_city', city);
+    
+    // Show/hide "Show all" button
+    const showAllBtn = document.getElementById('showAllCafes');
+    if (showAllBtn) {
+        showAllBtn.style.display = city ? 'block' : 'none';
+    }
     
     console.log('🔧 New currentCity:', currentCity);
     console.log('🔧 Saved city selection:', city);
@@ -343,6 +361,30 @@ function closeModal() {
     }
 }
 
+// Show all cafes regardless of city selection
+function showAllCafes() {
+    console.log('🔧 showAllCafes called');
+    currentCity = null;
+    localStorage.removeItem('coook_selected_city');
+    
+    // Update city select
+    const citySelect = document.getElementById('citySelect');
+    if (citySelect) {
+        citySelect.value = '';
+    }
+    
+    // Hide show all button
+    const showAllBtn = document.getElementById('showAllCafes');
+    if (showAllBtn) {
+        showAllBtn.style.display = 'none';
+    }
+    
+    // Display all cafes
+    displayCafes();
+    
+    console.log('🔧 All cafes will be shown');
+}
+
 // Show cities error
 function showCitiesError() {
     const citySelect = document.getElementById('citySelect');
@@ -387,6 +429,13 @@ function initializeTelegramWebApp() {
     console.log('🔧 Checking Telegram WebApp availability...');
     console.log('🔧 window.Telegram:', window.Telegram);
     console.log('🔧 window.Telegram?.WebApp:', window.Telegram?.WebApp);
+    console.log('🔧 window.location.href:', window.location.href);
+    console.log('🔧 window.location.search:', window.location.search);
+    
+    // Check for Telegram WebApp in URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const tgWebAppData = urlParams.get('tgWebAppData');
+    console.log('🔧 tgWebAppData from URL:', tgWebAppData);
     
     if (window.Telegram && window.Telegram.WebApp) {
         console.log('🔧 Telegram WebApp detected, initializing...');
@@ -399,6 +448,8 @@ function initializeTelegramWebApp() {
             // Set up user info
             const user = window.Telegram.WebApp.initDataUnsafe?.user;
             console.log('🔧 User data:', user);
+            console.log('🔧 initDataUnsafe:', window.Telegram.WebApp.initDataUnsafe);
+            console.log('🔧 initData:', window.Telegram.WebApp.initData);
             
             if (user) {
                 // Update user avatar
@@ -424,6 +475,14 @@ function initializeTelegramWebApp() {
             } else {
                 console.log('ℹ️ No Telegram user data available');
                 console.log('🔧 initDataUnsafe:', window.Telegram.WebApp.initDataUnsafe);
+                console.log('🔧 initData:', window.Telegram.WebApp.initData);
+                
+                // Try alternative ways to get user data
+                const initData = window.Telegram.WebApp.initData;
+                if (initData) {
+                    console.log('🔧 Trying to parse initData:', initData);
+                    // Parse initData manually if needed
+                }
             }
         } catch (error) {
             console.error('❌ Error initializing Telegram WebApp:', error);
@@ -431,6 +490,17 @@ function initializeTelegramWebApp() {
     } else {
         console.log('ℹ️ Not running in Telegram WebApp');
         console.log('🔧 Available global objects:', Object.keys(window).filter(key => key.toLowerCase().includes('telegram')));
+        console.log('🔧 User agent:', navigator.userAgent);
+        
+        // Check if we're in Telegram browser
+        const isTelegram = navigator.userAgent.includes('TelegramWebApp') || 
+                          navigator.userAgent.includes('Telegram') ||
+                          window.location.href.includes('tgWebAppData');
+        
+        if (isTelegram) {
+            console.log('🔧 Telegram browser detected, but WebApp API not available');
+            console.log('🔧 This might be a BotFather configuration issue');
+        }
         
         // Fallback: Set default user info for testing
         console.log('🔧 Setting fallback user info for testing...');
@@ -465,6 +535,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('🔧 City selected:', selectedCity);
             }
         });
+    }
+    
+    // Show all cafes button
+    const showAllBtn = document.getElementById('showAllCafes');
+    if (showAllBtn) {
+        showAllBtn.addEventListener('click', showAllCafes);
     }
     
     // Modal close
