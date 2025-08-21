@@ -236,6 +236,42 @@ body {
     white-space: nowrap;
 }
 
+/* Test button styles */
+.test-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #FF6B6B, #EE5A52);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+    margin-left: 12px;
+}
+
+.test-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    background: linear-gradient(135deg, #EE5A52, #D64545);
+}
+
+.test-button:active {
+    transform: translateY(0);
+}
+
+.test-icon {
+    font-size: 18px;
+}
+
+.test-text {
+    white-space: nowrap;
+}
+
 /* Map container styles */
 .map-container {
     position: fixed;
