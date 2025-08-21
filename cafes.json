@@ -4,13 +4,19 @@
     "name": "Café Central",
     "city": "São Paulo",
     "description": "Um café acolhedor no coração da cidade com os melhores grãos brasileiros.",
-    "image": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400"
+    "image": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400",
+    "hours": "Seg-Sex: 7h-22h, Sáb-Dom: 8h-23h",
+    "lat": -23.5505,
+    "lng": -46.6333
   },
   {
-    "id": "bella-vista",
-    "name": "Bella Vista",
-    "city": "Rio de Janeiro",
-    "description": "Café com vista panorâmica e ambiente sofisticado para momentos especiais.",
-    "image": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400"
+    "id": "emoromo",
+    "name": "Emoromo",
+    "city": "Salva",
+    "description": "Café tradicional com ambiente familiar e os melhores doces caseiros.",
+    "image": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400",
+    "hours": "Seg-Dom: 6h-20h",
+    "lat": -12.9716,
+    "lng": -38.5011
   }
 ]

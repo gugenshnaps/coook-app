@@ -165,6 +165,7 @@ function displayCafes() {
                 <p><strong>Cidade:</strong> ${cafe.city}</p>
                 <p><strong>Descrição:</strong> ${cafe.description || 'Sem descrição'}</p>
                 <p><strong>Horário:</strong> ${cafe.hours || 'Não informado'}</p>
+                ${cafe.lat && cafe.lng ? `<p><strong>Coordenadas:</strong> ${cafe.lat}, ${cafe.lng}</p>` : '<p><strong>Coordenadas:</strong> Não informadas</p>'}
             </div>
             <div class="cafe-actions">
                 <button onclick="editCafe('${cafe.id}')" class="edit-btn">✏️</button>
@@ -227,10 +228,16 @@ async function addCafe() {
     const cafeNameInput = document.getElementById('cafeName');
     const cafeCitySelect = document.getElementById('cafeCity');
     const cafeDescriptionInput = document.getElementById('cafeDescription');
+    const cafeHoursInput = document.getElementById('cafeHours');
+    const cafeLatInput = document.getElementById('cafeLat');
+    const cafeLngInput = document.getElementById('cafeLng');
     
     const cafeName = cafeNameInput.value.trim();
     const cafeCity = cafeCitySelect.value;
     const cafeDescription = cafeDescriptionInput.value.trim();
+    const cafeHours = cafeHoursInput.value.trim();
+    const cafeLat = cafeLatInput.value ? parseFloat(cafeLatInput.value) : null;
+    const cafeLng = cafeLngInput.value ? parseFloat(cafeLngInput.value) : null;
     
     if (!cafeName || !cafeCity) {
         showError('Por favor, preencha nome e cidade do café');
@@ -238,15 +245,21 @@ async function addCafe() {
     }
     
     try {
-        console.log('Adding cafe:', { name: cafeName, city: cafeCity, description: cafeDescription });
+        console.log('Adding cafe:', { name: cafeName, city: cafeCity, description: cafeDescription, hours: cafeHours, lat: cafeLat, lng: cafeLng });
         
         // Create cafe object
         const cafeData = {
             name: cafeName,
             city: cafeCity,
             description: cafeDescription,
-            hours: '8:00 - 22:00' // Default hours
+            hours: cafeHours || '8:00 - 22:00'
         };
+        
+        // Add coordinates if provided
+        if (cafeLat !== null && cafeLng !== null) {
+            cafeData.lat = cafeLat;
+            cafeData.lng = cafeLng;
+        }
         
         // Add to Firebase
         const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
@@ -256,6 +269,9 @@ async function addCafe() {
         cafeNameInput.value = '';
         cafeCitySelect.value = '';
         cafeDescriptionInput.value = '';
+        cafeHoursInput.value = '';
+        cafeLatInput.value = '';
+        cafeLngInput.value = '';
         
         showSuccess('Café adicionado com sucesso!');
         console.log('Cafe added successfully');

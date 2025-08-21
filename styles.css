@@ -201,6 +201,87 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+/* Map button styles */
+.map-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    color: white;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(74, 144, 226, 0.3);
+}
+
+.map-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(74, 144, 226, 0.4);
+    background: linear-gradient(135deg, #357ABD, #2E6AA8);
+}
+
+.map-button:active {
+    transform: translateY(0);
+}
+
+.map-icon {
+    font-size: 24px;
+}
+
+.map-text {
+    white-space: nowrap;
+}
+
+/* Map container styles */
+.map-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.google-map {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.close-map-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.close-map-btn:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
 /* Cafes list container */
 .cafes-list {
     padding: 0 16px;
