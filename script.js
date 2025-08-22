@@ -278,6 +278,12 @@ function displayCafes() {
                 <div class="cafes-grid">
                     ${cafesData.map(cafe => `
                         <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
+                            <div class="cafe-photo">
+                                ${cafe.photoUrl ? 
+                                    `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
+                                    `<div class="cafe-placeholder">☕</div>`
+                                }
+                            </div>
                             <div class="cafe-info">
                                 <h3>${cafe.name}</h3>
                                 <p class="cafe-city">${cafe.city}</p>
@@ -309,6 +315,12 @@ function displayCafes() {
             <div class="cafes-grid">
                 ${cityCafes.map(cafe => `
                     <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
+                        <div class="cafe-photo">
+                            ${cafe.photoUrl ? 
+                                `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
+                                `<div class="cafe-placeholder">☕</div>`
+                            }
+                        </div>
                         <div class="cafe-info">
                             <h3>${cafe.name}</h3>
                             <p class="cafe-city">${cafe.city}</p>
@@ -340,7 +352,10 @@ function showCafeDetails(cafeId) {
     if (modal && modalContent) {
         modalContent.innerHTML = `
             <div class="cafe-detail-image">
-                <div class="coffee-icon">☕</div>
+                ${cafe.photoUrl ? 
+                    `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-detail-photo">` : 
+                    `<div class="coffee-icon">☕</div>`
+                }
             </div>
             <div class="cafe-detail-info">
                 <h2 class="cafe-detail-name">${cafe.name}</h2>

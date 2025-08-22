@@ -29,6 +29,9 @@ async function initializeAdminPanel() {
         // Populate city selector
         populateCitySelector();
         
+        // Initialize photo upload functionality
+        initializePhotoUpload();
+        
         console.log('Admin panel initialized successfully!');
     } catch (error) {
         console.error('Error initializing admin panel:', error);
@@ -242,12 +245,37 @@ async function addCafe() {
     try {
         console.log('Adding cafe:', { name: cafeName, city: cafeCity, description: cafeDescription, hours: cafeHours });
         
+        // Get photo (file upload or URL)
+        let photoUrl = null;
+        const photoType = document.querySelector('input[name="photoType"]:checked').value;
+        
+        if (photoType === 'file') {
+            const photoInput = document.getElementById('cafePhoto');
+            if (photoInput.files[0]) {
+                photoUrl = await getPhotoBase64();
+            }
+        } else if (photoType === 'url') {
+            const urlInput = document.getElementById('cafePhotoUrl');
+            const url = urlInput.value.trim();
+            if (url) {
+                // Validate URL
+                const validation = await validateImageUrl(url);
+                if (validation.valid) {
+                    photoUrl = url;
+                } else {
+                    showError('URL da imagem inválida: ' + validation.error);
+                    return;
+                }
+            }
+        }
+        
         // Create cafe object
         const cafeData = {
             name: cafeName,
             city: cafeCity,
             description: cafeDescription,
-            hours: cafeHours || '8:00 - 22:00'
+            hours: cafeHours || '8:00 - 22:00',
+            photoUrl: photoUrl
         };
         
         // Add to Firebase
@@ -259,6 +287,7 @@ async function addCafe() {
         cafeCitySelect.value = '';
         cafeDescriptionInput.value = '';
         cafeHoursInput.value = '';
+        removePhoto(); // Clear photo
         
         showSuccess('Café adicionado com sucesso!');
         console.log('Cafe added successfully');
@@ -325,6 +354,221 @@ function showSuccess(message) {
 function showError(message) {
     // Simple error message (can be enhanced with toast notifications)
     alert('❌ ' + message);
+}
+
+// ===== PHOTO UPLOAD FUNCTIONALITY =====
+
+// Initialize photo upload functionality
+function initializePhotoUpload() {
+    const photoInput = document.getElementById('cafePhoto');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoUrlInput = document.getElementById('cafePhotoUrl');
+    const urlPreview = document.getElementById('urlPreview');
+    
+    // Radio button change handlers
+    const photoFileRadio = document.getElementById('photoFile');
+    const photoUrlRadio = document.getElementById('photoUrl');
+    
+    if (photoFileRadio && photoUrlRadio) {
+        photoFileRadio.addEventListener('change', () => switchPhotoMode('file'));
+        photoUrlRadio.addEventListener('change', () => switchPhotoMode('url'));
+    }
+    
+    // File upload handler
+    if (photoInput && photoPreview) {
+        photoInput.addEventListener('change', handlePhotoUpload);
+    }
+    
+    // URL input handler
+    if (photoUrlInput && urlPreview) {
+        photoUrlInput.addEventListener('input', handleUrlInput);
+    }
+    
+    console.log('📸 Photo upload initialized');
+}
+
+// Switch between file upload and URL input
+function switchPhotoMode(mode) {
+    const fileSection = document.getElementById('fileUploadSection');
+    const urlSection = document.getElementById('urlInputSection');
+    
+    if (mode === 'file') {
+        fileSection.style.display = 'block';
+        urlSection.style.display = 'none';
+        // Clear URL input
+        document.getElementById('cafePhotoUrl').value = '';
+        document.getElementById('urlPreview').innerHTML = '';
+    } else {
+        fileSection.style.display = 'none';
+        urlSection.style.display = 'block';
+        // Clear file input
+        document.getElementById('cafePhoto').value = '';
+        document.getElementById('photoPreview').innerHTML = '';
+    }
+    
+    console.log('📸 Switched to photo mode:', mode);
+}
+
+// Handle photo upload and preview with compression
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    const photoPreview = document.getElementById('photoPreview');
+    
+    if (file) {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Por favor, selecione apenas arquivos de imagem!');
+            return;
+        }
+        
+        // Validate file size (max 500KB)
+        if (file.size > 500 * 1024) {
+            alert('A imagem deve ter menos de 500KB! Será comprimida automaticamente.');
+        }
+        
+        // Compress and preview image
+        compressImage(file, 500 * 1024, photoPreview);
+        
+        console.log('📸 Photo upload started:', file.name, 'Size:', file.size);
+    }
+}
+
+// Compress image to target size
+function compressImage(file, targetSize, previewElement) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = function() {
+        // Calculate new dimensions (maintain aspect ratio)
+        let { width, height } = img;
+        const maxDimension = 800;
+        
+        if (width > height) {
+            if (width > maxDimension) {
+                height = (height * maxDimension) / width;
+                width = maxDimension;
+            }
+        } else {
+            if (height > maxDimension) {
+                width = (width * maxDimension) / height;
+                height = maxDimension;
+            }
+        }
+        
+        // Set canvas dimensions
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress image
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Try different quality levels
+        let quality = 0.8;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        
+        // Reduce quality until we meet target size
+        while (dataUrl.length > targetSize * 1.5 && quality > 0.1) {
+            quality -= 0.1;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        
+        // Show preview
+        previewElement.innerHTML = `
+            <img src="${dataUrl}" alt="Preview da foto">
+            <button type="button" class="remove-photo" onclick="removePhoto()">❌ Remover</button>
+            <div class="compression-info">
+                Original: ${(file.size / 1024).toFixed(1)}KB → 
+                Comprimido: ${(dataUrl.length / 1024).toFixed(1)}KB
+            </div>
+        `;
+        previewElement.classList.add('has-image');
+        
+        console.log('📸 Image compressed:', {
+            original: file.size,
+            compressed: dataUrl.length,
+            quality: quality,
+            dimensions: `${width}x${height}`
+        });
+    };
+    
+    img.src = URL.createObjectURL(file);
+}
+
+// Validate URL format and accessibility
+function validateImageUrl(url) {
+    return new Promise((resolve) => {
+        // Basic URL format validation
+        try {
+            new URL(url);
+        } catch {
+            resolve({ valid: false, error: 'Formato de URL inválido' });
+            return;
+        }
+        
+        // Check if image loads
+        const img = new Image();
+        img.onload = function() {
+            resolve({ valid: true, url: url });
+        };
+        img.onerror = function() {
+            resolve({ valid: false, error: 'Imagem não pode ser carregada' });
+        };
+        img.src = url;
+        
+        // Timeout after 10 seconds
+        setTimeout(() => {
+            resolve({ valid: false, error: 'Timeout ao carregar imagem' });
+        }, 10000);
+    });
+}
+
+// Handle URL input and preview
+function handleUrlInput(event) {
+    const url = event.target.value.trim();
+    const urlPreview = document.getElementById('urlPreview');
+    
+    if (url) {
+        urlPreview.innerHTML = `
+            <img src="${url}" alt="Preview da foto">
+            <button type="button" class="remove-photo" onclick="removePhoto()">❌ Remover</button>
+        `;
+        urlPreview.classList.add('has-image');
+    } else {
+        urlPreview.innerHTML = '';
+        urlPreview.classList.remove('has-image');
+    }
+    
+    console.log('📸 URL preview updated:', url);
+}
+
+// Remove photo
+function removePhoto() {
+    const photoInput = document.getElementById('cafePhoto');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoUrlInput = document.getElementById('cafePhotoUrl');
+    const urlPreview = document.getElementById('urlPreview');
+    
+    photoInput.value = '';
+    photoPreview.innerHTML = '';
+    photoPreview.classList.remove('has-image');
+    
+    photoUrlInput.value = '';
+    urlPreview.innerHTML = '';
+    urlPreview.classList.remove('has-image');
+    
+    console.log('📸 Photo removed');
+}
+
+// Get compressed photo data from preview
+function getPhotoBase64() {
+    const photoPreview = document.getElementById('photoPreview');
+    const img = photoPreview.querySelector('img');
+    
+    if (!img) return null;
+    
+    // Return the compressed data URL from preview
+    return img.src;
 }
 
 // Start initialization when page loads
