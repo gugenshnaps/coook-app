@@ -30,13 +30,26 @@ function loadSavedCity() {
         currentCity = savedCity;
         console.log('🔧 Loaded saved city:', currentCity);
         
+        // Update city select to show selected city
+        const citySelect = document.getElementById('citySelect');
+        if (citySelect) {
+            citySelect.value = savedCity;
+        }
+        
         // Show "Show all" button if city is selected
         const showAllBtn = document.getElementById('showAllCafes');
         if (showAllBtn) {
             showAllBtn.style.display = 'block';
         }
     } else {
-        console.log('🔧 No saved city found, currentCity remains:', currentCity);
+        currentCity = null;
+        console.log('🔧 No saved city found, currentCity set to null');
+        
+        // Update city select to show default option
+        const citySelect = document.getElementById('citySelect');
+        if (citySelect) {
+            citySelect.value = '';
+        }
         
         // Hide "Show all" button if no city is selected
         const showAllBtn = document.getElementById('showAllCafes');
@@ -52,7 +65,12 @@ function saveSelectedCity(city) {
     console.log('🔧 Previous currentCity:', currentCity);
     
     currentCity = city;
-    localStorage.setItem('coook_selected_city', city);
+    
+    if (city) {
+        localStorage.setItem('coook_selected_city', city);
+    } else {
+        localStorage.removeItem('coook_selected_city');
+    }
     
     // Show/hide "Show all" button
     const showAllBtn = document.getElementById('showAllCafes');
@@ -669,6 +687,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveSelectedCity(selectedCity);
                 displayCafes();
                 console.log('🔧 City selected:', selectedCity);
+            } else {
+                // Clear city selection and show all cafes
+                saveSelectedCity(null);
+                displayCafes();
+                console.log('🔧 City selection cleared, showing all cafes');
             }
         });
     }
