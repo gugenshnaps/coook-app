@@ -47,10 +47,7 @@
         console.log('🔥 Firebase functions available:', Object.keys(window.firebase));
     </script>
     
-    <!-- Google Maps JavaScript API -->
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkD6tUuXxdBU0_APzm-SkEL4sKuNlX4kA&libraries=places&callback=initMap">
-    </script>
+
 </head>
 <body>
     <!-- Header с аватаром и выбором города -->
@@ -77,22 +74,9 @@
 
             <!-- Основной контент -->
         <main class="main-content">
-            <!-- Заголовок приложения -->
-            <div class="app-title">
-                <button id="showMapBtn" class="map-button">
-                    <span class="map-icon">🗺️</span>
-                    <span class="map-text">Показать карту</span>
-                </button>
-                <button id="testMarkerBtn" class="test-button" style="display: none;">
-                    <span class="test-icon">🎯</span>
-                    <span class="test-text">Тест маркера</span>
-                </button>
-            </div>
-        
-        <!-- Контейнер для карты -->
-        <div id="mapContainer" class="map-container" style="display: none;">
-            <div id="map" class="google-map"></div>
-            <button id="closeMapBtn" class="close-map-btn">✕</button>
+                    <!-- Заголовок приложения -->
+        <div class="app-title">
+            <img src="logo.png" alt="Logo" class="app-logo">
         </div>
         
         <!-- Список кафе -->

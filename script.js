@@ -322,9 +322,6 @@ function displayCafes() {
     }
     
     console.log('🔧 Cafes displayed for city:', currentCity, 'Count:', cityCafes.length);
-    
-    // Update map if it's open
-    updateMapData();
 }
 
 // Show cafe details in modal
@@ -388,9 +385,6 @@ function showAllCafes() {
     
     // Display all cafes
     displayCafes();
-    
-    // Update map if it's open
-    updateMapData();
     
     console.log('🔧 All cafes will be shown');
 }
@@ -694,173 +688,19 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ===== GOOGLE MAPS FUNCTIONALITY =====
 
-// Global variables for map
-let map = null;
-let userMarker = null;
-let cafeMarkers = [];
-let userLocation = null;
 
-// Initialize map when Google Maps API is loaded
-function initMap() {
-    console.log('🗺️ Google Maps API loaded, initializing map...');
-    
-    // Set up map event listeners
-    setupMapEventListeners();
-    
-    // Try to get user location
-    getUserLocation();
-}
 
-// Set up map event listeners
-function setupMapEventListeners() {
-    const showMapBtn = document.getElementById('showMapBtn');
-    const closeMapBtn = document.getElementById('closeMapBtn');
-    const mapContainer = document.getElementById('mapContainer');
-    const testMarkerBtn = document.getElementById('testMarkerBtn');
-    
-    if (showMapBtn) {
-        showMapBtn.addEventListener('click', showMap);
-    }
-    
-    if (closeMapBtn) {
-        closeMapBtn.addEventListener('click', hideMap);
-    }
-    
-    if (mapContainer) {
-        mapContainer.addEventListener('click', (e) => {
-            if (e.target === mapContainer) {
-                hideMap();
-            }
-        });
-    }
-    
-    if (testMarkerBtn) {
-        testMarkerBtn.addEventListener('click', testMarker);
-    }
-}
 
-// Show map
-function showMap() {
-    console.log('🗺️ Showing map...');
-    
-    const mapContainer = document.getElementById('mapContainer');
-    const mapElement = document.getElementById('map');
-    const testMarkerBtn = document.getElementById('testMarkerBtn');
-    
-    if (mapContainer && mapElement) {
-        mapContainer.style.display = 'flex';
-        
-        // Show test button
-        if (testMarkerBtn) {
-            testMarkerBtn.style.display = 'flex';
-        }
-        
-        // Initialize map if not already done
-        if (!map) {
-            initializeMap(mapElement);
-        }
-        
-        // Update map with current data
-        updateMapWithCafes();
-    }
-}
 
-// Hide map
-function hideMap() {
-    console.log('🗺️ Hiding map...');
-    
-    const mapContainer = document.getElementById('mapContainer');
-    const testMarkerBtn = document.getElementById('testMarkerBtn');
-    
-    if (mapContainer) {
-        mapContainer.style.display = 'none';
-    }
-    
-    // Hide test button
-    if (testMarkerBtn) {
-        testMarkerBtn.style.display = 'none';
-    }
-}
 
-// Initialize Google Map
-function initializeMap(mapElement) {
-    console.log('🗺️ Initializing Google Map...');
-    
-    // Default center (São Paulo, Brazil)
-    const defaultCenter = { lat: -23.5505, lng: -46.6333 };
-    
-    // Create map
-    map = new google.maps.Map(mapElement, {
-        zoom: 12,
-        center: userLocation || defaultCenter,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        styles: [
-            {
-                featureType: 'poi.business',
-                elementType: 'labels',
-                stylers: [{ visibility: 'off' }]
-            }
-        ]
-    });
-    
-    console.log('✅ Map initialized successfully');
-}
 
-// Get user location
-function getUserLocation() {
-    console.log('📍 Getting user location...');
-    
-    if (navigator.geolocation) {
-        console.log('✅ Geolocation supported, requesting position...');
-        
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                
-                console.log('✅ User location obtained:', userLocation);
-                console.log('✅ Accuracy:', position.coords.accuracy, 'meters');
-                console.log('✅ Timestamp:', new Date(position.timestamp));
-                
-                // Add user marker if map is initialized
-                if (map) {
-                    console.log('✅ Map is ready, adding user marker...');
-                    addUserMarker();
-                    centerMapOnUser();
-                } else {
-                    console.log('⚠️ Map not ready yet, will add marker later');
-                }
-            },
-            (error) => {
-                console.warn('⚠️ Could not get user location:', error.message);
-                console.warn('⚠️ Error code:', error.code);
-                
-                // Use default location (São Paulo)
-                userLocation = { lat: -23.5505, lng: -46.6333 };
-                console.log('⚠️ Using default location:', userLocation);
-                
-                // Try to add marker anyway
-                if (map) {
-                    addUserMarker();
-                    centerMapOnUser();
-                }
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000
-            }
-        );
-    } else {
-        console.warn('⚠️ Geolocation not supported');
-        userLocation = { lat: -23.5505, lng: -46.6333 };
-        console.log('⚠️ Using default location:', userLocation);
-    }
-}
+
+
+
+
+
+
 
 // Add user marker to map
 function addUserMarker() {
@@ -905,124 +745,12 @@ function addUserMarker() {
     });
 }
 
-// Center map on user location
-function centerMapOnUser() {
-    if (map && userLocation) {
-        map.setCenter(userLocation);
-        console.log('✅ Map centered on user location');
-    }
-}
 
-// Update map with cafes
-function updateMapWithCafes() {
-    if (!map || !cafesData || cafesData.length === 0) return;
-    
-    console.log('🗺️ Updating map with cafes...');
-    
-    // Clear existing cafe markers
-    cafeMarkers.forEach(marker => marker.setMap(null));
-    cafeMarkers = [];
-    
-    // Add cafe markers
-    cafesData.forEach(cafe => {
-        if (cafe.lat && cafe.lng) {
-            const marker = new google.maps.Marker({
-                position: { lat: parseFloat(cafe.lat), lng: parseFloat(cafe.lng) },
-                map: map,
-                title: cafe.name,
-                icon: {
-                    url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyQzIgMTcuNTIgNi40OCAyMiAxMiAyMkMxNy41MiAyMiAyMiAxNy41MiAyMiAxMkMyMiA2LjQ4IDE3LjUyIDIgMTIgMloiIGZpbGw9IiNGRjY2MDAiLz4KPHBhdGggZD0iTTEyIDEzQzEzLjY2IDEzIDE1IDExLjY2IDE1IDEwQzE1IDguMzQgMTMuNjYgNyAxMiA3QzEwLjM0IDcgOSA4LjM0IDkgMTBDOSAxMS42NiAxMC4zNCAxMyAxMiAxM1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
-                    scaledSize: new google.maps.Size(24, 24)
-                }
-            });
-            
-            // Add click listener to marker
-            marker.addListener('click', () => {
-                showCafeInfo(cafe, marker);
-            });
-            
-            cafeMarkers.push(marker);
-        }
-    });
-    
-    console.log(`✅ Added ${cafeMarkers.length} cafe markers to map`);
-}
 
-// Show cafe info on map
-function showCafeInfo(cafe, marker) {
-    const infoWindow = new google.maps.InfoWindow({
-        content: `
-            <div style="padding: 10px; max-width: 200px;">
-                <h3 style="margin: 0 0 8px 0; color: #333;">${cafe.name}</h3>
-                <p style="margin: 0 0 5px 0; color: #666; font-size: 14px;">${cafe.description || ''}</p>
-                <p style="margin: 0 0 5px 0; color: #888; font-size: 12px;">${cafe.hours || ''}</p>
-                <p style="margin: 0; color: #4A90E2; font-size: 12px; font-weight: 600;">${cafe.city}</p>
-            </div>
-        `
-    });
-    
-    infoWindow.open(map, marker);
-}
 
-// Update map when cafes data changes
-function updateMapData() {
-    if (map) {
-        updateMapWithCafes();
-    }
-}
 
-// Test marker function
-function testMarker() {
-    console.log('🎯 Test marker button clicked');
-    
-    if (!map) {
-        console.warn('⚠️ Map not initialized');
-        alert('Карта не инициализирована!');
-        return;
-    }
-    
-    if (!userLocation) {
-        console.warn('⚠️ User location not available');
-        alert('Местоположение пользователя недоступно!');
-        return;
-    }
-    
-    console.log('🔧 Testing marker creation...');
-    
-    // Force add user marker
-    addUserMarker();
-    
-    // Center map on user
-    centerMapOnUser();
-    
-    // Add test cafe marker
-    const testCafeLocation = {
-        lat: userLocation.lat + 0.001, // Slightly offset from user
-        lng: userLocation.lng + 0.001
-    };
-    
-    const testMarker = new google.maps.Marker({
-        position: testCafeLocation,
-        map: map,
-        title: 'Test Cafe',
-        icon: {
-            url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyQzIgMTcuNTIgNi40OCAyMiAxMiAyMkMxNy41MiAyMiAyMiAxNy41MiAyMiAxMkMyMiA2LjQ4IDE3LjUyIDIgMTIgMloiIGZpbGw9IiNGRjY2MDAiLz4KPHBhdGggZD0iTTEyIDEzQzEzLjY2IDEzIDE1IDExLjY2IDE1IDEwQzE1IDguMzQgMTMuNjYgNyAxMiA3QzEwLjM0IDcgOSA4LjM0IDkgMTBDOSAxMS42NiAxMC4zNCAxMyAxMiAxM1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
-            scaledSize: new google.maps.Size(24, 24)
-        },
-        zIndex: 1001,
-        animation: google.maps.Animation.DROP
-    });
-    
-    console.log('✅ Test cafe marker created:', testMarker);
-    
-    // Add info window
-    const infoWindow = new google.maps.InfoWindow({
-        content: '<div style="padding: 10px;"><h3>Test Cafe</h3><p>Это тестовый маркер кафе!</p></div>'
-    });
-    
-    testMarker.addListener('click', () => {
-        infoWindow.open(map, testMarker);
-    });
-    
-    alert('Тестовые маркеры добавлены! Проверь консоль для деталей.');
-}
+
+
+
+
+
