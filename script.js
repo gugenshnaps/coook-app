@@ -438,6 +438,9 @@ async function initializeApp() {
         await loadCities();
         await loadCafes();
         
+        // Initialize menu functionality
+        initializeMenu();
+        
         console.log('✅ App initialized successfully');
     } catch (error) {
         console.error('❌ Error initializing app:', error);
@@ -687,6 +690,148 @@ document.addEventListener('keydown', (e) => {
         closeModal();
     }
 });
+
+// ===== MENU FUNCTIONALITY =====
+
+// Initialize menu functionality
+function initializeMenu() {
+    console.log('🍽️ Initializing menu functionality...');
+    
+    // Loyalty button
+    const loyaltyBtn = document.querySelector('.loyalty-btn');
+    if (loyaltyBtn) {
+        loyaltyBtn.addEventListener('click', showLoyalty);
+    }
+    
+    // Favorites button
+    const favoritesBtn = document.querySelector('.favorites-btn');
+    if (favoritesBtn) {
+        favoritesBtn.addEventListener('click', showFavorites);
+    }
+    
+    console.log('✅ Menu functionality initialized');
+}
+
+// Show loyalty information
+function showLoyalty() {
+    console.log('🎯 Loyalty button clicked');
+    
+    // Create modal content
+    const modalContent = `
+        <div class="loyalty-modal">
+            <h2>🎯 Minha Lealdade</h2>
+            <div class="loyalty-stats">
+                <div class="stat-item">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Cafés Visitados</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Pontos Acumulados</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">Bronze</span>
+                    <span class="stat-label">Nível Atual</span>
+                </div>
+            </div>
+            <div class="loyalty-info">
+                <p>🌟 Visite cafés para acumular pontos e subir de nível!</p>
+                <p>🎁 Desbloqueie benefícios exclusivos conforme sua lealdade cresce.</p>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Minha Lealdade');
+}
+
+// Show favorites
+function showFavorites() {
+    console.log('❤️ Favorites button clicked');
+    
+    // Get favorites from localStorage
+    const favorites = JSON.parse(localStorage.getItem('coook_favorites') || '[]');
+    
+    if (favorites.length === 0) {
+        const modalContent = `
+            <div class="favorites-modal">
+                <h2>❤️ Favoritos</h2>
+                <div class="empty-favorites">
+                    <p>📝 Você ainda não tem cafés favoritos</p>
+                    <p>💡 Clique no coração nos cafés para adicioná-los aos favoritos!</p>
+                </div>
+            </div>
+        `;
+        showModal(modalContent, 'Favoritos');
+    } else {
+        // Show favorites list
+        const favoritesList = favorites.map(cafe => `
+            <div class="favorite-item">
+                <h3>${cafe.name}</h3>
+                <p>${cafe.city}</p>
+                <p>${cafe.description || ''}</p>
+                <button class="remove-favorite" onclick="removeFavorite('${cafe.id}')">
+                    ❌ Remover dos favoritos
+                </button>
+            </div>
+        `).join('');
+        
+        const modalContent = `
+            <div class="favorites-modal">
+                <h2>❤️ Favoritos (${favorites.length})</h2>
+                <div class="favorites-list">
+                    ${favoritesList}
+                </div>
+            </div>
+        `;
+        showModal(modalContent, 'Favoritos');
+    }
+}
+
+// Show modal with custom content
+function showModal(content, title) {
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    
+    if (modal && modalContent) {
+        modalContent.innerHTML = content;
+        modal.style.display = 'flex';
+        console.log('🔧 Modal shown:', title);
+    }
+}
+
+// Remove cafe from favorites
+function removeFavorite(cafeId) {
+    console.log('❌ Removing cafe from favorites:', cafeId);
+    
+    const favorites = JSON.parse(localStorage.getItem('coook_favorites') || '[]');
+    const updatedFavorites = favorites.filter(cafe => cafe.id !== cafeId);
+    
+    localStorage.setItem('coook_favorites', JSON.stringify(updatedFavorites));
+    
+    // Refresh favorites modal
+    showFavorites();
+    
+    console.log('✅ Cafe removed from favorites');
+}
+
+// Add cafe to favorites
+function addToFavorites(cafe) {
+    console.log('❤️ Adding cafe to favorites:', cafe.name);
+    
+    const favorites = JSON.parse(localStorage.getItem('coook_favorites') || '[]');
+    
+    // Check if cafe is already in favorites
+    if (favorites.some(fav => fav.id === cafe.id)) {
+        console.log('⚠️ Cafe already in favorites');
+        return;
+    }
+    
+    // Add cafe to favorites
+    favorites.push(cafe);
+    localStorage.setItem('coook_favorites', JSON.stringify(favorites));
+    
+    console.log('✅ Cafe added to favorites');
+}
 
 
 
