@@ -303,7 +303,13 @@ function displayCafes() {
                                 }
                             </div>
                             <div class="cafe-info">
-                                <h3>${cafe.name}</h3>
+                                <div class="cafe-header">
+                                    <h3>${cafe.name}</h3>
+                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
+                                            onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                                    </button>
+                                </div>
                                 <p class="cafe-city">${cafe.city}</p>
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
                                 <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
@@ -339,12 +345,18 @@ function displayCafes() {
                                 `<div class="cafe-placeholder">☕</div>`
                             }
                         </div>
-                        <div class="cafe-info">
-                            <h3>${cafe.name}</h3>
-                            <p class="cafe-city">${cafe.city}</p>
-                            <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
-                            <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
-                        </div>
+                                                    <div class="cafe-info">
+                                <div class="cafe-header">
+                                    <h3>${cafe.name}</h3>
+                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
+                                            onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                                    </button>
+                                </div>
+                                <p class="cafe-city">${cafe.city}</p>
+                                <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
+                                <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
+                            </div>
                     </div>
                 `).join('')}
             </div>
@@ -447,6 +459,9 @@ async function initializeApp() {
     try {
         // Initialize Telegram WebApp if available
         initializeTelegramWebApp();
+        
+        // Initialize user system
+        await initializeUserSystem();
         
         // Load saved city
         loadSavedCity();
@@ -786,8 +801,23 @@ function showLoyalty() {
 function showFavorites() {
     console.log('❤️ Favorites button clicked');
     
-    // Get favorites from localStorage
-    const favorites = JSON.parse(localStorage.getItem('coook_favorites') || '[]');
+    // Check if user is logged in
+    if (!currentUser) {
+        const modalContent = `
+            <div class="favorites-modal">
+                <h2>❤️ Favoritos</h2>
+                <div class="empty-favorites">
+                    <p>⚠️ Você precisa estar logado para ver favoritos</p>
+                    <p>💡 Abra o app através do Telegram</p>
+                </div>
+            </div>
+        `;
+        showModal(modalContent, 'Favoritos');
+        return;
+    }
+    
+    // Get favorites from user system
+    const favorites = currentUser.favorites || [];
     
     if (favorites.length === 0) {
         const modalContent = `
@@ -802,12 +832,12 @@ function showFavorites() {
         showModal(modalContent, 'Favoritos');
     } else {
         // Show favorites list
-        const favoritesList = favorites.map(cafe => `
+        const favoritesList = favorites.map(fav => `
             <div class="favorite-item">
-                <h3>${cafe.name}</h3>
-                <p>${cafe.city}</p>
-                <p>${cafe.description || ''}</p>
-                <button class="remove-favorite" onclick="removeFavorite('${cafe.id}')">
+                <h3>${fav.cafeName}</h3>
+                <p>${fav.cafeCity}</p>
+                <p>${fav.cafeDescription || ''}</p>
+                <button class="remove-favorite" onclick="removeFavorite('${fav.cafeId}')">
                     ❌ Remover dos favoritos
                 </button>
             </div>
@@ -837,38 +867,373 @@ function showModal(content, title) {
     }
 }
 
-// Remove cafe from favorites
-function removeFavorite(cafeId) {
-    console.log('❌ Removing cafe from favorites:', cafeId);
-    
-    const favorites = JSON.parse(localStorage.getItem('coook_favorites') || '[]');
-    const updatedFavorites = favorites.filter(cafe => cafe.id !== cafeId);
-    
-    localStorage.setItem('coook_favorites', JSON.stringify(updatedFavorites));
-    
-    // Refresh favorites modal
-    showFavorites();
-    
-    console.log('✅ Cafe removed from favorites');
-}
-
 // Add cafe to favorites
-function addToFavorites(cafe) {
-    console.log('❤️ Adding cafe to favorites:', cafe.name);
-    
-    const favorites = JSON.parse(localStorage.getItem('coook_favorites') || '[]');
-    
-    // Check if cafe is already in favorites
-    if (favorites.some(fav => fav.id === cafe.id)) {
-        console.log('⚠️ Cafe already in favorites');
+async function addToFavorites(cafe) {
+    if (!currentUser) {
+        console.log('⚠️ No user logged in');
         return;
     }
     
-    // Add cafe to favorites
-    favorites.push(cafe);
-    localStorage.setItem('coook_favorites', JSON.stringify(favorites));
+    try {
+        console.log('❤️ Adding cafe to favorites:', cafe.name);
+        
+        // Check if cafe is already in favorites
+        if (currentUser.favorites.some(fav => fav.cafeId === cafe.id)) {
+            console.log('⚠️ Cafe already in favorites');
+            return;
+        }
+        
+        // Add to Firebase
+        const favoritesRef = window.firebase.collection(window.firebase.db, 'favorites');
+        const userFavoritesQuery = window.firebase.query(
+            favoritesRef,
+            window.firebase.where('userId', '==', currentUser.telegramId)
+        );
+        
+        const favoritesSnapshot = await window.firebase.getDocs(userFavoritesQuery);
+        
+        if (!favoritesSnapshot.empty) {
+            // Update existing favorites
+            const favoritesDoc = favoritesSnapshot.docs[0];
+            const newCafe = {
+                cafeId: cafe.id,
+                cafeName: cafe.name,
+                cafeCity: cafe.city,
+                cafeDescription: cafe.description,
+                addedAt: new Date()
+            };
+            
+            await window.firebase.updateDoc(favoritesDoc.ref, {
+                cafes: window.firebase.arrayUnion(newCafe)
+            });
+        } else {
+            // Create new favorites document
+            await window.firebase.addDoc(favoritesRef, {
+                userId: currentUser.telegramId,
+                cafes: [{
+                    cafeId: cafe.id,
+                    cafeName: cafe.name,
+                    cafeCity: cafe.city,
+                    cafeDescription: cafe.description,
+                    addedAt: new Date()
+                }]
+            });
+        }
+        
+        // Update local user data
+        currentUser.favorites.push({
+            cafeId: cafe.id,
+            cafeName: cafe.name,
+            cafeCity: cafe.city,
+            cafeDescription: cafe.description,
+            addedAt: new Date()
+        });
+        
+        console.log('✅ Cafe added to favorites');
+    } catch (error) {
+        console.error('❌ Error adding to favorites:', error);
+    }
+}
+
+// Remove cafe from favorites
+async function removeFavorite(cafeId) {
+    if (!currentUser) return;
     
-    console.log('✅ Cafe added to favorites');
+    try {
+        console.log('❌ Removing cafe from favorites:', cafeId);
+        
+        // Remove from Firebase
+        const favoritesRef = window.firebase.collection(window.firebase.db, 'favorites');
+        const userFavoritesQuery = window.firebase.query(
+            favoritesRef,
+            window.firebase.where('userId', '==', currentUser.telegramId)
+        );
+        
+        const favoritesSnapshot = await window.firebase.getDocs(userFavoritesQuery);
+        
+        if (!favoritesSnapshot.empty) {
+            const favoritesDoc = favoritesSnapshot.docs[0];
+            const currentFavorites = favoritesDoc.data().cafes;
+            const updatedFavorites = currentFavorites.filter(fav => fav.cafeId !== cafeId);
+            
+            await window.firebase.updateDoc(favoritesDoc.ref, {
+                cafes: updatedFavorites
+            });
+        }
+        
+        // Update local user data
+        currentUser.favorites = currentUser.favorites.filter(fav => fav.cafeId !== cafeId);
+        
+        console.log('✅ Cafe removed from favorites');
+    } catch (error) {
+        console.error('❌ Error removing from favorites:', error);
+    }
+}
+
+// Add loyalty points for visiting cafe
+async function addLoyaltyPoints(cafe, points = 50) {
+    if (!currentUser) return;
+    
+    try {
+        console.log('🎯 Adding loyalty points for cafe:', cafe.name, 'Points:', points);
+        
+        // Update Firebase
+        const loyaltyRef = window.firebase.collection(window.firebase.db, 'loyalty');
+        const userLoyaltyQuery = window.firebase.query(
+            loyaltyRef,
+            window.firebase.where('userId', '==', currentUser.telegramId)
+        );
+        
+        const loyaltySnapshot = await window.firebase.getDocs(userLoyaltyQuery);
+        
+        if (!loyaltySnapshot.empty) {
+            const loyaltyDoc = loyaltySnapshot.docs[0];
+            const currentLoyalty = loyaltyDoc.data();
+            const newTotalPoints = currentLoyalty.totalPoints + points;
+            const newLevel = calculateLevel(newTotalPoints);
+            
+            const newVisit = {
+                cafeId: cafe.id,
+                cafeName: cafe.name,
+                cafeCity: cafe.city,
+                points: points,
+                visitedAt: new Date()
+            };
+            
+            await window.firebase.updateDoc(loyaltyDoc.ref, {
+                totalPoints: newTotalPoints,
+                level: newLevel,
+                visits: window.firebase.arrayUnion(newVisit)
+            });
+            
+            // Update local user data
+            currentUser.loyalty.totalPoints = newTotalPoints;
+            currentUser.loyalty.level = newLevel;
+            currentUser.loyalty.visits.push(newVisit);
+        }
+        
+        console.log('✅ Loyalty points added. Total:', currentUser.loyalty.totalPoints);
+    } catch (error) {
+        console.error('❌ Error adding loyalty points:', error);
+    }
+}
+
+// Calculate user level based on points
+function calculateLevel(points) {
+    if (points >= 1000) return 'Diamond';
+    if (points >= 500) return 'Platinum';
+    if (points >= 200) return 'Gold';
+    if (points >= 100) return 'Silver';
+    return 'Bronze';
+}
+
+// ===== USER MANAGEMENT SYSTEM =====
+
+// Current user data
+let currentUser = null;
+
+// Initialize user system
+async function initializeUserSystem() {
+    console.log('👤 Initializing user system...');
+    
+    // Get Telegram user data
+    const telegramUser = getTelegramUserData();
+    
+    if (telegramUser && telegramUser.id) {
+        console.log('✅ Telegram user found:', telegramUser.id);
+        
+        // Create or get user from Firebase
+        currentUser = await createOrGetUser(telegramUser);
+        
+        if (currentUser) {
+            console.log('✅ User system initialized for:', currentUser.firstName);
+            // Load user's favorites and loyalty data
+            await loadUserData();
+        }
+    } else {
+        console.log('⚠️ No Telegram user data available');
+    }
+}
+
+// Get Telegram user data from URL
+function getTelegramUserData() {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const tgWebAppData = hashParams.get('tgWebAppData');
+    
+    if (tgWebAppData) {
+        try {
+            const decodedData = decodeURIComponent(tgWebAppData);
+            const userMatch = decodedData.match(/user=([^&]+)/);
+            
+            if (userMatch) {
+                const userString = decodeURIComponent(userMatch[1]);
+                const userData = JSON.parse(userString);
+                return userData;
+            }
+        } catch (error) {
+            console.error('❌ Error parsing Telegram user data:', error);
+        }
+    }
+    
+    return null;
+}
+
+// Create or get user from Firebase
+async function createOrGetUser(telegramUser) {
+    try {
+        const usersRef = window.firebase.collection(window.firebase.db, 'users');
+        
+        // Check if user exists
+        const userQuery = window.firebase.query(
+            usersRef,
+            window.firebase.where('telegramId', '==', telegramUser.id.toString())
+        );
+        
+        const userSnapshot = await window.firebase.getDocs(userQuery);
+        
+        if (!userSnapshot.empty) {
+            // User exists, return user data
+            const userDoc = userSnapshot.docs[0];
+            const userData = { id: userDoc.id, ...userDoc.data() };
+            console.log('✅ Existing user found:', userData.firstName);
+            return userData;
+        } else {
+            // Create new user
+            const newUser = {
+                telegramId: telegramUser.id.toString(),
+                firstName: telegramUser.first_name,
+                lastName: telegramUser.last_name || '',
+                username: telegramUser.username || '',
+                photoUrl: telegramUser.photo_url || '',
+                loyaltyPoints: 0,
+                level: 'Bronze',
+                visitedCafes: [],
+                createdAt: new Date()
+            };
+            
+            const userDoc = await window.firebase.addDoc(usersRef, newUser);
+            newUser.id = userDoc.id;
+            
+            console.log('✅ New user created:', newUser.firstName);
+            return newUser;
+        }
+    } catch (error) {
+        console.error('❌ Error creating/getting user:', error);
+        return null;
+    }
+}
+
+// Load user's favorites and loyalty data
+async function loadUserData() {
+    if (!currentUser) return;
+    
+    try {
+        console.log('📊 Loading user data for:', currentUser.firstName);
+        
+        // Load favorites
+        await loadUserFavorites();
+        
+        // Load loyalty data
+        await loadUserLoyalty();
+        
+        console.log('✅ User data loaded successfully');
+    } catch (error) {
+        console.error('❌ Error loading user data:', error);
+    }
+}
+
+// Load user favorites
+async function loadUserFavorites() {
+    if (!currentUser) return;
+    
+    try {
+        const favoritesRef = window.firebase.collection(window.firebase.db, 'favorites');
+        const userFavoritesQuery = window.firebase.query(
+            favoritesRef,
+            window.firebase.where('userId', '==', currentUser.telegramId)
+        );
+        
+        const favoritesSnapshot = await window.firebase.getDocs(userFavoritesQuery);
+        
+        if (!favoritesSnapshot.empty) {
+            const userFavorites = favoritesSnapshot.docs[0].data();
+            currentUser.favorites = userFavorites.cafes || [];
+            console.log('❤️ User favorites loaded:', currentUser.favorites.length);
+        } else {
+            // Create empty favorites document
+            await window.firebase.addDoc(favoritesRef, {
+                userId: currentUser.telegramId,
+                cafes: []
+            });
+            currentUser.favorites = [];
+            console.log('❤️ Empty favorites document created');
+        }
+    } catch (error) {
+        console.error('❌ Error loading favorites:', error);
+        currentUser.favorites = [];
+    }
+}
+
+// Load user loyalty data
+async function loadUserLoyalty() {
+    if (!currentUser) return;
+    
+    try {
+        const loyaltyRef = window.firebase.collection(window.firebase.db, 'loyalty');
+        const userLoyaltyQuery = window.firebase.query(
+            loyaltyRef,
+            window.firebase.where('userId', '==', currentUser.telegramId)
+        );
+        
+        const loyaltySnapshot = await window.firebase.getDocs(userLoyaltyQuery);
+        
+        if (!loyaltySnapshot.empty) {
+            const userLoyalty = loyaltySnapshot.docs[0].data();
+            currentUser.loyalty = userLoyalty;
+            console.log('🎯 User loyalty loaded:', userLoyalty.totalPoints, 'points');
+        } else {
+            // Create empty loyalty document
+            await window.firebase.addDoc(loyaltyRef, {
+                userId: currentUser.telegramId,
+                totalPoints: 0,
+                level: 'Bronze',
+                visits: []
+            });
+            currentUser.loyalty = { totalPoints: 0, level: 'Bronze', visits: [] };
+            console.log('🎯 Empty loyalty document created');
+        }
+    } catch (error) {
+        console.error('❌ Error loading loyalty:', error);
+        currentUser.loyalty = { totalPoints: 0, level: 'Bronze', visits: [] };
+    }
+}
+
+// Toggle favorite status for cafe
+async function toggleFavorite(cafeId, cafeName, cafeCity, cafeDescription) {
+    if (!currentUser) {
+        console.log('⚠️ No user logged in');
+        return;
+    }
+    
+    const cafe = {
+        id: cafeId,
+        name: cafeName,
+        city: cafeCity,
+        description: cafeDescription
+    };
+    
+    if (isCafeInFavorites(cafeId)) {
+        // Remove from favorites
+        await removeFavorite(cafeId);
+        console.log('❌ Cafe removed from favorites');
+    } else {
+        // Add to favorites
+        await addToFavorites(cafe);
+        console.log('❤️ Cafe added to favorites');
+    }
+    
+    // Refresh the display to show updated favorite status
+    displayCafes();
 }
 
 
