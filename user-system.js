@@ -1,7 +1,7 @@
 // ===== SIMPLE USER SYSTEM FOR COOK APP =====
 
-// Current user data
-let currentUser = null;
+// Current user data - make it global for access from script.js
+window.currentUser = null;
 
 // Initialize user system
 async function initializeUserSystem() {
@@ -14,36 +14,82 @@ async function initializeUserSystem() {
         console.log('✅ Telegram user found:', telegramUser.id);
         
         // Create or get user from Firebase
-        currentUser = await createOrGetUser(telegramUser);
+        window.currentUser = await createOrGetUser(telegramUser);
         
-        if (currentUser) {
-            console.log('✅ User system initialized for:', currentUser.firstName);
+        if (window.currentUser) {
+            console.log('✅ User system initialized for:', window.currentUser.firstName);
             // Load user's favorites
             await loadUserFavorites();
         }
     } else {
         console.log('⚠️ No Telegram user data available');
+        
+        // For local testing - create a test user
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('🧪 Creating test user for local development...');
+            window.currentUser = {
+                id: 'test-user-001',
+                telegramId: 'test-001',
+                firstName: 'Usuário Teste',
+                lastName: 'Local',
+                username: 'testuser',
+                photoUrl: '',
+                favorites: [],
+                createdAt: new Date()
+            };
+            console.log('✅ Test user created:', window.currentUser.firstName);
+        }
     }
 }
 
 // Get Telegram user data from URL hash
 function getTelegramUserData() {
+    console.log('🔍 DEBUG: window.location.hash:', window.location.hash);
+    console.log('🔍 DEBUG: window.location.search:', window.location.search);
+    console.log('🔍 DEBUG: window.location.href:', window.location.href);
+    
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const tgWebAppData = hashParams.get('tgWebAppData');
     
-    if (tgWebAppData) {
+    console.log('🔍 DEBUG: tgWebAppData from hash:', tgWebAppData);
+
+    // Also check window.location.search, as Telegram sometimes uses it
+    let tgWebAppDataFromSearch = null;
+    const searchParams = new URLSearchParams(window.location.search);
+    tgWebAppDataFromSearch = searchParams.get('tgWebAppData');
+    console.log('🔍 DEBUG: tgWebAppData from search:', tgWebAppDataFromSearch);
+
+    const finalTgWebAppData = tgWebAppData || tgWebAppDataFromSearch;
+
+    if (finalTgWebAppData) {
+        console.log('🔍 DEBUG: Found tgWebAppData:', finalTgWebAppData);
         try {
-            const decodedData = decodeURIComponent(tgWebAppData);
+            // Attempt to decode multiple times in case of double encoding
+            let decodedData = decodeURIComponent(finalTgWebAppData);
+            console.log('🔍 DEBUG: Decoded once:', decodedData);
+
+            // Check if it needs further decoding (e.g., if it still contains %22 for quotes)
+            if (decodedData.includes('%')) {
+                decodedData = decodeURIComponent(decodedData);
+                console.log('🔍 DEBUG: Decoded twice:', decodedData);
+            }
+
             const userMatch = decodedData.match(/user=([^&]+)/);
             
             if (userMatch) {
                 const userString = decodeURIComponent(userMatch[1]);
+                console.log('🔍 DEBUG: User string:', userString);
                 const userData = JSON.parse(userString);
+                console.log('🔍 DEBUG: Parsed user data:', userData);
                 return userData;
+            } else {
+                console.log('🔍 DEBUG: No user= parameter found in decoded data.');
             }
         } catch (error) {
             console.error('❌ Error parsing Telegram user data:', error);
         }
+    } else {
+        console.log('🔍 DEBUG: No tgWebAppData found in hash or search.');
     }
     
     return null;
@@ -93,41 +139,41 @@ async function createOrGetUser(telegramUser) {
 
 // Load user favorites
 async function loadUserFavorites() {
-    if (!currentUser) return;
+    if (!window.currentUser) return;
     
     try {
-        console.log('❤️ Loading favorites for user:', currentUser.firstName);
+        console.log('❤️ Loading favorites for user:', window.currentUser.firstName);
         
         const favoritesRef = window.firebase.collection(window.firebase.db, 'favorites');
         const userFavoritesQuery = window.firebase.query(
             favoritesRef,
-            window.firebase.where('userId', '==', currentUser.telegramId)
+            window.firebase.where('userId', '==', window.currentUser.telegramId)
         );
         
         const favoritesSnapshot = await window.firebase.getDocs(userFavoritesQuery);
         
         if (!favoritesSnapshot.empty) {
             const userFavorites = favoritesSnapshot.docs[0].data();
-            currentUser.favorites = userFavorites.cafes || [];
-            console.log('❤️ User favorites loaded:', currentUser.favorites.length);
+            window.currentUser.favorites = userFavorites.cafes || [];
+            console.log('❤️ User favorites loaded:', window.currentUser.favorites.length);
         } else {
             // Create empty favorites document
             await window.firebase.addDoc(favoritesRef, {
-                userId: currentUser.telegramId,
+                userId: window.currentUser.telegramId,
                 cafes: []
             });
-            currentUser.favorites = [];
+            window.currentUser.favorites = [];
             console.log('❤️ Empty favorites document created');
         }
     } catch (error) {
         console.error('❌ Error loading favorites:', error);
-        currentUser.favorites = [];
+        window.currentUser.favorites = [];
     }
 }
 
 // Add cafe to favorites
 async function addToFavorites(cafe) {
-    if (!currentUser) {
+    if (!window.currentUser) {
         console.log('⚠️ No user logged in');
         return;
     }
@@ -136,7 +182,7 @@ async function addToFavorites(cafe) {
         console.log('❤️ Adding cafe to favorites:', cafe.name);
         
         // Check if cafe is already in favorites
-        if (currentUser.favorites.some(fav => fav.cafeId === cafe.id)) {
+        if (window.currentUser.favorites.some(fav => fav.cafeId === cafe.id)) {
             console.log('⚠️ Cafe already in favorites');
             return;
         }
@@ -145,7 +191,7 @@ async function addToFavorites(cafe) {
         const favoritesRef = window.firebase.collection(window.firebase.db, 'favorites');
         const userFavoritesQuery = window.firebase.query(
             favoritesRef,
-            window.firebase.where('userId', '==', currentUser.telegramId)
+            window.firebase.where('userId', '==', window.currentUser.telegramId)
         );
         
         const favoritesSnapshot = await window.firebase.getDocs(userFavoritesQuery);
@@ -167,7 +213,7 @@ async function addToFavorites(cafe) {
         } else {
             // Create new favorites document
             await window.firebase.addDoc(favoritesRef, {
-                userId: currentUser.telegramId,
+                userId: window.currentUser.telegramId,
                 cafes: [{
                     cafeId: cafe.id,
                     cafeName: cafe.name,
@@ -179,7 +225,7 @@ async function addToFavorites(cafe) {
         }
         
         // Update local user data
-        currentUser.favorites.push({
+        window.currentUser.favorites.push({
             cafeId: cafe.id,
             cafeName: cafe.name,
             cafeCity: cafe.city,
@@ -195,7 +241,7 @@ async function addToFavorites(cafe) {
 
 // Remove cafe from favorites
 async function removeFavorite(cafeId) {
-    if (!currentUser) return;
+    if (!window.currentUser) return;
     
     try {
         console.log('❌ Removing cafe from favorites:', cafeId);
@@ -204,7 +250,7 @@ async function removeFavorite(cafeId) {
         const favoritesRef = window.firebase.collection(window.firebase.db, 'favorites');
         const userFavoritesQuery = window.firebase.query(
             favoritesRef,
-            window.firebase.where('userId', '==', currentUser.telegramId)
+            window.firebase.where('userId', '==', window.currentUser.telegramId)
         );
         
         const favoritesSnapshot = await window.firebase.getDocs(userFavoritesQuery);
@@ -220,7 +266,7 @@ async function removeFavorite(cafeId) {
         }
         
         // Update local user data
-        currentUser.favorites = currentUser.favorites.filter(fav => fav.cafeId !== cafeId);
+        window.currentUser.favorites = window.currentUser.favorites.filter(fav => fav.cafeId !== cafeId);
         
         console.log('✅ Cafe removed from favorites');
     } catch (error) {
@@ -230,11 +276,11 @@ async function removeFavorite(cafeId) {
 
 // Check if cafe is in favorites
 function isCafeInFavorites(cafeId) {
-    if (!currentUser || !currentUser.favorites) return false;
-    return currentUser.favorites.some(fav => fav.cafeId === cafeId);
+    if (!window.currentUser || !window.currentUser.favorites) return false;
+    return window.currentUser.favorites.some(fav => fav.cafeId === cafeId);
 }
 
 // Get current user
 function getCurrentUser() {
-    return currentUser;
+    return window.currentUser;
 }

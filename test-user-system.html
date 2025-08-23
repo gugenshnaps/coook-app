@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test User System</title>
+</head>
+<body>
+    <h1>Test User System</h1>
+    <div id="status">Loading...</div>
+    
+    <script>
+        // Test if user-system.js functions are available
+        window.addEventListener('load', () => {
+            const status = document.getElementById('status');
+            
+            if (typeof initializeUserSystem === 'function') {
+                status.innerHTML = '✅ initializeUserSystem function found';
+            } else {
+                status.innerHTML = '❌ initializeUserSystem function NOT found';
+            }
+            
+            if (typeof currentUser !== 'undefined') {
+                status.innerHTML += '<br>✅ currentUser variable found';
+            } else {
+                status.innerHTML += '<br>❌ currentUser variable NOT found';
+            }
+        });
+    </script>
+    
+    <!-- Load user-system.js first -->
+    <script src="user-system.js"></script>
+    
+    <!-- Then load main script -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -306,7 +306,7 @@ function displayCafes() {
                                 <div class="cafe-header">
                                     <h3>${cafe.name}</h3>
                                     <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
-                                            onclick="event.stopPropagation(); toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                                            onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
@@ -349,7 +349,7 @@ function displayCafes() {
                                 <div class="cafe-header">
                                     <h3>${cafe.name}</h3>
                                     <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
-                                            onclick="event.stopPropagation(); toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                                            onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
@@ -802,7 +802,7 @@ function showFavorites() {
     console.log('❤️ Favorites button clicked');
     
     // Check if user is logged in
-    if (!window.currentUser) {
+    if (!currentUser) {
         const modalContent = `
             <div class="favorites-modal">
                 <h2>❤️ Favoritos</h2>
@@ -817,7 +817,7 @@ function showFavorites() {
     }
     
     // Get favorites from user system
-    const favorites = window.currentUser.favorites || [];
+    const favorites = currentUser.favorites || [];
     
     if (favorites.length === 0) {
         const modalContent = `
@@ -867,40 +867,6 @@ function showModal(content, title) {
     }
 }
 
-// Toggle favorite status for cafe
-async function toggleFavorite(cafeId, cafeName, cafeCity, cafeDescription) {
-    if (!window.currentUser) {
-        console.log('⚠️ No user logged in');
-        return;
-    }
-    
-    const cafe = {
-        id: cafeId,
-        name: cafeName,
-        city: cafeCity,
-        description: cafeDescription
-    };
-    
-    if (isCafeInFavorites(cafeId)) {
-        // Remove from favorites
-        await removeFavorite(cafeId);
-        console.log('❌ Cafe removed from favorites');
-    } else {
-        // Add to favorites
-        await addToFavorites(cafe);
-        console.log('❤️ Cafe added to favorites');
-    }
-    
-    // Refresh the display to show updated favorite status
-    displayCafes();
-}
-
-// Check if cafe is in favorites
-function isCafeInFavorites(cafeId) {
-    if (!window.currentUser || !window.currentUser.favorites) return false;
-    return window.currentUser.favorites.some(fav => fav.cafeId === cafeId);
-}
-
 // Add cafe to favorites - now managed by user-system.js
 // async function addToFavorites(cafe) { ... } // REMOVED - conflicts with user-system.js
 
@@ -939,4 +905,228 @@ function getTelegramUserData() {
     
     return null;
 }
+
+// Create or get user from Firebase
+async function createOrGetUser(telegramUser) {
+    try {
+        const usersRef = window.firebase.collection(window.firebase.db, 'users');
+        
+        // Check if user exists
+        const userQuery = window.firebase.query(
+            usersRef,
+            window.firebase.where('telegramId', '==', telegramUser.id.toString())
+        );
+        
+        const userSnapshot = await window.firebase.getDocs(userQuery);
+        
+        if (!userSnapshot.empty) {
+            // User exists, return user data
+            const userDoc = userSnapshot.docs[0];
+            const userData = { id: userDoc.id, ...userDoc.data() };
+            console.log('✅ Existing user found:', userData.firstName);
+            return userData;
+        } else {
+            // Create new user
+            const newUser = {
+                telegramId: telegramUser.id.toString(),
+                firstName: telegramUser.first_name,
+                lastName: telegramUser.last_name || '',
+                username: telegramUser.username || '',
+                photoUrl: telegramUser.photo_url || '',
+                loyaltyPoints: 0,
+                level: 'Bronze',
+                visitedCafes: [],
+                createdAt: new Date()
+            };
+            
+            const userDoc = await window.firebase.addDoc(usersRef, newUser);
+            newUser.id = userDoc.id;
+            
+            console.log('✅ New user created:', newUser.firstName);
+            return newUser;
+        }
+    } catch (error) {
+        console.error('❌ Error creating/getting user:', error);
+        return null;
+    }
+}
+
+// Load user's favorites and loyalty data
+async function loadUserData() {
+    if (!currentUser) return;
+    
+    try {
+        console.log('📊 Loading user data for:', currentUser.firstName);
+        
+        // Load favorites
+        await loadUserFavorites();
+        
+        // Load loyalty data
+        await loadUserLoyalty();
+        
+        console.log('✅ User data loaded successfully');
+    } catch (error) {
+        console.error('❌ Error loading user data:', error);
+    }
+}
+
+// Load user favorites
+async function loadUserFavorites() {
+    if (!currentUser) return;
+    
+    try {
+        const favoritesRef = window.firebase.collection(window.firebase.db, 'favorites');
+        const userFavoritesQuery = window.firebase.query(
+            favoritesRef,
+            window.firebase.where('userId', '==', currentUser.telegramId)
+        );
+        
+        const favoritesSnapshot = await window.firebase.getDocs(userFavoritesQuery);
+        
+        if (!favoritesSnapshot.empty) {
+            const userFavorites = favoritesSnapshot.docs[0].data();
+            currentUser.favorites = userFavorites.cafes || [];
+            console.log('❤️ User favorites loaded:', currentUser.favorites.length);
+        } else {
+            // Create empty favorites document
+            await window.firebase.addDoc(favoritesRef, {
+                userId: currentUser.telegramId,
+                cafes: []
+            });
+            currentUser.favorites = [];
+            console.log('❤️ Empty favorites document created');
+        }
+    } catch (error) {
+        console.error('❌ Error loading favorites:', error);
+        currentUser.favorites = [];
+    }
+}
+
+// Load user loyalty data
+async function loadUserLoyalty() {
+    if (!currentUser) return;
+    
+    try {
+        const loyaltyRef = window.firebase.collection(window.firebase.db, 'loyalty');
+        const userLoyaltyQuery = window.firebase.query(
+            loyaltyRef,
+            window.firebase.where('userId', '==', currentUser.telegramId)
+        );
+        
+        const loyaltySnapshot = await window.firebase.getDocs(userLoyaltyQuery);
+        
+        if (!loyaltySnapshot.empty) {
+            const userLoyalty = loyaltySnapshot.docs[0].data();
+            currentUser.loyalty = userLoyalty;
+            console.log('🎯 User loyalty loaded:', userLoyalty.totalPoints, 'points');
+        } else {
+            // Create empty loyalty document
+            await window.firebase.addDoc(loyaltyRef, {
+                userId: currentUser.telegramId,
+                totalPoints: 0,
+                level: 'Bronze',
+                visits: []
+            });
+            currentUser.loyalty = { totalPoints: 0, level: 'Bronze', visits: [] };
+            console.log('🎯 Empty loyalty document created');
+        }
+    } catch (error) {
+        console.error('❌ Error loading loyalty:', error);
+        currentUser.loyalty = { totalPoints: 0, level: 'Bronze', visits: [] };
+    }
+}
+
+// Toggle favorite status for cafe
+async function toggleFavorite(cafeId, cafeName, cafeCity, cafeDescription) {
+    if (!currentUser) {
+        console.log('⚠️ No user logged in');
+        return;
+    }
+    
+    const cafe = {
+        id: cafeId,
+        name: cafeName,
+        city: cafeCity,
+        description: cafeDescription
+    };
+    
+    if (isCafeInFavorites(cafeId)) {
+        // Remove from favorites
+        await removeFavorite(cafeId);
+        console.log('❌ Cafe removed from favorites');
+    } else {
+        // Add to favorites
+        await addToFavorites(cafe);
+        console.log('❤️ Cafe added to favorites');
+    }
+    
+    // Refresh the display to show updated favorite status
+    displayCafes();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Add user marker to map
+function addUserMarker() {
+    console.log('🔧 addUserMarker called');
+    console.log('🔧 map exists:', !!map);
+    console.log('🔧 userLocation:', userLocation);
+    
+    if (!map || !userLocation) {
+        console.warn('⚠️ Cannot add user marker: map or userLocation missing');
+        return;
+    }
+    
+    // Remove existing user marker
+    if (userMarker) {
+        console.log('🔧 Removing existing user marker');
+        userMarker.setMap(null);
+    }
+    
+    console.log('🔧 Creating new user marker at:', userLocation);
+    
+    // Create new user marker
+    userMarker = new google.maps.Marker({
+        position: userLocation,
+        map: map,
+        title: 'Your Location',
+        icon: {
+            url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyQzIgMTcuNTIgNi40OCAyMiAxMiAyMkMxNy41MiAyMiAyMiAxNy41MiAyMiAxMkMyMiA2LjQ4IDE3LjUyIDIgMTIgMloiIGZpbGw9IiM0QTkwRTIiLz4KPHBhdGggZD0iTTEyIDEzQzEzLjY2IDEzIDE1IDExLjY2IDE1IDEwQzE1IDguMzQgMTMuNjYgNyAxMiA3QzEwLjM0IDcgOSA4LjM0IDkgMTBDOSAxMS42NiAxMC4zNCAxMyAxMiAxM1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=',
+            scaledSize: new google.maps.Size(24, 24)
+        },
+        zIndex: 1000, // Ensure marker is on top
+        animation: google.maps.Animation.BOUNCE // Add animation to make it visible
+    });
+    
+    console.log('✅ User marker created:', userMarker);
+    console.log('✅ User marker position:', userMarker.getPosition());
+    console.log('✅ User marker map:', userMarker.getMap());
+    
+    // Add click listener to test if marker is working
+    userMarker.addListener('click', () => {
+        console.log('🎯 User marker clicked!');
+        alert('Это твое местоположение! 🎯');
+    });
+}
+
+
+
+
+
+
+
+
+
 
