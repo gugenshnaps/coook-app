@@ -295,7 +295,7 @@ function displayCafes() {
                 <h3 class="cafe-section-header">Todos os cafés (${cafesData.length})</h3>
                 <div class="cafes-grid">
                     ${cafesData.map(cafe => `
-                        <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
+                        <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
                             <div class="cafe-photo">
                                 ${cafe.photoUrl ? 
                                     `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
@@ -306,7 +306,10 @@ function displayCafes() {
                                 <div class="cafe-header">
                                     <h3>${cafe.name}</h3>
                                     <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
-                                            onclick="event.stopPropagation(); toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                                            data-cafe-id="${cafe.id}" 
+                                            data-cafe-name="${cafe.name}" 
+                                            data-cafe-city="${cafe.city}" 
+                                            data-cafe-description="${cafe.description || ''}">
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
@@ -319,6 +322,10 @@ function displayCafes() {
                 </div>
             `;
         }
+        
+        // Add event listeners to favorite buttons
+        addFavoriteButtonListeners();
+        
         return;
     }
     
@@ -338,7 +345,7 @@ function displayCafes() {
             <h3 class="cafe-section-header">Cafés em ${currentCity} (${cityCafes.length})</h3>
             <div class="cafes-grid">
                 ${cityCafes.map(cafe => `
-                    <div class="cafe-card" onclick="showCafeDetails('${cafe.id}')">
+                    <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
                         <div class="cafe-photo">
                             ${cafe.photoUrl ? 
                                 `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
@@ -349,7 +356,10 @@ function displayCafes() {
                                 <div class="cafe-header">
                                     <h3>${cafe.name}</h3>
                                     <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
-                                            onclick="event.stopPropagation(); toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                                            data-cafe-id="${cafe.id}" 
+                                            data-cafe-name="${cafe.name}" 
+                                            data-cafe-city="${cafe.city}" 
+                                            data-cafe-description="${cafe.description || ''}">
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
@@ -364,6 +374,32 @@ function displayCafes() {
     }
     
     console.log('🔧 Cafes displayed for city:', currentCity, 'Count:', cityCafes.length);
+    
+    // Add event listeners to favorite buttons
+    addFavoriteButtonListeners();
+}
+
+// Add event listeners to favorite buttons
+function addFavoriteButtonListeners() {
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
+    
+    favoriteButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const cafeId = this.getAttribute('data-cafe-id');
+            const cafeName = this.getAttribute('data-cafe-name');
+            const cafeCity = this.getAttribute('data-cafe-city');
+            const cafeDescription = this.getAttribute('data-cafe-description');
+            
+            console.log('🔍 DEBUG: Favorite button clicked:', { cafeId, cafeName, cafeCity, cafeDescription });
+            
+            toggleFavorite(cafeId, cafeName, cafeCity, cafeDescription);
+        });
+    });
+    
+    console.log('🔧 Event listeners added to', favoriteButtons.length, 'favorite buttons');
 }
 
 // Show cafe details in modal
@@ -450,6 +486,20 @@ function showCafesError() {
         cafesList.innerHTML = '<div class="no-cafes"><p>Erro ao carregar cafés</p></div>';
     }
     console.error('❌ Cafes loading failed');
+}
+
+// Handle cafe card click - smart click detection
+function handleCafeCardClick(event, cafeId) {
+    // Check if click was on a button or interactive element
+    if (event.target.closest('.favorite-btn') || 
+        event.target.closest('button') || 
+        event.target.tagName === 'BUTTON') {
+        console.log('🔍 DEBUG: Click on button, not opening card');
+        return; // Don't open card if clicking on button
+    }
+    
+    console.log('🔍 DEBUG: Opening cafe card for:', cafeId);
+    showCafeDetails(cafeId);
 }
 
 // Initialize app
