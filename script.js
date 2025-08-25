@@ -869,6 +869,9 @@ function showModal(content, title) {
 
 // Toggle favorite status for cafe
 async function toggleFavorite(cafeId, cafeName, cafeCity, cafeDescription) {
+    console.log('🔍 DEBUG: toggleFavorite called with:', { cafeId, cafeName, cafeCity, cafeDescription });
+    console.log('🔍 DEBUG: window.currentUser:', window.currentUser);
+    
     if (!window.currentUser) {
         console.log('⚠️ No user logged in');
         return;
@@ -881,24 +884,41 @@ async function toggleFavorite(cafeId, cafeName, cafeCity, cafeDescription) {
         description: cafeDescription
     };
     
-    if (isCafeInFavorites(cafeId)) {
+    console.log('🔍 DEBUG: Checking if cafe is in favorites...');
+    const isFavorite = isCafeInFavorites(cafeId);
+    console.log('🔍 DEBUG: Is cafe in favorites?', isFavorite);
+    
+    if (isFavorite) {
         // Remove from favorites
+        console.log('🔍 DEBUG: Removing from favorites...');
         await removeFavorite(cafeId);
         console.log('❌ Cafe removed from favorites');
     } else {
         // Add to favorites
+        console.log('🔍 DEBUG: Adding to favorites...');
         await addToFavorites(cafe);
         console.log('❤️ Cafe added to favorites');
     }
     
     // Refresh the display to show updated favorite status
+    console.log('🔍 DEBUG: Refreshing display...');
     displayCafes();
 }
 
 // Check if cafe is in favorites
 function isCafeInFavorites(cafeId) {
-    if (!window.currentUser || !window.currentUser.favorites) return false;
-    return window.currentUser.favorites.some(fav => fav.cafeId === cafeId);
+    console.log('🔍 DEBUG: isCafeInFavorites called with cafeId:', cafeId);
+    console.log('🔍 DEBUG: window.currentUser:', window.currentUser);
+    console.log('🔍 DEBUG: window.currentUser.favorites:', window.currentUser?.favorites);
+    
+    if (!window.currentUser || !window.currentUser.favorites) {
+        console.log('🔍 DEBUG: No user or no favorites, returning false');
+        return false;
+    }
+    
+    const result = window.currentUser.favorites.some(fav => fav.cafeId === cafeId);
+    console.log('🔍 DEBUG: Result:', result);
+    return result;
 }
 
 // Add cafe to favorites - now managed by user-system.js
