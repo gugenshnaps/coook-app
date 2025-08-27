@@ -314,8 +314,18 @@ function displayCafes() {
                                     </button>
                                 </div>
                                 <p class="cafe-city">${cafe.city}</p>
+                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
-                                <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
+                                
+                                <!-- Working hours for all days -->
+                                <div class="cafe-working-hours">
+                                    ${formatWorkingHours(cafe.workingHours)}
+                                </div>
+                                
+                                <!-- Loyalty button -->
+                                <button class="loyalty-apply-btn" onclick="event.stopPropagation(); applyLoyalty('${cafe.id}', '${cafe.name}')">
+                                    🎯 Aplicar Lealdade
+                                </button>
                             </div>
                         </div>
                     `).join('')}
@@ -364,8 +374,18 @@ function displayCafes() {
                                     </button>
                                 </div>
                                 <p class="cafe-city">${cafe.city}</p>
+                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
-                                <p class="cafe-hours">${cafe.hours || 'Horário não informado'}</p>
+                                
+                                <!-- Working hours for all days -->
+                                <div class="cafe-working-hours">
+                                    ${formatWorkingHours(cafe.workingHours)}
+                                </div>
+                                
+                                <!-- Loyalty button -->
+                                <button class="loyalty-apply-btn" onclick="event.stopPropagation(); applyLoyalty('${cafe.id}', '${cafe.name}')">
+                                    🎯 Aplicar Lealdade
+                                </button>
                             </div>
                     </div>
                 `).join('')}
@@ -1008,5 +1028,112 @@ function getTelegramUserData() {
     }
     
     return null;
+}
+
+// Format working hours for display
+function formatWorkingHours(workingHours) {
+    if (!workingHours) {
+        return '<p class="cafe-hours">Horário não informado</p>';
+    }
+    
+    const days = {
+        monday: 'Seg',
+        tuesday: 'Ter',
+        wednesday: 'Qua',
+        thursday: 'Qui',
+        friday: 'Sex',
+        saturday: 'Sáb',
+        sunday: 'Dom'
+    };
+    
+    let hoursHtml = '<div class="working-hours-list">';
+    
+    Object.entries(workingHours).forEach(([day, hours]) => {
+        if (hours.open && hours.close) {
+            hoursHtml += `
+                <div class="working-hour-item">
+                    <span class="day-name">${days[day]}:</span>
+                    <span class="time-range">${hours.open} - ${hours.close}</span>
+                </div>
+            `;
+        }
+    });
+    
+    hoursHtml += '</div>';
+    return hoursHtml;
+}
+
+// Apply loyalty for cafe
+function applyLoyalty(cafeId, cafeName) {
+    console.log('🎯 Applying loyalty for cafe:', cafeId, cafeName);
+    
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para aplicar lealdade!\n💡 Abra o app através do Telegram');
+        return;
+    }
+    
+    // Show loyalty modal
+    const modalContent = `
+        <div class="loyalty-apply-modal">
+            <h2>🎯 Aplicar Lealdade</h2>
+            <div class="cafe-loyalty-info">
+                <h3>${cafeName}</h3>
+                <p>🏆 Seu nível: ${window.currentUser.loyalty?.level || 'Bronze'}</p>
+                <p>⭐ Seus pontos: ${window.currentUser.loyalty?.totalPoints || 0}</p>
+            </div>
+            <div class="loyalty-actions">
+                <button class="btn-checkin" onclick="checkInToCafe('${cafeId}', '${cafeName}')">
+                    ✅ Fazer Check-in
+                </button>
+                <button class="btn-view-benefits" onclick="viewLoyaltyBenefits('${cafeId}')">
+                    🎁 Ver Benefícios
+                </button>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Aplicar Lealdade');
+}
+
+// Check in to cafe (placeholder for now)
+function checkInToCafe(cafeId, cafeName) {
+    console.log('✅ Check-in to cafe:', cafeId, cafeName);
+    alert(`🎉 Check-in realizado com sucesso em ${cafeName}!\n⭐ +50 pontos de lealdade`);
+    
+    // TODO: Implement actual check-in logic
+    // - Add points to user
+    // - Update Firebase
+    // - Show updated loyalty status
+}
+
+// View loyalty benefits (placeholder for now)
+function viewLoyaltyBenefits(cafeId) {
+    console.log('🎁 Viewing loyalty benefits for cafe:', cafeId);
+    
+    const modalContent = `
+        <div class="loyalty-benefits-modal">
+            <h2>🎁 Benefícios de Lealdade</h2>
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <span class="benefit-level">🥉 Bronze (0-499 pts)</span>
+                    <span class="benefit-desc">Acesso básico</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-level">🥈 Silver (500-999 pts)</span>
+                    <span class="benefit-desc">Desconto 5%</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-level">🥇 Gold (1000-1999 pts)</span>
+                    <span class="benefit-desc">Desconto 10% + café grátis</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-level">💎 Platinum (2000+ pts)</span>
+                    <span class="benefit-desc">VIP + desconto 15%</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Benefícios de Lealdade');
 }
 

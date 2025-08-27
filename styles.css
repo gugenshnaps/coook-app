@@ -970,3 +970,168 @@ body {
         height: 24px;
     }
 }
+
+/* Cafe address */
+.cafe-address {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Working hours list */
+.working-hours-list {
+    margin-bottom: 16px;
+}
+
+.working-hour-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 2px;
+    padding: 2px 0;
+}
+
+.day-name {
+    font-weight: 500;
+    color: #555;
+}
+
+.time-range {
+    color: #666;
+}
+
+/* Loyalty apply button */
+.loyalty-apply-btn {
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.loyalty-apply-btn:hover {
+    background: linear-gradient(135deg, #357ABD, #2E6AA8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.loyalty-apply-btn:active {
+    transform: translateY(0);
+}
+
+/* Loyalty modal styles */
+.loyalty-apply-modal {
+    padding: 20px;
+}
+
+.loyalty-apply-modal h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.cafe-loyalty-info {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.cafe-loyalty-info h3 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.cafe-loyalty-info p {
+    margin: 6px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.loyalty-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-checkin,
+.btn-view-benefits {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-checkin {
+    background: linear-gradient(135deg, #28A745, #20C997);
+    color: white;
+}
+
+.btn-checkin:hover {
+    background: linear-gradient(135deg, #20C997, #1EA085);
+    transform: translateY(-2px);
+}
+
+.btn-view-benefits {
+    background: linear-gradient(135deg, #FFC107, #FF9800);
+    color: white;
+}
+
+.btn-view-benefits:hover {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    transform: translateY(-2px);
+}
+
+/* Loyalty benefits modal */
+.loyalty-benefits-modal {
+    padding: 20px;
+}
+
+.loyalty-benefits-modal h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.benefits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.benefit-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #4A90E2;
+}
+
+.benefit-level {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.benefit-desc {
+    color: #666;
+    font-size: 13px;
+}

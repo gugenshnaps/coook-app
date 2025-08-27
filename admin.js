@@ -227,73 +227,87 @@ async function addCity() {
 
 // Add new cafe
 async function addCafe() {
-    const cafeNameInput = document.getElementById('cafeName');
-    const cafeCitySelect = document.getElementById('cafeCity');
-    const cafeDescriptionInput = document.getElementById('cafeDescription');
-    const cafeHoursInput = document.getElementById('cafeHours');
+    const cafeName = document.getElementById('cafeName').value.trim();
+    const cafeCity = document.getElementById('cafeCity').value.trim();
+    const cafeAddress = document.getElementById('cafeAddress').value.trim();
+    const cafeDescription = document.getElementById('cafeDescription').value.trim();
     
-    const cafeName = cafeNameInput.value.trim();
-    const cafeCity = cafeCitySelect.value;
-    const cafeDescription = cafeDescriptionInput.value.trim();
-    const cafeHours = cafeHoursInput.value.trim();
+    // Get working hours for each day
+    const workingHours = {
+        monday: {
+            open: document.getElementById('mondayOpen').value,
+            close: document.getElementById('mondayClose').value
+        },
+        tuesday: {
+            open: document.getElementById('tuesdayOpen').value,
+            close: document.getElementById('tuesdayClose').value
+        },
+        wednesday: {
+            open: document.getElementById('wednesdayOpen').value,
+            close: document.getElementById('wednesdayClose').value
+        },
+        thursday: {
+            open: document.getElementById('thursdayOpen').value,
+            close: document.getElementById('thursdayClose').value
+        },
+        friday: {
+            open: document.getElementById('fridayOpen').value,
+            close: document.getElementById('fridayClose').value
+        },
+        saturday: {
+            open: document.getElementById('saturdayOpen').value,
+            close: document.getElementById('saturdayClose').value
+        },
+        sunday: {
+            open: document.getElementById('sundayOpen').value,
+            close: document.getElementById('sundayClose').value
+        }
+    };
     
-    if (!cafeName || !cafeCity) {
-        showError('Por favor, preencha nome e cidade do café');
+    // Validate required fields
+    if (!cafeName || !cafeCity || !cafeAddress) {
+        alert('Por favor, preencha todos os campos obrigatórios!');
+        return;
+    }
+    
+    // Validate working hours (at least one day should have hours)
+    const hasWorkingHours = Object.values(workingHours).some(day => day.open && day.close);
+    if (!hasWorkingHours) {
+        alert('Por favor, preencha pelo menos um dia de funcionamento!');
         return;
     }
     
     try {
-        console.log('Adding cafe:', { name: cafeName, city: cafeCity, description: cafeDescription, hours: cafeHours });
+        // Get photo data
+        const photoUrl = await getPhotoBase64();
         
-        // Get photo (file upload or URL)
-        let photoUrl = null;
-        const photoType = document.querySelector('input[name="photoType"]:checked').value;
-        
-        if (photoType === 'file') {
-            const photoInput = document.getElementById('cafePhoto');
-            if (photoInput.files[0]) {
-                photoUrl = await getPhotoBase64();
-            }
-        } else if (photoType === 'url') {
-            const urlInput = document.getElementById('cafePhotoUrl');
-            const url = urlInput.value.trim();
-            if (url) {
-                // Validate URL
-                const validation = await validateImageUrl(url);
-                if (validation.valid) {
-                    photoUrl = url;
-                } else {
-                    showError('URL da imagem inválida: ' + validation.error);
-                    return;
-                }
-            }
-        }
-        
-        // Create cafe object
-        const cafeData = {
+        const newCafe = {
             name: cafeName,
             city: cafeCity,
+            address: cafeAddress,
             description: cafeDescription,
-            hours: cafeHours || '8:00 - 22:00',
-            photoUrl: photoUrl
+            workingHours: workingHours,
+            photoUrl: photoUrl,
+            createdAt: new Date()
         };
         
         // Add to Firebase
         const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
-        await window.firebase.addDoc(cafesRef, cafeData);
+        await window.firebase.addDoc(cafesRef, newCafe);
         
-        // Clear inputs
-        cafeNameInput.value = '';
-        cafeCitySelect.value = '';
-        cafeDescriptionInput.value = '';
-        cafeHoursInput.value = '';
-        removePhoto(); // Clear photo
+        console.log('✅ Cafe added successfully:', newCafe);
         
-        showSuccess('Café adicionado com sucesso!');
-        console.log('Cafe added successfully');
+        // Clear form
+        clearCafeForm();
+        
+        // Refresh cafes list
+        loadCafes();
+        
+        alert('Café adicionado com sucesso!');
+        
     } catch (error) {
-        console.error('Error adding cafe:', error);
-        showError('Erro ao adicionar café: ' + error.message);
+        console.error('❌ Error adding cafe:', error);
+        alert('Erro ao adicionar café: ' + error.message);
     }
 }
 
@@ -354,6 +368,33 @@ function showSuccess(message) {
 function showError(message) {
     // Simple error message (can be enhanced with toast notifications)
     alert('❌ ' + message);
+}
+
+// Clear cafe form
+function clearCafeForm() {
+    document.getElementById('cafeName').value = '';
+    document.getElementById('cafeCity').value = '';
+    document.getElementById('cafeAddress').value = '';
+    document.getElementById('cafeDescription').value = '';
+    
+    // Clear working hours
+    document.getElementById('mondayOpen').value = '';
+    document.getElementById('mondayClose').value = '';
+    document.getElementById('tuesdayOpen').value = '';
+    document.getElementById('tuesdayClose').value = '';
+    document.getElementById('wednesdayOpen').value = '';
+    document.getElementById('wednesdayClose').value = '';
+    document.getElementById('thursdayOpen').value = '';
+    document.getElementById('thursdayClose').value = '';
+    document.getElementById('fridayOpen').value = '';
+    document.getElementById('fridayClose').value = '';
+    document.getElementById('saturdayOpen').value = '';
+    document.getElementById('saturdayClose').value = '';
+    document.getElementById('sundayOpen').value = '';
+    document.getElementById('sundayClose').value = '';
+    
+    // Clear photo
+    removePhoto();
 }
 
 // ===== PHOTO UPLOAD FUNCTIONALITY =====
