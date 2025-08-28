@@ -1135,3 +1135,121 @@ body {
     color: #666;
     font-size: 13px;
 }
+
+/* Details button */
+.btn-details {
+    background: white;
+    color: #4A90E2;
+    border: 2px solid #4A90E2;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-details:hover {
+    background: #4A90E2;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.btn-details:active {
+    transform: translateY(0);
+}
+
+/* Cafe detail modal styles */
+.cafe-detail-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.cafe-detail-image {
+    flex-shrink: 0;
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cafe-detail-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.coffee-icon {
+    font-size: 48px;
+    color: #adb5bd;
+}
+
+.cafe-detail-title {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.cafe-detail-name {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    line-height: 1.2;
+}
+
+.cafe-detail-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.cafe-detail-city {
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: inline-block;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.cafe-detail-address {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cafe-detail-description {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.cafe-detail-working-hours {
+    margin-bottom: 24px;
+}
+
+.cafe-detail-working-hours h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+}

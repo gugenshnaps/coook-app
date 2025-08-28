@@ -303,28 +303,11 @@ function displayCafes() {
                                 }
                             </div>
                             <div class="cafe-info">
-                                <div class="cafe-header">
-                                    <h3>${cafe.name}</h3>
-                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
-                                            data-cafe-id="${cafe.id}" 
-                                            data-cafe-name="${cafe.name}" 
-                                            data-cafe-city="${cafe.city}" 
-                                            data-cafe-description="${cafe.description || ''}">
-                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
-                                    </button>
-                                </div>
-                                <p class="cafe-city">${cafe.city}</p>
+                                <h3 class="cafe-name">${cafe.name}</h3>
                                 ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
-                                
-                                <!-- Working hours for all days -->
-                                <div class="cafe-working-hours">
-                                    ${formatWorkingHours(cafe.workingHours)}
-                                </div>
-                                
-                                <!-- Loyalty button -->
-                                <button class="loyalty-apply-btn" onclick="event.stopPropagation(); applyLoyalty('${cafe.id}', '${cafe.name}')">
-                                    🎯 Aplicar Lealdade
+                                <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
+                                    Ver Detalhes
                                 </button>
                             </div>
                         </div>
@@ -363,28 +346,11 @@ function displayCafes() {
                             }
                         </div>
                                                     <div class="cafe-info">
-                                <div class="cafe-header">
-                                    <h3>${cafe.name}</h3>
-                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
-                                            data-cafe-id="${cafe.id}" 
-                                            data-cafe-name="${cafe.name}" 
-                                            data-cafe-city="${cafe.city}" 
-                                            data-cafe-description="${cafe.description || ''}">
-                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
-                                    </button>
-                                </div>
-                                <p class="cafe-city">${cafe.city}</p>
+                                <h3 class="cafe-name">${cafe.name}</h3>
                                 ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
-                                
-                                <!-- Working hours for all days -->
-                                <div class="cafe-working-hours">
-                                    ${formatWorkingHours(cafe.workingHours)}
-                                </div>
-                                
-                                <!-- Loyalty button -->
-                                <button class="loyalty-apply-btn" onclick="event.stopPropagation(); applyLoyalty('${cafe.id}', '${cafe.name}')">
-                                    🎯 Aplicar Lealdade
+                                <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
+                                    Ver Detalhes
                                 </button>
                             </div>
                     </div>
@@ -437,17 +403,39 @@ function showCafeDetails(cafeId) {
     
     if (modal && modalContent) {
         modalContent.innerHTML = `
-            <div class="cafe-detail-image">
-                ${cafe.photoUrl ? 
-                    `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-detail-photo">` : 
-                    `<div class="coffee-icon">☕</div>`
-                }
+            <div class="cafe-detail-header">
+                <div class="cafe-detail-image">
+                    ${cafe.photoUrl ? 
+                        `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-detail-photo">` : 
+                        `<div class="coffee-icon">☕</div>`
+                    }
+                </div>
+                <div class="cafe-detail-title">
+                    <h2 class="cafe-detail-name">${cafe.name}</h2>
+                    <div class="cafe-detail-actions">
+                        <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
+                                onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                            ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                        </button>
+                    </div>
+                </div>
             </div>
+            
             <div class="cafe-detail-info">
-                <h2 class="cafe-detail-name">${cafe.name}</h2>
                 <p class="cafe-detail-city">${cafe.city}</p>
+                ${cafe.address ? `<p class="cafe-detail-address">📍 ${cafe.address}</p>` : ''}
                 <p class="cafe-detail-description">${cafe.description || 'Sem descrição'}</p>
-                <p class="cafe-detail-hours">${cafe.hours || 'Horário não informado'}</p>
+                
+                <!-- Working hours for all days -->
+                <div class="cafe-detail-working-hours">
+                    <h3>🕒 Horário de Funcionamento</h3>
+                    ${formatWorkingHours(cafe.workingHours)}
+                </div>
+                
+                <!-- Loyalty button -->
+                <button class="loyalty-apply-btn" onclick="applyLoyalty('${cafe.id}', '${cafe.name}')">
+                    🎯 Aplicar Lealdade
+                </button>
             </div>
         `;
         
