@@ -1,0 +1,624 @@
+/* Cafe TMA - Sistema de Lealdade Styles */
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.tma-container {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: white;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Screen management */
+.screen {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* Login Screen */
+.login-header {
+    text-align: center;
+    margin: 60px 0 40px;
+}
+
+.login-header h1 {
+    font-size: 32px;
+    color: #4a5568;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.login-header p {
+    color: #718096;
+    font-size: 16px;
+}
+
+.login-form {
+    background: #f7fafc;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 2px solid #e2e8f0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 14px;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.login-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.login-help {
+    text-align: center;
+    color: #718096;
+    font-size: 14px;
+}
+
+/* Dashboard Screen */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.cafe-info h2 {
+    font-size: 24px;
+    color: #2d3748;
+    margin-bottom: 5px;
+}
+
+.cafe-info p {
+    color: #718096;
+    font-size: 14px;
+}
+
+.logout-btn {
+    background: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: #c53030;
+    transform: translateY(-1px);
+}
+
+/* Dashboard Stats */
+.dashboard-stats {
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 25px;
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.stat-item strong {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* Dashboard Actions */
+.dashboard-actions {
+    display: grid;
+    gap: 15px;
+}
+
+.action-btn {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: #4a5568;
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.earn-btn {
+    border-color: #48bb78;
+    color: #48bb78;
+}
+
+.earn-btn:hover {
+    background: #48bb78;
+    color: white;
+}
+
+.spend-btn {
+    border-color: #ed8936;
+    color: #ed8936;
+}
+
+.spend-btn:hover {
+    background: #ed8936;
+    color: white;
+}
+
+.settings-btn {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.settings-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    margin: 20px;
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.large-modal {
+    max-width: 600px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 25px 20px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: #f7fafc;
+    color: #4a5568;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+/* QR Section */
+.qr-section {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.qr-section h4 {
+    font-size: 16px;
+    color: #4a5568;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.qr-display {
+    background: #f7fafc;
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    padding: 40px;
+    margin-bottom: 20px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-placeholder {
+    color: #a0aec0;
+    font-size: 14px;
+}
+
+.qr-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.qr-btn:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+}
+
+/* Order Section */
+.order-section {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.order-section h4 {
+    font-size: 16px;
+    color: #4a5568;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.points-preview,
+.final-amount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border: 1px solid #e2e8f0;
+}
+
+.points-preview strong,
+.final-amount strong {
+    font-size: 18px;
+    color: #667eea;
+}
+
+.confirm-btn {
+    width: 100%;
+    background: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.confirm-btn:hover {
+    background: #38a169;
+    transform: translateY(-1px);
+}
+
+/* Customer Info */
+.customer-info {
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.customer-info h4 {
+    color: #2b6cb0;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.customer-details p {
+    margin-bottom: 8px;
+    color: #2d3748;
+}
+
+.customer-details strong {
+    color: #2b6cb0;
+}
+
+/* Loyalty Settings */
+.loyalty-settings {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.loyalty-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f7fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.loyalty-toggle input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #667eea;
+}
+
+.loyalty-toggle label {
+    font-weight: 600;
+    color: #4a5568;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.loyalty-basic-settings,
+.loyalty-advanced-settings {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.loyalty-basic-settings h4 {
+    color: #2d3748;
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.loyalty-basic-settings .form-group {
+    margin-bottom: 15px;
+}
+
+.loyalty-basic-settings input {
+    width: 120px;
+    padding: 10px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.input-hint {
+    color: #718096;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.special-days-grid,
+.time-periods-grid,
+.personal-conditions-grid {
+    display: grid;
+    gap: 12px;
+    margin: 15px 0;
+    padding: 15px;
+    background: #f7fafc;
+    border-radius: 8px;
+}
+
+.day-row,
+.time-row,
+.condition-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.day-label,
+.time-label,
+.condition-label {
+    min-width: 150px;
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 14px;
+}
+
+.multiplier-input {
+    width: 80px;
+    padding: 8px 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.multiplier-hint {
+    color: #718096;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.save-btn {
+    width: 100%;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.save-btn:hover {
+    background: #5a67d8;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .tma-container {
+        margin: 0;
+        box-shadow: none;
+    }
+    
+    .screen {
+        padding: 15px;
+    }
+    
+    .login-header {
+        margin: 40px 0 30px;
+    }
+    
+    .login-header h1 {
+        font-size: 28px;
+    }
+    
+    .login-form {
+        padding: 20px;
+    }
+    
+    .modal-content {
+        margin: 10px;
+    }
+    
+    .day-label,
+    .time-label,
+    .condition-label {
+        min-width: 120px;
+        font-size: 13px;
+    }
+    
+    .loyalty-basic-settings input {
+        width: 100px;
+        font-size: 13px;
+    }
+    
+    .multiplier-input {
+        width: 70px;
+        font-size: 13px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.screen.active {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal {
+    animation: fadeIn 0.2s ease-out;
+}
