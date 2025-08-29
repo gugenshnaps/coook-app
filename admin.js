@@ -281,6 +281,39 @@ async function addCafe() {
         // Get photo data
         const photoUrl = await getPhotoBase64();
         
+        // Get loyalty settings
+        const loyaltySettings = {
+            loyaltyEnabled: document.getElementById('loyaltyEnabled').checked,
+            basePointsPerReal: parseFloat(document.getElementById('basePointsPerReal').value) || 1.0,
+            minOrderAmount: parseInt(document.getElementById('minOrderAmount').value) || 10,
+            maxPointsPerOrder: parseInt(document.getElementById('maxPointsPerOrder').value) || 100,
+            specialDaysEnabled: document.getElementById('specialDaysEnabled').checked,
+            specialDays: {
+                monday: parseFloat(document.getElementById('mondayMultiplier').value) || 1.0,
+                tuesday: parseFloat(document.getElementById('tuesdayMultiplier').value) || 1.0,
+                wednesday: parseFloat(document.getElementById('wednesdayMultiplier').value) || 1.0,
+                thursday: parseFloat(document.getElementById('thursdayMultiplier').value) || 1.0,
+                friday: parseFloat(document.getElementById('fridayMultiplier').value) || 1.0,
+                saturday: parseFloat(document.getElementById('saturdayMultiplier').value) || 1.0,
+                sunday: parseFloat(document.getElementById('sundayMultiplier').value) || 1.0
+            },
+            timePeriodsEnabled: document.getElementById('timePeriodsEnabled').checked,
+            timePeriods: {
+                morning: parseFloat(document.getElementById('morningMultiplier').value) || 1.0,
+                afternoon: parseFloat(document.getElementById('afternoonMultiplier').value) || 1.0,
+                evening: parseFloat(document.getElementById('eveningMultiplier').value) || 1.0
+            },
+            personalConditionsEnabled: document.getElementById('personalConditionsEnabled').checked,
+            personalConditions: {
+                vip: parseFloat(document.getElementById('vipMultiplier').value) || 2.0,
+                birthday: parseFloat(document.getElementById('birthdayMultiplier').value) || 3.0,
+                firstOrder: parseFloat(document.getElementById('firstOrderMultiplier').value) || 2.0
+            }
+        };
+
+        // Generate password for cafe
+        const cafePassword = generateSecurePassword();
+        
         const newCafe = {
             name: cafeName,
             city: cafeCity,
@@ -288,14 +321,41 @@ async function addCafe() {
             description: cafeDescription,
             workingHours: workingHours,
             photoUrl: photoUrl,
+            loyaltySettings: loyaltySettings,
             createdAt: new Date()
         };
         
         // Add to Firebase
         const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
-        await window.firebase.addDoc(cafesRef, newCafe);
+        const cafeDoc = await window.firebase.addDoc(cafesRef, newCafe);
+        
+        // Create password record for cafe
+        const cafePasswordData = {
+            cafeId: cafeDoc.id,
+            cafeName: cafeName,
+            passwordHash: await hashPassword(cafePassword),
+            createdAt: new Date(),
+            isActive: true
+        };
+        
+        const passwordsRef = window.firebase.collection(window.firebase.db, 'cafe_passwords');
+        await window.firebase.addDoc(passwordsRef, cafePasswordData);
+        
+        // Create loyalty settings record
+        const loyaltySettingsData = {
+            cafeId: cafeDoc.id,
+            cafeName: cafeName,
+            ...loyaltySettings
+        };
+        
+        const loyaltyRef = window.firebase.collection(window.firebase.db, 'cafe_loyalty_settings');
+        await window.firebase.addDoc(loyaltyRef, loyaltySettingsData);
         
         console.log('✅ Cafe added successfully:', newCafe);
+        console.log('✅ Password created:', cafePassword);
+        
+        // Show success message with login credentials
+        showCafeCredentials(cafeName, cafePassword);
         
         // Clear form
         clearCafeForm();
@@ -303,11 +363,88 @@ async function addCafe() {
         // Refresh cafes list
         loadCafes();
         
-        alert('Café adicionado com sucesso!');
-        
     } catch (error) {
         console.error('❌ Error adding cafe:', error);
         alert('Erro ao adicionar café: ' + error.message);
+    }
+}
+
+// Generate secure password for cafe
+function generateSecurePassword() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 16; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+}
+
+// Hash password using bcrypt-like approach (simplified for demo)
+async function hashPassword(password) {
+    // In production, use proper bcrypt or similar
+    // For now, we'll use a simple hash
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + 'salt_coook_app');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+// Show cafe credentials after creation
+function showCafeCredentials(cafeName, password) {
+    const modal = document.createElement('div');
+    modal.className = 'credentials-modal';
+    modal.innerHTML = `
+        <div class="credentials-content">
+            <h2>✅ Café "${cafeName}" criado com sucesso!</h2>
+            
+            <div class="credentials-info">
+                <h3>🔐 DADOS PARA ENTRAR NO TMA:</h3>
+                
+                <div class="credential-row">
+                    <strong>Login:</strong> <span class="credential-value">${cafeName}</span>
+                    <button onclick="copyToClipboard('${cafeName}')" class="copy-btn">📋</button>
+                </div>
+                
+                <div class="credential-row">
+                    <strong>Senha:</strong> <span class="credential-value">${password}</span>
+                    <button onclick="copyToClipboard('${password}')" class="copy-btn">📋</button>
+                </div>
+            </div>
+            
+            <div class="credentials-warning">
+                ⚠️ <strong>ATENÇÃO:</strong> A senha é mostrada apenas uma vez!
+                <br>📋 Copie e entregue ao proprietário do café.
+            </div>
+            
+            <button onclick="closeCredentialsModal()" class="close-btn">Fechar</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Copy text to clipboard
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        // Show temporary success message
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = '✅';
+        btn.style.background = '#28a745';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+        }, 1000);
+    });
+}
+
+// Close credentials modal
+function closeCredentialsModal() {
+    const modal = document.querySelector('.credentials-modal');
+    if (modal) {
+        modal.remove();
     }
 }
 
@@ -395,6 +532,34 @@ function clearCafeForm() {
     
     // Clear photo
     removePhoto();
+    
+    // Reset loyalty settings to defaults
+    document.getElementById('loyaltyEnabled').checked = true;
+    document.getElementById('basePointsPerReal').value = '1.0';
+    document.getElementById('minOrderAmount').value = '10';
+    document.getElementById('maxPointsPerOrder').value = '100';
+    
+    // Reset special days
+    document.getElementById('specialDaysEnabled').checked = false;
+    document.getElementById('mondayMultiplier').value = '1.0';
+    document.getElementById('tuesdayMultiplier').value = '1.0';
+    document.getElementById('wednesdayMultiplier').value = '1.0';
+    document.getElementById('thursdayMultiplier').value = '1.0';
+    document.getElementById('fridayMultiplier').value = '1.0';
+    document.getElementById('saturdayMultiplier').value = '1.0';
+    document.getElementById('sundayMultiplier').value = '1.0';
+    
+    // Reset time periods
+    document.getElementById('timePeriodsEnabled').checked = false;
+    document.getElementById('morningMultiplier').value = '1.0';
+    document.getElementById('afternoonMultiplier').value = '1.0';
+    document.getElementById('eveningMultiplier').value = '1.0';
+    
+    // Reset personal conditions
+    document.getElementById('personalConditionsEnabled').checked = false;
+    document.getElementById('vipMultiplier').value = '2.0';
+    document.getElementById('birthdayMultiplier').value = '3.0';
+    document.getElementById('firstOrderMultiplier').value = '2.0';
 }
 
 // ===== PHOTO UPLOAD FUNCTIONALITY =====

@@ -534,3 +534,286 @@ body {
         justify-content: center;
     }
 }
+
+/* Loyalty System Styles */
+.loyalty-settings-group {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.loyalty-settings-group h3 {
+    color: #495057;
+    margin-bottom: 20px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loyalty-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.loyalty-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #007bff;
+}
+
+.loyalty-toggle label {
+    font-weight: 600;
+    color: #495057;
+    cursor: pointer;
+}
+
+.loyalty-basic-settings {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.loyalty-input {
+    width: 120px;
+    padding: 8px 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.input-hint {
+    color: #6c757d;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.loyalty-advanced-settings {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+}
+
+.special-days-grid,
+.time-periods-grid,
+.personal-conditions-grid {
+    display: grid;
+    gap: 10px;
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.day-row,
+.time-row,
+.condition-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.day-label,
+.time-label,
+.condition-label {
+    min-width: 140px;
+    font-weight: 500;
+    color: #495057;
+    font-size: 14px;
+}
+
+.multiplier-input {
+    width: 80px;
+    padding: 6px 10px;
+    border: 2px solid #e9ecef;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.multiplier-hint {
+    color: #6c757d;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .loyalty-settings-group {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .day-label,
+    .time-label,
+    .condition-label {
+        min-width: 120px;
+        font-size: 13px;
+    }
+    
+    .loyalty-input,
+    .multiplier-input {
+        width: 100px;
+        font-size: 13px;
+    }
+    
+    .day-row,
+    .time-row,
+    .condition-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+/* Credentials Modal Styles */
+.credentials-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.credentials-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.credentials-content h2 {
+    color: #28a745;
+    margin-bottom: 25px;
+    font-size: 24px;
+}
+
+.credentials-info {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 2px solid #e9ecef;
+}
+
+.credentials-info h3 {
+    color: #495057;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.credential-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid #dee2e6;
+}
+
+.credential-value {
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    font-weight: bold;
+    color: #007bff;
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    flex: 1;
+    margin: 0 15px;
+    text-align: center;
+}
+
+.copy-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.copy-btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.credentials-warning {
+    background: #fff3cd;
+    border: 2px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px 0;
+    color: #856404;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.close-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.close-btn:hover {
+    background: #545b62;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments for modal */
+@media (max-width: 768px) {
+    .credentials-content {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    .credentials-content h2 {
+        font-size: 20px;
+    }
+    
+    .credential-row {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .credential-value {
+        margin: 0;
+        width: 100%;
+    }
+}
