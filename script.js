@@ -346,11 +346,20 @@ function displayCafes() {
                             }
                         </div>
                                                     <div class="cafe-info">
-                                <h3 class="cafe-name">${cafe.name}</h3>
+                                <div class="cafe-header">
+                                    <h3 class="cafe-name">${cafe.name}</h3>
+                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
+                                            data-cafe-id="${cafe.id}" 
+                                            data-cafe-name="${cafe.name}" 
+                                            data-cafe-city="${cafe.city}" 
+                                            data-cafe-description="${cafe.description || ''}">
+                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                                    </button>
+                                </div>
                                 ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
-                                    Ver Detalhes
+                                    VER DETALHES
                                 </button>
                             </div>
                     </div>
