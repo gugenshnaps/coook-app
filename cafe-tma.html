@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe TMA - Sistema de Lealdade</title>
+    <link rel="stylesheet" href="cafe-tma.css">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBv4tfDPHboApf6CXtUqLIReQA4KzjQJg",
+            authDomain: "coook-app.firebaseapp.com",
+            projectId: "coook-app",
+            storageBucket: "coook-app.firebasestorage.app",
+            messagingSenderId: "1027223490741",
+            appId: "1:1027223490741:web:a56a826d5d16d517f2aefc",
+            measurementId: "G-1XZV0W4QPR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.firebase = { db, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy };
+    </script>
+</head>
+<body>
+    <div class="tma-container">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-header">
+                <h1>☕ Sistema de Lealdade</h1>
+                <p>Faça login para gerenciar seu café</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="cafeSelect">Selecione seu café:</label>
+                    <select id="cafeSelect" required>
+                        <option value="">Escolha um café...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cafePassword">Senha:</label>
+                    <input type="password" id="cafePassword" placeholder="Digite sua senha" required>
+                </div>
+                
+                <button onclick="loginCafe()" class="login-btn">Entrar</button>
+            </div>
+            
+            <div class="login-help">
+                <p>❓ Precisa de ajuda? Entre em contato com o administrador</p>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="dashboardScreen" class="screen">
+            <div class="dashboard-header">
+                <div class="cafe-info">
+                    <h2 id="cafeName">Nome do Café</h2>
+                    <p id="cafeLocation">Localização</p>
+                </div>
+                <button onclick="logout()" class="logout-btn">Sair</button>
+            </div>
+            
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>📊 Estatísticas do Dia</h3>
+                    <div class="stat-item">
+                        <span>Visitantes:</span>
+                        <strong id="dailyVisitors">0</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Transações:</span>
+                        <strong id="dailyTransactions">0</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Pontos distribuídos:</span>
+                        <strong id="dailyPoints">0</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-actions">
+                <button onclick="showEarnPoints()" class="action-btn earn-btn">
+                    💰 Acumular Pontos
+                </button>
+                <button onclick="showSpendPoints()" class="action-btn spend-btn">
+                    🎯 Aplicar Desconto
+                </button>
+                <button onclick="showLoyaltySettings()" class="action-btn settings-btn">
+                    ⚙️ Configurações
+                </button>
+            </div>
+        </div>
+
+        <!-- Earn Points Modal -->
+        <div id="earnPointsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>💰 Acumular Pontos</h3>
+                    <button onclick="closeModal('earnPointsModal')" class="close-btn">×</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="qr-section">
+                        <h4>📱 Escaneie o QR Code do Cliente</h4>
+                        <div id="qrCodeDisplay" class="qr-display">
+                            <div class="qr-placeholder">QR Code aparecerá aqui</div>
+                        </div>
+                        <button onclick="generateQRCode()" class="qr-btn">Gerar QR Code</button>
+                    </div>
+                    
+                    <div class="order-section">
+                        <h4>📋 Dados do Pedido</h4>
+                        <div class="form-group">
+                            <label for="orderAmount">Valor do pedido (R$):</label>
+                            <input type="number" id="orderAmount" min="1" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="points-preview">
+                            <span>Pontos a serem ganhos:</span>
+                            <strong id="pointsToEarn">0</strong>
+                        </div>
+                        <button onclick="confirmEarnPoints()" class="confirm-btn">Confirmar Pontos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spend Points Modal -->
+        <div id="spendPointsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>🎯 Aplicar Desconto</h3>
+                    <button onclick="closeModal('spendPointsModal')" class="close-btn">×</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="qr-section">
+                        <h4>📱 Escaneie o QR Code do Cliente</h4>
+                        <div id="qrCodeDisplaySpend" class="qr-display">
+                            <div class="qr-placeholder">QR Code aparecerá aqui</div>
+                        </div>
+                        <button onclick="generateQRCodeSpend()" class="qr-btn">Gerar QR Code</button>
+                    </div>
+                    
+                    <div class="customer-info" id="customerInfo" style="display: none;">
+                        <h4>👤 Informações do Cliente</h4>
+                        <div class="customer-details">
+                            <p><strong>Nome:</strong> <span id="customerName">-</span></p>
+                            <p><strong>Pontos disponíveis:</strong> <span id="customerPoints">0</span></p>
+                            <p><strong>Valor do desconto:</strong> <span id="discountValue">R$ 0,00</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="order-section">
+                        <h4>📋 Dados do Pedido</h4>
+                        <div class="form-group">
+                            <label for="spendOrderAmount">Valor do pedido (R$):</label>
+                            <input type="number" id="spendOrderAmount" min="1" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="final-amount">
+                            <span>Valor final com desconto:</span>
+                            <strong id="finalAmount">R$ 0,00</strong>
+                        </div>
+                        <button onclick="confirmSpendPoints()" class="confirm-btn">Aplicar Desconto</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loyalty Settings Modal -->
+        <div id="loyaltySettingsModal" class="modal">
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h3>⚙️ Configurações de Lealdade</h3>
+                    <button onclick="closeModal('loyaltySettingsModal')" class="close-btn">×</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="loyalty-settings">
+                        <div class="loyalty-toggle">
+                            <input type="checkbox" id="loyaltyEnabled" checked>
+                            <label for="loyaltyEnabled">Ativar sistema de lealdade</label>
+                        </div>
+                        
+                        <div class="loyalty-basic-settings">
+                            <h4>Configurações Básicas</h4>
+                            <div class="form-group">
+                                <label for="basePointsPerReal">Coeficiente de pontos:</label>
+                                <input type="number" id="basePointsPerReal" value="1.0" min="0.1" max="10.0" step="0.1">
+                                <span class="input-hint">pontos por 1 real</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="minOrderAmount">Valor mínimo do pedido:</label>
+                                <input type="number" id="minOrderAmount" value="10" min="1" max="1000">
+                                <span class="input-hint">reais para ganhar pontos</span>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="maxPointsPerOrder">Máximo de pontos por pedido:</label>
+                                <input type="number" id="maxPointsPerOrder" value="100" min="10" max="10000">
+                                <span class="input-hint">proteção contra abusos</span>
+                            </div>
+                        </div>
+                        
+                        <div class="loyalty-advanced-settings">
+                            <div class="loyalty-toggle">
+                                <input type="checkbox" id="specialDaysEnabled">
+                                <label for="specialDaysEnabled">Ativar dias especiais</label>
+                            </div>
+                            
+                            <div class="special-days-grid" id="specialDaysGrid">
+                                <div class="day-row">
+                                    <span class="day-label">Segunda-feira:</span>
+                                    <input type="number" id="mondayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="day-row">
+                                    <span class="day-label">Terça-feira:</span>
+                                    <input type="number" id="tuesdayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="day-row">
+                                    <span class="day-label">Quarta-feira:</span>
+                                    <input type="number" id="wednesdayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="day-row">
+                                    <span class="day-label">Quinta-feira:</span>
+                                    <input type="number" id="thursdayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="day-row">
+                                    <span class="day-label">Sexta-feira:</span>
+                                    <input type="number" id="fridayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="day-row">
+                                    <span class="day-label">Sábado:</span>
+                                    <input type="number" id="saturdayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="day-row">
+                                    <span class="day-label">Domingo:</span>
+                                    <input type="number" id="sundayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                            </div>
+                            
+                            <div class="loyalty-toggle">
+                                <input type="checkbox" id="timePeriodsEnabled">
+                                <label for="timePeriodsEnabled">Ativar períodos especiais</label>
+                            </div>
+                            
+                            <div class="time-periods-grid" id="timePeriodsGrid">
+                                <div class="time-row">
+                                    <span class="time-label">Manhã (9:00-12:00):</span>
+                                    <input type="number" id="morningMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="time-row">
+                                    <span class="time-label">Tarde (12:00-18:00):</span>
+                                    <input type="number" id="afternoonMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="time-row">
+                                    <span class="time-label">Noite (18:00-22:00):</span>
+                                    <input type="number" id="eveningMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                            </div>
+                            
+                            <div class="loyalty-toggle">
+                                <input type="checkbox" id="personalConditionsEnabled">
+                                <label for="personalConditionsEnabled">Ativar condições especiais</label>
+                            </div>
+                            
+                            <div class="personal-conditions-grid" id="personalConditionsGrid">
+                                <div class="condition-row">
+                                    <span class="condition-label">Clientes VIP:</span>
+                                    <input type="number" id="vipMultiplier" value="2.0" min="0.1" max="10.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="condition-row">
+                                    <span class="condition-label">Aniversariantes:</span>
+                                    <input type="number" id="birthdayMultiplier" value="3.0" min="0.1" max="10.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                                <div class="condition-row">
+                                    <span class="condition-label">Primeira compra:</span>
+                                    <input type="number" id="firstOrderMultiplier" value="2.0" min="0.1" max="10.0" step="0.1">
+                                    <span class="multiplier-hint">x pontos</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="saveLoyaltySettings()" class="save-btn">💾 Salvar Configurações</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="cafe-tma.js"></script>
+</body>
+</html>

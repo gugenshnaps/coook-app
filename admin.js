@@ -281,35 +281,7 @@ async function addCafe() {
         // Get photo data
         const photoUrl = await getPhotoBase64();
         
-        // Get loyalty settings
-        const loyaltySettings = {
-            loyaltyEnabled: document.getElementById('loyaltyEnabled').checked,
-            basePointsPerReal: parseFloat(document.getElementById('basePointsPerReal').value) || 1.0,
-            minOrderAmount: parseInt(document.getElementById('minOrderAmount').value) || 10,
-            maxPointsPerOrder: parseInt(document.getElementById('maxPointsPerOrder').value) || 100,
-            specialDaysEnabled: document.getElementById('specialDaysEnabled').checked,
-            specialDays: {
-                monday: parseFloat(document.getElementById('mondayMultiplier').value) || 1.0,
-                tuesday: parseFloat(document.getElementById('tuesdayMultiplier').value) || 1.0,
-                wednesday: parseFloat(document.getElementById('wednesdayMultiplier').value) || 1.0,
-                thursday: parseFloat(document.getElementById('thursdayMultiplier').value) || 1.0,
-                friday: parseFloat(document.getElementById('fridayMultiplier').value) || 1.0,
-                saturday: parseFloat(document.getElementById('saturdayMultiplier').value) || 1.0,
-                sunday: parseFloat(document.getElementById('sundayMultiplier').value) || 1.0
-            },
-            timePeriodsEnabled: document.getElementById('timePeriodsEnabled').checked,
-            timePeriods: {
-                morning: parseFloat(document.getElementById('morningMultiplier').value) || 1.0,
-                afternoon: parseFloat(document.getElementById('afternoonMultiplier').value) || 1.0,
-                evening: parseFloat(document.getElementById('eveningMultiplier').value) || 1.0
-            },
-            personalConditionsEnabled: document.getElementById('personalConditionsEnabled').checked,
-            personalConditions: {
-                vip: parseFloat(document.getElementById('vipMultiplier').value) || 2.0,
-                birthday: parseFloat(document.getElementById('birthdayMultiplier').value) || 3.0,
-                firstOrder: parseFloat(document.getElementById('firstOrderMultiplier').value) || 2.0
-            }
-        };
+
 
         // Generate password for cafe
         const cafePassword = generateSecurePassword();
@@ -321,7 +293,6 @@ async function addCafe() {
             description: cafeDescription,
             workingHours: workingHours,
             photoUrl: photoUrl,
-            loyaltySettings: loyaltySettings,
             createdAt: new Date()
         };
         
@@ -341,15 +312,7 @@ async function addCafe() {
         const passwordsRef = window.firebase.collection(window.firebase.db, 'cafe_passwords');
         await window.firebase.addDoc(passwordsRef, cafePasswordData);
         
-        // Create loyalty settings record
-        const loyaltySettingsData = {
-            cafeId: cafeDoc.id,
-            cafeName: cafeName,
-            ...loyaltySettings
-        };
-        
-        const loyaltyRef = window.firebase.collection(window.firebase.db, 'cafe_loyalty_settings');
-        await window.firebase.addDoc(loyaltyRef, loyaltySettingsData);
+
         
         console.log('✅ Cafe added successfully:', newCafe);
         console.log('✅ Password created:', cafePassword);
@@ -533,33 +496,7 @@ function clearCafeForm() {
     // Clear photo
     removePhoto();
     
-    // Reset loyalty settings to defaults
-    document.getElementById('loyaltyEnabled').checked = true;
-    document.getElementById('basePointsPerReal').value = '1.0';
-    document.getElementById('minOrderAmount').value = '10';
-    document.getElementById('maxPointsPerOrder').value = '100';
-    
-    // Reset special days
-    document.getElementById('specialDaysEnabled').checked = false;
-    document.getElementById('mondayMultiplier').value = '1.0';
-    document.getElementById('tuesdayMultiplier').value = '1.0';
-    document.getElementById('wednesdayMultiplier').value = '1.0';
-    document.getElementById('thursdayMultiplier').value = '1.0';
-    document.getElementById('fridayMultiplier').value = '1.0';
-    document.getElementById('saturdayMultiplier').value = '1.0';
-    document.getElementById('sundayMultiplier').value = '1.0';
-    
-    // Reset time periods
-    document.getElementById('timePeriodsEnabled').checked = false;
-    document.getElementById('morningMultiplier').value = '1.0';
-    document.getElementById('afternoonMultiplier').value = '1.0';
-    document.getElementById('eveningMultiplier').value = '1.0';
-    
-    // Reset personal conditions
-    document.getElementById('personalConditionsEnabled').checked = false;
-    document.getElementById('vipMultiplier').value = '2.0';
-    document.getElementById('birthdayMultiplier').value = '3.0';
-    document.getElementById('firstOrderMultiplier').value = '2.0';
+
 }
 
 // ===== PHOTO UPLOAD FUNCTIONALITY =====
