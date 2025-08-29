@@ -4,6 +4,9 @@
 let currentCafe = null;
 let cafes = [];
 let loyaltySettings = null;
+let qrScanner = null;
+let qrScannerSpend = null;
+let currentCustomer = null;
 
 // Wait for Firebase to initialize
 function waitForFirebase() {
@@ -337,28 +340,334 @@ function showLoyaltySettings() {
 // Close modal
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
+    
+    // Reset customer data and UI
+    if (modalId === 'earnPointsModal') {
+        document.getElementById('customerInfoEarn').style.display = 'none';
+        document.getElementById('confirmEarnBtn').disabled = true;
+        document.getElementById('manualCodeInput').value = '';
+        if (qrScanner) stopQRScanner();
+    } else if (modalId === 'spendPointsModal') {
+        document.getElementById('customerInfo').style.display = 'none';
+        document.getElementById('confirmSpendBtn').disabled = true;
+        document.getElementById('manualCodeInputSpend').value = '';
+        if (qrScannerSpend) stopQRScannerSpend();
+    }
+    
+    currentCustomer = null;
     console.log('❌ Modal closed:', modalId);
 }
 
-// Generate QR code (placeholder)
-function generateQRCode() {
-    const qrDisplay = document.getElementById('qrCodeDisplay');
-    qrDisplay.innerHTML = '<div style="text-align: center; color: #667eea; font-size: 14px;">📱 QR Code gerado<br>Cliente deve escanear</div>';
-    console.log('📱 QR code generated (placeholder)');
+// QR Scanner Functions
+async function startQRScanner() {
+    try {
+        console.log('📱 Starting QR scanner for earn points...');
+        
+        const video = document.getElementById('qrVideo');
+        const container = document.getElementById('qrScannerContainer');
+        
+        // Request camera access
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        
+        video.srcObject = stream;
+        container.style.display = 'block';
+        
+        // Start scanning
+        qrScanner = setInterval(() => {
+            scanQRCode(video, 'earn');
+        }, 100);
+        
+        console.log('✅ QR scanner started');
+        
+    } catch (error) {
+        console.error('❌ Error starting QR scanner:', error);
+        showError('Erro ao acessar câmera: ' + error.message);
+    }
 }
 
-// Generate QR code for spending (placeholder)
-function generateQRCodeSpend() {
-    const qrDisplay = document.getElementById('qrCodeDisplaySpend');
-    qrDisplay.innerHTML = '<div style="text-align: center; color: #667eea; font-size: 14px;">📱 QR Code gerado<br>Cliente deve escanear</div>';
+async function startQRScannerSpend() {
+    try {
+        console.log('📱 Starting QR scanner for spend points...');
+        
+        const video = document.getElementById('qrVideoSpend');
+        const container = document.getElementById('qrScannerContainerSpend');
+        
+        // Request camera access
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        
+        video.srcObject = stream;
+        container.style.display = 'block';
+        
+        // Start scanning
+        qrScannerSpend = setInterval(() => {
+            scanQRCode(video, 'spend');
+        }, 100);
+        
+        console.log('✅ QR scanner started for spending');
+        
+    } catch (error) {
+        console.error('❌ Error starting QR scanner:', error);
+        showError('Erro ao acessar câmera: ' + error.message);
+    }
+}
+
+function stopQRScanner() {
+    if (qrScanner) {
+        clearInterval(qrScanner);
+        qrScanner = null;
+    }
     
-    // Show customer info (placeholder)
-    document.getElementById('customerInfo').style.display = 'block';
-    document.getElementById('customerName').textContent = 'João Silva';
-    document.getElementById('customerPoints').textContent = '45';
-    document.getElementById('discountValue').textContent = 'R$ 4,50';
+    const video = document.getElementById('qrVideo');
+    const container = document.getElementById('qrScannerContainer');
     
-    console.log('📱 QR code generated for spending (placeholder)');
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+    }
+    
+    container.style.display = 'none';
+    console.log('❌ QR scanner stopped');
+}
+
+function stopQRScannerSpend() {
+    if (qrScannerSpend) {
+        clearInterval(qrScannerSpend);
+        qrScannerSpend = null;
+    }
+    
+    const video = document.getElementById('qrVideoSpend');
+    const container = document.getElementById('qrScannerContainerSpend');
+    
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+    }
+    
+    container.style.display = 'none';
+    console.log('❌ QR scanner stopped for spending');
+}
+
+async function scanQRCode(video, mode) {
+    try {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (code) {
+            console.log('📱 QR Code detected:', code.data);
+            
+            // Stop scanner
+            if (mode === 'earn') {
+                stopQRScanner();
+            } else {
+                stopQRScannerSpend();
+            }
+            
+            // Process QR data
+            await processQRData(code.data, mode);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error scanning QR code:', error);
+    }
+}
+
+async function processQRData(qrData, mode) {
+    try {
+        // Parse QR data: user_id:cafe_id:timestamp
+        const parts = qrData.split(':');
+        
+        if (parts.length !== 3) {
+            showError('QR Code inválido!');
+            return;
+        }
+        
+        const userId = parts[0];
+        const cafeId = parts[1];
+        const timestamp = parts[2];
+        
+        // Verify cafe ID matches current cafe
+        if (cafeId !== currentCafe.id) {
+            showError('QR Code não é para este café!');
+            return;
+        }
+        
+        // Load customer data
+        await loadCustomerData(userId, mode);
+        
+    } catch (error) {
+        console.error('❌ Error processing QR data:', error);
+        showError('Erro ao processar QR Code: ' + error.message);
+    }
+}
+
+// Manual Code Input Functions
+async function applyManualCode() {
+    const codeInput = document.getElementById('manualCodeInput');
+    const code = codeInput.value.trim();
+    
+    if (!code || code.length !== 8) {
+        showError('Por favor, insira um código de 8 dígitos!');
+        return;
+    }
+    
+    if (!/^\d{8}$/.test(code)) {
+        showError('O código deve conter apenas números!');
+        return;
+    }
+    
+    try {
+        console.log('⌨️ Processing manual code:', code);
+        
+        // Convert 8-digit code to user ID (simple mapping for demo)
+        // In real app, this would be a proper lookup table
+        const userId = await convertCodeToUserId(code);
+        
+        if (userId) {
+            await loadCustomerData(userId, 'earn');
+        } else {
+            showError('Código inválido! Cliente não encontrado.');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error processing manual code:', error);
+        showError('Erro ao processar código: ' + error.message);
+    }
+}
+
+async function applyManualCodeSpend() {
+    const codeInput = document.getElementById('manualCodeInputSpend');
+    const code = codeInput.value.trim();
+    
+    if (!code || code.length !== 8) {
+        showError('Por favor, insira um código de 8 dígitos!');
+        return;
+    }
+    
+    if (!/^\d{8}$/.test(code)) {
+        showError('O código deve conter apenas números!');
+        return;
+    }
+    
+    try {
+        console.log('⌨️ Processing manual code for spending:', code);
+        
+        // Convert 8-digit code to user ID
+        const userId = await convertCodeToUserId(code);
+        
+        if (userId) {
+            await loadCustomerData(userId, 'spend');
+        } else {
+            showError('Código inválido! Cliente não encontrado.');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error processing manual code:', error);
+        showError('Erro ao processar código: ' + error.message);
+    }
+}
+
+// Convert 8-digit code to user ID (demo implementation)
+async function convertCodeToUserId(code) {
+    try {
+        // For demo purposes, we'll use a simple algorithm
+        // In real app, this would query a database
+        
+        // Convert code to number and use modulo to get user ID
+        const codeNum = parseInt(code);
+        const userId = (codeNum % 1000) + 1; // Generate user ID 1-1000
+        
+        console.log('🔄 Converting code', code, 'to user ID:', userId);
+        return userId.toString();
+        
+    } catch (error) {
+        console.error('❌ Error converting code to user ID:', error);
+        return null;
+    }
+}
+
+// Load customer data for both QR and manual input
+async function loadCustomerData(userId, mode) {
+    try {
+        console.log('👤 Loading customer data for user:', userId, 'mode:', mode);
+        
+        // For demo purposes, we'll create mock customer data
+        // In real app, this would query Firebase for user data
+        
+        const customerData = {
+            id: userId,
+            name: `Cliente ${userId}`,
+            points: Math.floor(Math.random() * 100) + 10, // Random points 10-110
+            status: 'Ativo'
+        };
+        
+        currentCustomer = customerData;
+        
+        // Display customer info based on mode
+        if (mode === 'earn') {
+            displayCustomerInfoEarn(customerData);
+        } else {
+            displayCustomerInfoSpend(customerData);
+        }
+        
+        // Enable confirm buttons
+        if (mode === 'earn') {
+            document.getElementById('confirmEarnBtn').disabled = false;
+        } else {
+            document.getElementById('confirmSpendBtn').disabled = false;
+        }
+        
+        console.log('✅ Customer data loaded:', customerData);
+        
+    } catch (error) {
+        console.error('❌ Error loading customer data:', error);
+        showError('Erro ao carregar dados do cliente: ' + error.message);
+    }
+}
+
+// Display customer info for earn points
+function displayCustomerInfoEarn(customer) {
+    const customerInfo = document.getElementById('customerInfoEarn');
+    const customerName = document.getElementById('customerNameEarn');
+    const customerPoints = document.getElementById('customerPointsEarn');
+    const customerStatus = document.getElementById('customerStatusEarn');
+    
+    customerName.textContent = customer.name;
+    customerPoints.textContent = customer.points;
+    customerStatus.textContent = customer.status;
+    
+    customerInfo.style.display = 'block';
+}
+
+// Display customer info for spend points
+function displayCustomerInfoSpend(customer) {
+    const customerInfo = document.getElementById('customerInfo');
+    const customerName = document.getElementById('customerName');
+    const customerPoints = document.getElementById('customerPoints');
+    const discountValue = document.getElementById('discountValue');
+    
+    customerName.textContent = customer.name;
+    customerPoints.textContent = customer.points;
+    discountValue.textContent = `R$ ${(customer.points * 0.10).toFixed(2)}`;
+    
+    customerInfo.style.display = 'block';
 }
 
 // Calculate points to earn
@@ -409,6 +718,11 @@ function calculatePointsToEarn() {
 
 // Confirm earn points
 async function confirmEarnPoints() {
+    if (!currentCustomer) {
+        showError('Por favor, escaneie o QR code ou insira o código do cliente primeiro!');
+        return;
+    }
+    
     const orderAmount = parseFloat(document.getElementById('orderAmount').value);
     const pointsToEarn = parseInt(document.getElementById('pointsToEarn').textContent);
     
@@ -425,19 +739,22 @@ async function confirmEarnPoints() {
     try {
         // Here you would create a loyalty transaction record
         // For now, we'll just show success
-        showSuccess(`✅ ${pointsToEarn} pontos confirmados para o pedido de R$ ${orderAmount.toFixed(2)}!`);
+        showSuccess(`✅ ${pointsToEarn} pontos confirmados para ${currentCustomer.name} (pedido de R$ ${orderAmount.toFixed(2)})!`);
         
         // Close modal
         closeModal('earnPointsModal');
         
-        // Clear form
+        // Clear form and reset
         document.getElementById('orderAmount').value = '';
         document.getElementById('pointsToEarn').textContent = '0';
+        document.getElementById('customerInfoEarn').style.display = 'none';
+        document.getElementById('confirmEarnBtn').disabled = true;
+        currentCustomer = null;
         
         // Refresh daily stats
         loadDailyStats();
         
-        console.log('✅ Points earned:', pointsToEarn, 'for order:', orderAmount);
+        console.log('✅ Points earned:', pointsToEarn, 'for customer:', currentCustomer.name, 'order:', orderAmount);
         
     } catch (error) {
         console.error('❌ Error confirming points:', error);
@@ -464,6 +781,11 @@ function calculateFinalAmount() {
 
 // Confirm spend points
 async function confirmSpendPoints() {
+    if (!currentCustomer) {
+        showError('Por favor, escaneie o QR code ou insira o código do cliente primeiro!');
+        return;
+    }
+    
     const orderAmount = parseFloat(document.getElementById('spendOrderAmount').value);
     const finalAmount = parseFloat(document.getElementById('finalAmount').textContent.replace('R$ ', '').replace(',', '.'));
     
@@ -476,20 +798,22 @@ async function confirmSpendPoints() {
         // Here you would create a loyalty transaction record
         // For now, we'll just show success
         const discountAmount = orderAmount - finalAmount;
-        showSuccess(`✅ Desconto aplicado! Valor final: R$ ${finalAmount.toFixed(2)} (desconto: R$ ${discountAmount.toFixed(2)})`);
+        showSuccess(`✅ Desconto aplicado para ${currentCustomer.name}! Valor final: R$ ${finalAmount.toFixed(2)} (desconto: R$ ${discountAmount.toFixed(2)})`);
         
         // Close modal
         closeModal('spendPointsModal');
         
-        // Clear form
+        // Clear form and reset
         document.getElementById('spendOrderAmount').value = '';
         document.getElementById('finalAmount').textContent = 'R$ 0,00';
         document.getElementById('customerInfo').style.display = 'none';
+        document.getElementById('confirmSpendBtn').disabled = true;
+        currentCustomer = null;
         
         // Refresh daily stats
         loadDailyStats();
         
-        console.log('✅ Points spent for order:', orderAmount, 'final amount:', finalAmount);
+        console.log('✅ Points spent for customer:', currentCustomer.name, 'order:', orderAmount, 'final amount:', finalAmount);
         
     } catch (error) {
         console.error('❌ Error confirming discount:', error);

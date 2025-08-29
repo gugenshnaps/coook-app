@@ -100,21 +100,49 @@
 
         <!-- Earn Points Modal -->
         <div id="earnPointsModal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content large-modal">
                 <div class="modal-header">
                     <h3>💰 Acumular Pontos</h3>
                     <button onclick="closeModal('earnPointsModal')" class="close-btn">×</button>
                 </div>
                 
                 <div class="modal-body">
+                    <!-- QR Scanner Section -->
                     <div class="qr-section">
-                        <h4>📱 Escaneie o QR Code do Cliente</h4>
-                        <div id="qrCodeDisplay" class="qr-display">
-                            <div class="qr-placeholder">QR Code aparecerá aqui</div>
+                        <h4>📱 Escanear QR Code do Cliente</h4>
+                        <button class="qr-scan-btn" onclick="startQRScanner()">📱 Scan QR Code</button>
+                        <div id="qrScannerContainer" class="qr-scanner-container" style="display: none;">
+                            <video id="qrVideo" autoplay muted></video>
+                            <canvas id="qrCanvas" style="display: none;"></canvas>
+                            <div class="scanner-overlay">
+                                <div class="scanner-frame"></div>
+                                <p class="scanner-hint">Posicione o QR code dentro da moldura</p>
+                            </div>
+                            <button class="stop-scan-btn" onclick="stopQRScanner()">❌ Parar Scanner</button>
                         </div>
-                        <button onclick="generateQRCode()" class="qr-btn">Gerar QR Code</button>
+                    </div>
+
+                    <!-- Manual Code Input Section -->
+                    <div class="manual-code-section">
+                        <h4>⌨️ Ou digite o código manualmente</h4>
+                        <div class="code-input-group">
+                            <input type="text" id="manualCodeInput" maxlength="8" placeholder="12345678" pattern="[0-9]{8}">
+                            <button class="apply-code-btn" onclick="applyManualCode()">Apply</button>
+                        </div>
+                        <small class="code-hint">Digite o código de 8 dígitos do cliente</small>
+                    </div>
+
+                    <!-- Customer Info Display -->
+                    <div id="customerInfoEarn" class="customer-info" style="display: none;">
+                        <h4>📋 Informações do Cliente</h4>
+                        <div class="customer-details">
+                            <p><strong>Nome:</strong> <span id="customerNameEarn">-</span></p>
+                            <p><strong>Pontos atuais:</strong> <span id="customerPointsEarn">-</span></p>
+                            <p><strong>Status:</strong> <span id="customerStatusEarn">-</span></p>
+                        </div>
                     </div>
                     
+                    <!-- Order Section -->
                     <div class="order-section">
                         <h4>📋 Dados do Pedido</h4>
                         <div class="form-group">
@@ -125,7 +153,7 @@
                             <span>Pontos a serem ganhos:</span>
                             <strong id="pointsToEarn">0</strong>
                         </div>
-                        <button onclick="confirmEarnPoints()" class="confirm-btn">Confirmar Pontos</button>
+                        <button onclick="confirmEarnPoints()" class="confirm-btn" disabled id="confirmEarnBtn">Confirmar Pontos</button>
                     </div>
                 </div>
             </div>
@@ -133,19 +161,36 @@
 
         <!-- Spend Points Modal -->
         <div id="spendPointsModal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content large-modal">
                 <div class="modal-header">
                     <h3>🎯 Aplicar Desconto</h3>
                     <button onclick="closeModal('spendPointsModal')" class="close-btn">×</button>
                 </div>
                 
                 <div class="modal-body">
+                    <!-- QR Scanner Section -->
                     <div class="qr-section">
-                        <h4>📱 Escaneie o QR Code do Cliente</h4>
-                        <div id="qrCodeDisplaySpend" class="qr-display">
-                            <div class="qr-placeholder">QR Code aparecerá aqui</div>
+                        <h4>📱 Escanear QR Code do Cliente</h4>
+                        <button class="qr-scan-btn" onclick="startQRScannerSpend()">📱 Scan QR Code</button>
+                        <div id="qrScannerContainerSpend" class="qr-scanner-container" style="display: none;">
+                            <video id="qrVideoSpend" autoplay muted></video>
+                            <canvas id="qrCanvasSpend" style="display: none;"></canvas>
+                            <div class="scanner-overlay">
+                                <div class="scanner-frame"></div>
+                                <p class="scanner-hint">Posicione o QR code dentro da moldura</p>
+                            </div>
+                            <button class="stop-scan-btn" onclick="stopQRScannerSpend()">❌ Parar Scanner</button>
                         </div>
-                        <button onclick="generateQRCodeSpend()" class="qr-btn">Gerar QR Code</button>
+                    </div>
+
+                    <!-- Manual Code Input Section -->
+                    <div class="manual-code-section">
+                        <h4>⌨️ Ou digite o código manualmente</h4>
+                        <div class="code-input-group">
+                            <input type="text" id="manualCodeInputSpend" maxlength="8" placeholder="12345678" pattern="[0-9]{8}">
+                            <button class="apply-code-btn" onclick="applyManualCodeSpend()">Apply</button>
+                        </div>
+                        <small class="code-hint">Digite o código de 8 dígitos do cliente</small>
                     </div>
                     
                     <div class="customer-info" id="customerInfo" style="display: none;">
@@ -167,7 +212,7 @@
                             <span>Valor final com desconto:</span>
                             <strong id="finalAmount">R$ 0,00</strong>
                         </div>
-                        <button onclick="confirmSpendPoints()" class="confirm-btn">Aplicar Desconto</button>
+                        <button onclick="confirmSpendPoints()" class="confirm-btn" disabled id="confirmSpendBtn">Aplicar Desconto</button>
                     </div>
                 </div>
             </div>
@@ -307,6 +352,7 @@
         </div>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="cafe-tma.js"></script>
 </body>
 </html>
