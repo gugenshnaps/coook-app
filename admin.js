@@ -32,6 +32,9 @@ async function initializeAdminPanel() {
         // Initialize photo upload functionality
         initializePhotoUpload();
         
+        // Initialize edit form functionality
+        initializeEditForm();
+        
         console.log('Admin panel initialized successfully!');
     } catch (error) {
         console.error('Error initializing admin panel:', error);
@@ -453,15 +456,114 @@ async function deleteCafe(cafeId) {
     }
 }
 
-// Edit cafe (placeholder for future implementation)
-function editCafe(cafeId) {
-    showError('Edição de cafés será implementada em breve!');
+// Edit cafe - Load cafe data into edit form
+async function editCafe(cafeId) {
+    try {
+        console.log('✏️ Editing cafe:', cafeId);
+        
+        // Find cafe data
+        const cafe = cafes.find(c => c.id === cafeId);
+        if (!cafe) {
+            showError('Café não encontrado!');
+            return;
+        }
+        
+        // Load cafe data into edit form
+        loadCafeDataIntoEditForm(cafe);
+        
+        // Show edit modal
+        document.getElementById('editCafeModal').style.display = 'block';
+        
+        console.log('✅ Edit form loaded for cafe:', cafe.name);
+        
+    } catch (error) {
+        console.error('❌ Error loading edit form:', error);
+        showError('Erro ao carregar formulário de edição: ' + error.message);
+    }
+}
+
+// Load cafe data into edit form
+function loadCafeDataIntoEditForm(cafe) {
+    // Basic info
+    document.getElementById('editCafeName').value = cafe.name || '';
+    document.getElementById('editCafeCity').value = cafe.city || '';
+    document.getElementById('editCafeAddress').value = cafe.address || '';
+    document.getElementById('editCafeDescription').value = cafe.description || '';
+    
+    // Working hours
+    if (cafe.workingHours) {
+        document.getElementById('editMondayOpen').value = cafe.workingHours.monday?.open || '';
+        document.getElementById('editMondayClose').value = cafe.workingHours.monday?.close || '';
+        document.getElementById('editTuesdayOpen').value = cafe.workingHours.tuesday?.open || '';
+        document.getElementById('editTuesdayClose').value = cafe.workingHours.tuesday?.close || '';
+        document.getElementById('editWednesdayOpen').value = cafe.workingHours.wednesday?.open || '';
+        document.getElementById('editWednesdayClose').value = cafe.workingHours.wednesday?.close || '';
+        document.getElementById('editThursdayOpen').value = cafe.workingHours.thursday?.open || '';
+        document.getElementById('editThursdayClose').value = cafe.workingHours.thursday?.close || '';
+        document.getElementById('editFridayOpen').value = cafe.workingHours.friday?.open || '';
+        document.getElementById('editFridayClose').value = cafe.workingHours.friday?.close || '';
+        document.getElementById('editSaturdayOpen').value = cafe.workingHours.saturday?.open || '';
+        document.getElementById('editSaturdayClose').value = cafe.workingHours.saturday?.close || '';
+        document.getElementById('editSundayOpen').value = cafe.workingHours.sunday?.open || '';
+        document.getElementById('editSundayClose').value = cafe.workingHours.sunday?.close || '';
+    }
+    
+    // Photo
+    if (cafe.photoUrl) {
+        document.getElementById('editPhotoUrl').checked = true;
+        document.getElementById('editCafePhotoUrl').value = cafe.photoUrl;
+        document.getElementById('editUrlInputSection').style.display = 'block';
+        document.getElementById('editFileUploadSection').style.display = 'none';
+        showEditPhotoPreview(cafe.photoUrl);
+    } else {
+        document.getElementById('editPhotoFile').checked = true;
+        document.getElementById('editFileUploadSection').style.display = 'block';
+        document.getElementById('editUrlInputSection').style.display = 'none';
+    }
+    
+    // Store cafe ID for update
+    document.getElementById('editCafeForm').dataset.cafeId = cafe.id;
+    
+    console.log('✅ Cafe data loaded into edit form');
+}
+
+// Show photo preview in edit form
+function showEditPhotoPreview(photoUrl) {
+    const preview = document.getElementById('editUrlPreview');
+    preview.innerHTML = `
+        <img src="${photoUrl}" alt="Foto do café" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+    `;
 }
 
 // Show success message
 function showSuccess(message) {
     // Simple success message (can be enhanced with toast notifications)
     alert('✅ ' + message);
+}
+
+// Close edit cafe modal
+function closeEditCafeModal() {
+    document.getElementById('editCafeModal').style.display = 'none';
+    
+    // Clear form
+    clearEditCafeForm();
+    
+    console.log('❌ Edit cafe modal closed');
+}
+
+// Clear edit cafe form
+function clearEditCafeForm() {
+    document.getElementById('editCafeForm').reset();
+    document.getElementById('editPhotoPreview').innerHTML = '';
+    document.getElementById('editUrlPreview').innerHTML = '';
+    document.getElementById('editFileUploadSection').style.display = 'block';
+    document.getElementById('editUrlInputSection').style.display = 'none';
+    document.getElementById('editPhotoFile').checked = true;
+    
+    // Remove cafe ID
+    delete document.getElementById('editCafeForm').dataset.cafeId;
+    
+    console.log('✅ Edit cafe form cleared');
 }
 
 // Show error message
@@ -712,6 +814,185 @@ function getPhotoBase64() {
     
     // Return the compressed data URL from preview
     return img.src;
+}
+
+// Initialize edit form functionality
+function initializeEditForm() {
+    const editForm = document.getElementById('editCafeForm');
+    if (editForm) {
+        editForm.addEventListener('submit', handleEditCafeSubmit);
+    }
+    
+    // Photo type radio buttons
+    const editPhotoFile = document.getElementById('editPhotoFile');
+    const editPhotoUrl = document.getElementById('editPhotoUrl');
+    
+    if (editPhotoFile && editPhotoUrl) {
+        editPhotoFile.addEventListener('change', () => switchEditPhotoMode('file'));
+        editPhotoUrl.addEventListener('change', () => switchEditPhotoMode('url'));
+    }
+    
+    // File upload handler for edit form
+    const editCafePhoto = document.getElementById('editCafePhoto');
+    if (editCafePhoto) {
+        editCafePhoto.addEventListener('change', handleEditPhotoUpload);
+    }
+    
+    // URL input handler for edit form
+    const editCafePhotoUrl = document.getElementById('editCafePhotoUrl');
+    if (editCafePhotoUrl) {
+        editCafePhotoUrl.addEventListener('input', handleEditUrlInput);
+    }
+    
+    console.log('✅ Edit form functionality initialized');
+}
+
+// Handle edit cafe form submission
+async function handleEditCafeSubmit(event) {
+    event.preventDefault();
+    
+    try {
+        const cafeId = event.target.dataset.cafeId;
+        if (!cafeId) {
+            showError('ID do café não encontrado!');
+            return;
+        }
+        
+        console.log('💾 Updating cafe:', cafeId);
+        
+        // Collect form data
+        const updatedCafe = collectEditFormData();
+        
+        // Update cafe in Firebase
+        await updateCafeInFirebase(cafeId, updatedCafe);
+        
+        // Show success and close modal
+        showSuccess('Café atualizado com sucesso!');
+        closeEditCafeModal();
+        
+        // Refresh cafes list
+        loadCafes();
+        
+    } catch (error) {
+        console.error('❌ Error updating cafe:', error);
+        showError('Erro ao atualizar café: ' + error.message);
+    }
+}
+
+// Collect data from edit form
+async function collectEditFormData() {
+    const updatedCafe = {
+        name: document.getElementById('editCafeName').value.trim(),
+        city: document.getElementById('editCafeCity').value.trim(),
+        address: document.getElementById('editCafeAddress').value.trim(),
+        description: document.getElementById('editCafeDescription').value.trim(),
+        workingHours: {
+            monday: {
+                open: document.getElementById('editMondayOpen').value,
+                close: document.getElementById('editMondayClose').value
+            },
+            tuesday: {
+                open: document.getElementById('editTuesdayOpen').value,
+                close: document.getElementById('editTuesdayClose').value
+            },
+            wednesday: {
+                open: document.getElementById('editWednesdayOpen').value,
+                close: document.getElementById('editWednesdayClose').value
+            },
+            thursday: {
+                open: document.getElementById('editThursdayOpen').value,
+                close: document.getElementById('editThursdayClose').value
+            },
+            friday: {
+                open: document.getElementById('editFridayOpen').value,
+                close: document.getElementById('editFridayClose').value
+            },
+            saturday: {
+                open: document.getElementById('editSaturdayOpen').value,
+                close: document.getElementById('editSaturdayClose').value
+            },
+            sunday: {
+                open: document.getElementById('editSundayOpen').value,
+                close: document.getElementById('editSundayClose').value
+            }
+        }
+    };
+    
+    // Handle photo
+    if (document.getElementById('editPhotoUrl').checked) {
+        updatedCafe.photoUrl = document.getElementById('editCafePhotoUrl').value.trim();
+    } else if (document.getElementById('editCafePhoto').files.length > 0) {
+        // Handle file upload (similar to addCafe)
+        const file = document.getElementById('editCafePhoto').files[0];
+        if (file) {
+            const photoUrl = await processPhotoFile(file);
+            if (photoUrl) {
+                updatedCafe.photoUrl = photoUrl;
+            }
+        }
+    }
+    
+    return updatedCafe;
+}
+
+// Update cafe in Firebase
+async function updateCafeInFirebase(cafeId, updatedCafe) {
+    try {
+        const cafeRef = window.firebase.doc(window.firebase.db, 'cafes', cafeId);
+        await window.firebase.updateDoc(cafeRef, updatedCafe);
+        
+        console.log('✅ Cafe updated in Firebase:', cafeId);
+        
+    } catch (error) {
+        console.error('❌ Error updating cafe in Firebase:', error);
+        throw error;
+    }
+}
+
+// Switch edit photo mode
+function switchEditPhotoMode(mode) {
+    const fileSection = document.getElementById('editFileUploadSection');
+    const urlSection = document.getElementById('editUrlInputSection');
+    
+    if (mode === 'file') {
+        fileSection.style.display = 'block';
+        urlSection.style.display = 'none';
+        document.getElementById('editCafePhotoUrl').value = '';
+        document.getElementById('editUrlPreview').innerHTML = '';
+    } else {
+        fileSection.style.display = 'none';
+        urlSection.style.display = 'block';
+        document.getElementById('editCafePhoto').value = '';
+        document.getElementById('editPhotoPreview').innerHTML = '';
+    }
+    
+    console.log('📸 Switched edit photo mode to:', mode);
+}
+
+// Handle edit photo upload
+async function handleEditPhotoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+        const photoUrl = await processPhotoFile(file);
+        if (photoUrl) {
+            showEditPhotoPreview(photoUrl);
+        }
+    } catch (error) {
+        console.error('❌ Error processing edit photo:', error);
+        showError('Erro ao processar foto: ' + error.message);
+    }
+}
+
+// Handle edit URL input
+function handleEditUrlInput(event) {
+    const url = event.target.value.trim();
+    if (url) {
+        showEditPhotoPreview(url);
+    } else {
+        document.getElementById('editUrlPreview').innerHTML = '';
+    }
 }
 
 // Start initialization when page loads
