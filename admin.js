@@ -174,6 +174,7 @@ function displayCafes() {
             </div>
             <div class="cafe-actions">
                 <button onclick="editCafe('${cafe.id}')" class="edit-btn">✏️</button>
+                <button onclick="viewCafePassword('${cafe.id}')" class="password-btn">🔑</button>
                 <button onclick="deleteCafe('${cafe.id}')" class="delete-btn">🗑️</button>
             </div>
         </div>
@@ -992,6 +993,94 @@ function handleEditUrlInput(event) {
         showEditPhotoPreview(url);
     } else {
         document.getElementById('editUrlPreview').innerHTML = '';
+    }
+}
+
+// View cafe password
+async function viewCafePassword(cafeId) {
+    try {
+        console.log('🔑 Viewing password for cafe:', cafeId);
+        
+        // Find cafe data
+        const cafe = cafes.find(c => c.id === cafeId);
+        if (!cafe) {
+            showError('Café não encontrado!');
+            return;
+        }
+        
+        // Load password data from Firebase
+        const passwordData = await loadCafePassword(cafeId);
+        if (!passwordData) {
+            showError('Senha não encontrada para este café!');
+            return;
+        }
+        
+        // Display cafe info and password
+        document.getElementById('passwordCafeName').textContent = cafe.name;
+        document.getElementById('passwordCafeCity').textContent = cafe.city;
+        document.getElementById('passwordCafeLogin').textContent = passwordData.login;
+        document.getElementById('passwordCafePassword').textContent = passwordData.password;
+        
+        // Show password modal
+        document.getElementById('viewPasswordModal').style.display = 'block';
+        
+        console.log('✅ Password modal loaded for cafe:', cafe.name);
+        
+    } catch (error) {
+        console.error('❌ Error loading password:', error);
+        showError('Erro ao carregar senha: ' + error.message);
+    }
+}
+
+// Load cafe password from Firebase
+async function loadCafePassword(cafeId) {
+    try {
+        const passwordsRef = window.firebase.collection(window.firebase.db, 'cafe_passwords');
+        const passwordQuery = window.firebase.query(passwordsRef, window.firebase.where('cafeId', '==', cafeId));
+        const passwordSnapshot = await window.firebase.getDocs(passwordQuery);
+        
+        if (passwordSnapshot.empty) {
+            console.log('❌ No password found for cafe:', cafeId);
+            return null;
+        }
+        
+        const passwordDoc = passwordSnapshot.docs[0];
+        const passwordData = passwordDoc.data();
+        
+        // Return login and password
+        return {
+            login: passwordData.cafeName || 'N/A',
+            password: passwordData.password || 'N/A'
+        };
+        
+    } catch (error) {
+        console.error('❌ Error loading password from Firebase:', error);
+        throw error;
+    }
+}
+
+// Close view password modal
+function closeViewPasswordModal() {
+    document.getElementById('viewPasswordModal').style.display = 'none';
+    console.log('❌ Password modal closed');
+}
+
+// Copy password to clipboard
+async function copyPasswordToClipboard() {
+    try {
+        const password = document.getElementById('passwordCafePassword').textContent;
+        
+        if (password && password !== 'N/A') {
+            await navigator.clipboard.writeText(password);
+            showSuccess('Senha copiada para a área de transferência!');
+            console.log('✅ Password copied to clipboard');
+        } else {
+            showError('Nenhuma senha para copiar!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error copying password:', error);
+        showError('Erro ao copiar senha: ' + error.message);
     }
 }
 

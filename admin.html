@@ -267,6 +267,39 @@
         </div>
     </div>
     
+    <!-- View Cafe Password Modal -->
+    <div id="viewPasswordModal" class="modal">
+        <div class="modal-content small-modal">
+            <div class="modal-header">
+                <h3>🔑 Senha do Café</h3>
+                <button class="close-btn" onclick="closeViewPasswordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="password-info">
+                    <div class="cafe-details">
+                        <p><strong>Nome do Café:</strong> <span id="passwordCafeName">-</span></p>
+                        <p><strong>Cidade:</strong> <span id="passwordCafeCity">-</span></p>
+                    </div>
+                    <div class="password-section">
+                        <h4>🔐 Credenciais de Acesso</h4>
+                        <div class="credential-row">
+                            <span class="credential-label">Login:</span>
+                            <span class="credential-value" id="passwordCafeLogin">-</span>
+                        </div>
+                        <div class="credential-row">
+                            <span class="credential-label">Senha:</span>
+                            <span class="credential-value" id="passwordCafePassword">-</span>
+                        </div>
+                    </div>
+                    <div class="password-actions">
+                        <button onclick="copyPasswordToClipboard()" class="copy-btn">📋 Copiar Senha</button>
+                        <button onclick="closeViewPasswordModal()" class="close-btn-secondary">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script src="admin.js"></script>
 </body>
 </html>
