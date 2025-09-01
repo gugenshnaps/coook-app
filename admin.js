@@ -817,6 +817,59 @@ function getPhotoBase64() {
     return img.src;
 }
 
+// Compress image to base64 for edit form
+async function compressImageToBase64(file) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = function() {
+            // Calculate new dimensions (maintain aspect ratio)
+            let { width, height } = img;
+            const maxDimension = 800;
+            
+            if (width > height) {
+                if (width > maxDimension) {
+                    height = (height * maxDimension) / width;
+                    width = maxDimension;
+                }
+            } else {
+                if (height > maxDimension) {
+                    width = (width * maxDimension) / height;
+                    height = maxDimension;
+                }
+            }
+            
+            // Set canvas dimensions
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress image
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Try different quality levels
+            let quality = 0.8;
+            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+            
+            // Reduce quality until we meet target size (500KB)
+            const targetSize = 500 * 1024;
+            while (dataUrl.length > targetSize * 1.5 && quality > 0.1) {
+                quality -= 0.1;
+                dataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
+            
+            resolve(dataUrl);
+        };
+        
+        img.onerror = function() {
+            resolve(null);
+        };
+        
+        img.src = URL.createObjectURL(file);
+    });
+}
+
 // Initialize edit form functionality
 function initializeEditForm() {
     const editForm = document.getElementById('editCafeForm');
@@ -926,7 +979,8 @@ async function collectEditFormData() {
         // Handle file upload (similar to addCafe)
         const file = document.getElementById('editCafePhoto').files[0];
         if (file) {
-            const photoUrl = await processPhotoFile(file);
+            // Compress and get base64 data
+            const photoUrl = await compressImageToBase64(file);
             if (photoUrl) {
                 updatedCafe.photoUrl = photoUrl;
             }
@@ -976,7 +1030,7 @@ async function handleEditPhotoUpload(event) {
     if (!file) return;
     
     try {
-        const photoUrl = await processPhotoFile(file);
+        const photoUrl = await compressImageToBase64(file);
         if (photoUrl) {
             showEditPhotoPreview(photoUrl);
         }
