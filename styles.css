@@ -368,12 +368,10 @@ body {
     color: #666;
     line-height: 1.4;
     margin-bottom: 8px; /* Уменьшаем отступ для кнопки */
-    display: -webkit-box; /* Возвращаем webkit-box для line-clamp */
-    -webkit-line-clamp: 2; /* Максимум 2 строки */
-    -webkit-box-orient: vertical; /* Вертикальная ориентация */
-    overflow: hidden;
-    max-height: 60px; /* Высота для 2 строк описания */
-    flex: 1; /* Занимает доступное пространство */
+    display: block; /* Простой блок без webkit-box */
+    overflow: visible; /* Показываем весь текст */
+    height: 44px; /* Фиксированная высота для 2 строк (13px * 1.4 * 2 + padding) */
+    word-wrap: break-word; /* Перенос длинных слов */
 }
 
 .cafe-hours {
