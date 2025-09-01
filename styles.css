@@ -372,7 +372,7 @@ body {
     -webkit-line-clamp: 2; /* Максимум 2 строки вместо 3 */
     -webkit-box-orient: vertical;
     overflow: hidden;
-    max-height: 40px; /* Увеличиваем высоту для 2 строк описания */
+    max-height: 44px; /* Увеличиваем высоту для 2 строк описания */
     flex: 1; /* Занимает доступное пространство */
 }
 
@@ -1251,7 +1251,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     width: 100%;
-    margin-top: auto; /* Прижимает кнопку к низу */
+    margin-top: 8px; /* Фиксированный отступ вместо auto */
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
