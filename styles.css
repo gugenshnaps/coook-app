@@ -340,7 +340,7 @@ body {
     flex: 1; /* Занимает доступное пространство */
     display: flex;
     flex-direction: column;
-    min-height: 120px; /* Уменьшаем высоту карточки с 160px до 120px */
+    min-height: 100px; /* Уменьшаем высоту карточки с 120px до 100px */
 }
 
 .cafe-name {
@@ -367,12 +367,12 @@ body {
     font-size: 13px;
     color: #666;
     line-height: 1.4;
-    margin-bottom: 12px; /* Уменьшаем отступ для кнопки */
+    margin-bottom: 8px; /* Уменьшаем отступ для кнопки */
     display: -webkit-box;
     -webkit-line-clamp: 2; /* Максимум 2 строки вместо 3 */
     -webkit-box-orient: vertical;
     overflow: hidden;
-    max-height: 36px; /* Фиксированная высота для 2 строк описания */
+    max-height: 40px; /* Увеличиваем высоту для 2 строк описания */
     flex: 1; /* Занимает доступное пространство */
 }
 
