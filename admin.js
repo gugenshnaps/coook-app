@@ -915,7 +915,7 @@ async function handleEditCafeSubmit(event) {
         console.log('💾 Updating cafe:', cafeId);
         
         // Collect form data
-        const updatedCafe = collectEditFormData();
+        const updatedCafe = await collectEditFormData();
         
         // Update cafe in Firebase
         await updateCafeInFirebase(cafeId, updatedCafe);
