@@ -1369,7 +1369,14 @@ function generateQRCode(data) {
             }, function (error) {
                 if (error) {
                     console.error('❌ qrcode.toCanvas error:', error);
-                    drawFallbackQR(ctx);
+                    // Show error instead of fallback
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, 200, 200);
+                    ctx.fillStyle = '#FF0000';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('QR GENERATION', 100, 90);
+                    ctx.fillText('ERROR', 100, 110);
                 } else {
                     console.log('✅ QR Code generated successfully with qrcode.toCanvas');
                 }
@@ -1407,14 +1414,27 @@ function generateQRCode(data) {
                 drawFallbackQR(ctx);
             }
         } else {
-            console.log('🔄 No standard QR libraries, trying manual generation...');
-            try {
-                // Simple manual QR-like pattern based on data
-                generateSimpleQR(ctx, data);
-            } catch (error) {
-                console.error('❌ Manual QR generation failed:', error);
-                drawFallbackQR(ctx);
-            }
+            console.error('❌ CRITICAL: No QR libraries available for MVP!');
+            console.error('❌ This will break the loyalty system!');
+            
+            // Show error message to user
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, 200, 200);
+            ctx.fillStyle = '#FF0000';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('QR LIBRARY', 100, 80);
+            ctx.fillText('NOT LOADED', 100, 100);
+            ctx.fillStyle = '#000000';
+            ctx.font = '12px Arial';
+            ctx.fillText('Please refresh page', 100, 130);
+            ctx.fillText('and try again', 100, 150);
+            
+            // Try to reload the page after 3 seconds
+            setTimeout(() => {
+                console.log('🔄 Attempting to reload page to fix QR library...');
+                window.location.reload();
+            }, 3000);
         }
     } else {
         console.error('❌ Canvas element not found');
@@ -1469,7 +1489,14 @@ function generateQRCodeSpend(data) {
             }, function (error) {
                 if (error) {
                     console.error('❌ qrcode.toCanvas error:', error);
-                    drawFallbackQR(ctx);
+                    // Show error instead of fallback
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, 200, 200);
+                    ctx.fillStyle = '#FF0000';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('QR GENERATION', 100, 90);
+                    ctx.fillText('ERROR', 100, 110);
                 } else {
                     console.log('✅ QR Code generated successfully with qrcode.toCanvas');
                 }
@@ -1507,104 +1534,32 @@ function generateQRCodeSpend(data) {
                 drawFallbackQR(ctx);
             }
         } else {
-            console.log('🔄 No standard QR libraries, trying manual generation...');
-            try {
-                // Simple manual QR-like pattern based on data
-                generateSimpleQR(ctx, data);
-            } catch (error) {
-                console.error('❌ Manual QR generation failed:', error);
-                drawFallbackQR(ctx);
-            }
+            console.error('❌ CRITICAL: No QR libraries available for MVP!');
+            console.error('❌ This will break the loyalty system!');
+            
+            // Show error message to user
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, 200, 200);
+            ctx.fillStyle = '#FF0000';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('QR LIBRARY', 100, 80);
+            ctx.fillText('NOT LOADED', 100, 100);
+            ctx.fillStyle = '#000000';
+            ctx.font = '12px Arial';
+            ctx.fillText('Please refresh page', 100, 130);
+            ctx.fillText('and try again', 100, 150);
+            
+            // Try to reload the page after 3 seconds
+            setTimeout(() => {
+                console.log('🔄 Attempting to reload page to fix QR library...');
+                window.location.reload();
+            }, 3000);
         }
     } else {
         console.error('❌ Canvas element not found');
     }
 }
 
-// Simple QR code generation based on data hash
-function generateSimpleQR(ctx, data) {
-    console.log('🎨 Generating simple QR pattern...');
-    
-    // Clear canvas
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, 200, 200);
-    
-    // Create a simple pattern based on data
-    const hash = simpleHash(data);
-    const cellSize = 8;
-    const gridSize = Math.floor(200 / cellSize);
-    
-    ctx.fillStyle = '#000000';
-    
-    // Generate pattern based on hash
-    for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
-            const index = (row * gridSize + col) % hash.length;
-            if (hash[index] % 2 === 0) {
-                ctx.fillRect(
-                    col * cellSize,
-                    row * cellSize,
-                    cellSize,
-                    cellSize
-                );
-            }
-        }
-    }
-    
-    // Add corner markers (like real QR codes)
-    ctx.fillStyle = '#000000';
-    // Top-left corner
-    ctx.fillRect(0, 0, 24, 24);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(8, 8, 8, 8);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(10, 10, 4, 4);
-    
-    // Top-right corner
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(176, 0, 24, 24);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(184, 8, 8, 8);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(186, 10, 4, 4);
-    
-    // Bottom-left corner
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 176, 24, 24);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(8, 184, 8, 8);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(10, 186, 4, 4);
-    
-    console.log('✅ Simple QR pattern generated');
-}
-
-// Simple hash function
-function simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash).toString().split('').map(Number);
-}
-
-// Fallback QR code pattern
-function drawFallbackQR(ctx) {
-    // Draw simple QR-like pattern (placeholder)
-    ctx.fillStyle = '#000';
-    ctx.fillRect(50, 50, 100, 100);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(60, 60, 80, 80);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(70, 70, 60, 60);
-    
-    // Add text
-    ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('QR Code', 100, 180);
-    ctx.fillText('Fallback', 100, 195);
-}
+// REMOVED: Fallback QR functions - we need REAL QR codes for MVP!
 
