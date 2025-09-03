@@ -774,6 +774,18 @@ function setFallbackUserInfo() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔧 DOM loaded, setting up event listeners...');
     
+    // Check QR Code library loading
+    setTimeout(() => {
+        console.log('🔍 QR Code library check:');
+        console.log('   - window.QRCode:', !!window.QRCode);
+        console.log('   - QRCode.toCanvas:', !!(window.QRCode && window.QRCode.toCanvas));
+        if (window.QRCode) {
+            console.log('✅ QR Code library loaded successfully');
+        } else {
+            console.error('❌ QR Code library failed to load');
+        }
+    }, 1000);
+    
     // City selection
     const citySelect = document.getElementById('citySelect');
     if (citySelect) {
@@ -1311,8 +1323,16 @@ async function copyUserCode(code) {
 
 // Generate QR code for earn points
 function generateQRCode(data) {
+    console.log('🔍 Starting QR code generation...');
+    console.log('🔍 Data to encode:', data);
+    console.log('🔍 QRCode library available:', !!window.QRCode);
+    
     const canvas = document.getElementById('qrCanvas');
+    console.log('🔍 Canvas element found:', !!canvas);
+    
     if (canvas && window.QRCode) {
+        console.log('✅ All requirements met, generating QR code...');
+        
         // Clear canvas first
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1336,17 +1356,29 @@ function generateQRCode(data) {
             }
         });
     } else {
-        console.error('❌ QR Code library not available');
+        console.error('❌ Missing requirements:');
+        console.error('   - Canvas:', !!canvas);
+        console.error('   - QRCode library:', !!window.QRCode);
         // Fallback to simple pattern
-        const ctx = canvas.getContext('2d');
-        drawFallbackQR(ctx);
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            drawFallbackQR(ctx);
+        }
     }
 }
 
 // Generate QR code for spend points
 function generateQRCodeSpend(data) {
+    console.log('🔍 Starting QR code generation (spend)...');
+    console.log('🔍 Data to encode:', data);
+    console.log('🔍 QRCode library available:', !!window.QRCode);
+    
     const canvas = document.getElementById('qrCanvasSpend');
+    console.log('🔍 Canvas element found:', !!canvas);
+    
     if (canvas && window.QRCode) {
+        console.log('✅ All requirements met, generating QR code...');
+        
         // Clear canvas first
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1370,10 +1402,14 @@ function generateQRCodeSpend(data) {
             }
         });
     } else {
-        console.error('❌ QR Code library not available');
+        console.error('❌ Missing requirements:');
+        console.error('   - Canvas:', !!canvas);
+        console.error('   - QRCode library:', !!window.QRCode);
         // Fallback to simple pattern
-        const ctx = canvas.getContext('2d');
-        drawFallbackQR(ctx);
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            drawFallbackQR(ctx);
+        }
     }
 }
 

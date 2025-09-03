@@ -106,8 +106,19 @@
         </div>
     </div>
 
-    <!-- QR Code Library -->
+    <!-- QR Code Library - Multiple CDNs for reliability -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // Fallback if first CDN fails
+        if (!window.QRCode) {
+            console.log('🔄 First QR CDN failed, trying backup...');
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
+            script.onload = () => console.log('✅ Backup QR library loaded');
+            script.onerror = () => console.error('❌ All QR libraries failed to load');
+            document.head.appendChild(script);
+        }
+    </script>
     
     <script src="user-system.js"></script>
     <script src="script.js"></script>
