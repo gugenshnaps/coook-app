@@ -453,10 +453,10 @@ function showCafeDetails(cafeId) {
                 <!-- Loyalty buttons -->
                 <div class="loyalty-buttons">
                     <button class="loyalty-earn-btn" onclick="showEarnPoints('${cafe.id}', '${cafe.name}')">
-                        ⬆️ Накопить баллы
+                        ⬆️ Acumular Pontos
                     </button>
                     <button class="loyalty-spend-btn" onclick="showSpendPoints('${cafe.id}', '${cafe.name}')">
-                        ⬇️ Списать баллы
+                        ⬇️ Gastar Pontos
                     </button>
                 </div>
             </div>
@@ -1198,21 +1198,21 @@ function showEarnPoints(cafeId, cafeName) {
     
     const modalContent = `
         <div class="earn-points-modal">
-            <h2>⬆️ Накопить баллы</h2>
+            <h2>⬆️ Acumular Pontos</h2>
             <div class="cafe-info">
                 <h3>${cafeName}</h3>
-                <p>📱 Покажите этот код бариста или администратору</p>
+                <p>📱 Mostre este código para o barista ou administrador</p>
             </div>
             
             <div class="qr-code-section">
-                <h4>📱 QR Код:</h4>
+                <h4>📱 Código QR:</h4>
                 <div class="qr-code-container">
                     <canvas id="qrCanvas" width="200" height="200"></canvas>
                 </div>
             </div>
             
             <div class="manual-code-section">
-                <h4>🔢 8-значный код:</h4>
+                <h4>🔢 Código de 8 dígitos:</h4>
                 <div class="code-display">
                     <span class="user-code">${userCode}</span>
                     <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
@@ -1220,12 +1220,12 @@ function showEarnPoints(cafeId, cafeName) {
             </div>
             
             <div class="instructions">
-                <p>💡 Бариста отсканирует QR код или введет 8-значный код в приложении для кафе</p>
+                <p>💡 O barista escaneará o código QR ou inserirá o código de 8 dígitos no aplicativo do café</p>
             </div>
         </div>
     `;
     
-    showModal(modalContent, 'Накопить баллы');
+    showModal(modalContent, 'Acumular Pontos');
     
     // Generate QR code
     generateQRCode(qrData);
@@ -1248,21 +1248,21 @@ function showSpendPoints(cafeId, cafeName) {
     
     const modalContent = `
         <div class="spend-points-modal">
-            <h2>⬇️ Списать баллы</h2>
+            <h2>⬇️ Gastar Pontos</h2>
             <div class="cafe-info">
                 <h3>${cafeName}</h3>
-                <p>📱 Покажите этот код бариста или администратору</p>
+                <p>📱 Mostre este código para o barista ou administrador</p>
             </div>
             
             <div class="qr-code-section">
-                <h4>📱 QR Код:</h4>
+                <h4>📱 Código QR:</h4>
                 <div class="qr-code-container">
                     <canvas id="qrCanvasSpend" width="200" height="200"></canvas>
                 </div>
             </div>
             
             <div class="manual-code-section">
-                <h4>🔢 8-значный код:</h4>
+                <h4>🔢 Código de 8 dígitos:</h4>
                 <div class="code-display">
                     <span class="user-code">${userCode}</span>
                     <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
@@ -1270,13 +1270,13 @@ function showSpendPoints(cafeId, cafeName) {
             </div>
             
             <div class="instructions">
-                <p>💡 Бариста отсканирует QR код или введет 8-значный код в приложении для кафе</p>
-                <p>💰 После сканирования будет показан ваш баланс баллов и пересчитана сумма заказа</p>
+                <p>💡 O barista escaneará o código QR ou inserirá o código de 8 dígitos no aplicativo do café</p>
+                <p>💰 Após o escaneamento, será mostrado seu saldo de pontos e recalculado o valor do pedido</p>
             </div>
         </div>
     `;
     
-    showModal(modalContent, 'Списать баллы');
+    showModal(modalContent, 'Gastar Pontos');
     
     // Generate QR code
     generateQRCodeSpend(qrData);
@@ -1301,7 +1301,7 @@ function generateUserCode(userId) {
 async function copyUserCode(code) {
     try {
         await navigator.clipboard.writeText(code);
-        alert('📋 Код скопирован: ' + code);
+        alert('📋 Código copiado: ' + code);
         console.log('✅ User code copied:', code);
     } catch (error) {
         console.error('❌ Error copying user code:', error);
