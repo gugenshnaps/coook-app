@@ -313,7 +313,7 @@ function displayCafes() {
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
+                                ${cafe.address ? `<p class="cafe-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
@@ -365,7 +365,7 @@ function displayCafes() {
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
+                                ${cafe.address ? `<p class="cafe-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
@@ -450,10 +450,15 @@ function showCafeDetails(cafeId) {
                     ${formatWorkingHours(cafe.workingHours)}
                 </div>
                 
-                <!-- Loyalty button -->
-                <button class="loyalty-apply-btn" onclick="applyLoyalty('${cafe.id}', '${cafe.name}')">
-                    🎯 Aplicar Lealdade
-                </button>
+                <!-- Loyalty buttons -->
+                <div class="loyalty-buttons">
+                    <button class="loyalty-earn-btn" onclick="showEarnPoints('${cafe.id}', '${cafe.name}')">
+                        ⬆️ Накопить баллы
+                    </button>
+                    <button class="loyalty-spend-btn" onclick="showSpendPoints('${cafe.id}', '${cafe.name}')">
+                        ⬇️ Списать баллы
+                    </button>
+                </div>
             </div>
         `;
         
@@ -1141,5 +1146,199 @@ function viewLoyaltyBenefits(cafeId) {
     `;
     
     showModal(modalContent, 'Benefícios de Lealdade');
+}
+
+// Copy address to clipboard
+async function copyAddress(address) {
+    try {
+        await navigator.clipboard.writeText(address);
+        alert('📍 Endereço copiado: ' + address);
+        console.log('✅ Address copied:', address);
+    } catch (error) {
+        console.error('❌ Error copying address:', error);
+        alert('❌ Erro ao copiar endereço');
+    }
+}
+
+// Show earn points modal with QR code and 8-digit code
+function showEarnPoints(cafeId, cafeName) {
+    console.log('⬆️ Show earn points for cafe:', cafeId, cafeName);
+    
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para acumular pontos!\n💡 Abra o app através do Telegram');
+        return;
+    }
+    
+    // Generate QR code data and 8-digit code
+    const userId = window.currentUser.id;
+    const timestamp = Date.now();
+    const qrData = `${userId}:${cafeId}:${timestamp}`;
+    const userCode = generateUserCode(userId);
+    
+    const modalContent = `
+        <div class="earn-points-modal">
+            <h2>⬆️ Накопить баллы</h2>
+            <div class="cafe-info">
+                <h3>${cafeName}</h3>
+                <p>📱 Покажите этот код бариста или администратору</p>
+            </div>
+            
+            <div class="qr-code-section">
+                <h4>📱 QR Код:</h4>
+                <div class="qr-code-container">
+                    <canvas id="qrCanvas" width="200" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="manual-code-section">
+                <h4>🔢 8-значный код:</h4>
+                <div class="code-display">
+                    <span class="user-code">${userCode}</span>
+                    <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>💡 Бариста отсканирует QR код или введет 8-значный код в приложении для кафе</p>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Накопить баллы');
+    
+    // Generate QR code
+    generateQRCode(qrData);
+}
+
+// Show spend points modal with QR code and 8-digit code
+function showSpendPoints(cafeId, cafeName) {
+    console.log('⬇️ Show spend points for cafe:', cafeId, cafeName);
+    
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para gastar pontos!\n💡 Abra o app através do Telegram');
+        return;
+    }
+    
+    // Generate QR code data and 8-digit code
+    const userId = window.currentUser.id;
+    const timestamp = Date.now();
+    const qrData = `${userId}:${cafeId}:${timestamp}`;
+    const userCode = generateUserCode(userId);
+    
+    const modalContent = `
+        <div class="spend-points-modal">
+            <h2>⬇️ Списать баллы</h2>
+            <div class="cafe-info">
+                <h3>${cafeName}</h3>
+                <p>📱 Покажите этот код бариста или администратору</p>
+            </div>
+            
+            <div class="qr-code-section">
+                <h4>📱 QR Код:</h4>
+                <div class="qr-code-container">
+                    <canvas id="qrCanvasSpend" width="200" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="manual-code-section">
+                <h4>🔢 8-значный код:</h4>
+                <div class="code-display">
+                    <span class="user-code">${userCode}</span>
+                    <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>💡 Бариста отсканирует QR код или введет 8-значный код в приложении для кафе</p>
+                <p>💰 После сканирования будет показан ваш баланс баллов и пересчитана сумма заказа</p>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Списать баллы');
+    
+    // Generate QR code
+    generateQRCodeSpend(qrData);
+}
+
+// Generate 8-digit user code from user ID
+function generateUserCode(userId) {
+    // Simple hash of user ID to create 8-digit code
+    let hash = 0;
+    for (let i = 0; i < userId.length; i++) {
+        const char = userId.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    // Convert to positive 8-digit number
+    const code = Math.abs(hash).toString().padStart(8, '0').slice(-8);
+    return code;
+}
+
+// Copy user code to clipboard
+async function copyUserCode(code) {
+    try {
+        await navigator.clipboard.writeText(code);
+        alert('📋 Код скопирован: ' + code);
+        console.log('✅ User code copied:', code);
+    } catch (error) {
+        console.error('❌ Error copying user code:', error);
+        alert('❌ Erro ao copiar código');
+    }
+}
+
+// Generate QR code for earn points
+function generateQRCode(data) {
+    // Simple QR code generation (you can use a library like qrcode.js)
+    const canvas = document.getElementById('qrCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw simple QR-like pattern (placeholder)
+        ctx.fillStyle = '#000';
+        ctx.fillRect(50, 50, 100, 100);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(60, 60, 80, 80);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(70, 70, 60, 60);
+        
+        // Add text
+        ctx.fillStyle = '#000';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('QR Code', 100, 180);
+        ctx.fillText(data.slice(0, 20) + '...', 100, 195);
+    }
+}
+
+// Generate QR code for spend points
+function generateQRCodeSpend(data) {
+    // Simple QR code generation (you can use a library like qrcode.js)
+    const canvas = document.getElementById('qrCanvasSpend');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw simple QR-like pattern (placeholder)
+        ctx.fillStyle = '#000';
+        ctx.fillRect(50, 50, 100, 100);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(60, 60, 80, 80);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(70, 70, 60, 60);
+        
+        // Add text
+        ctx.fillStyle = '#000';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('QR Code', 100, 180);
+        ctx.fillText(data.slice(0, 20) + '...', 100, 195);
+    }
 }
 
