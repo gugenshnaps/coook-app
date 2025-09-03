@@ -1311,55 +1311,87 @@ async function copyUserCode(code) {
 
 // Generate QR code for earn points
 function generateQRCode(data) {
-    // Simple QR code generation (you can use a library like qrcode.js)
     const canvas = document.getElementById('qrCanvas');
-    if (canvas) {
+    if (canvas && window.QRCode) {
+        // Clear canvas first
         const ctx = canvas.getContext('2d');
-        
-        // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Draw simple QR-like pattern (placeholder)
-        ctx.fillStyle = '#000';
-        ctx.fillRect(50, 50, 100, 100);
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(60, 60, 80, 80);
-        ctx.fillStyle = '#000';
-        ctx.fillRect(70, 70, 60, 60);
-        
-        // Add text
-        ctx.fillStyle = '#000';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('QR Code', 100, 180);
-        ctx.fillText(data.slice(0, 20) + '...', 100, 195);
+        // Generate real QR code
+        QRCode.toCanvas(canvas, data, {
+            width: 200,
+            height: 200,
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        }, function (error) {
+            if (error) {
+                console.error('❌ QR Code generation error:', error);
+                // Fallback to simple pattern
+                drawFallbackQR(ctx);
+            } else {
+                console.log('✅ QR Code generated successfully');
+            }
+        });
+    } else {
+        console.error('❌ QR Code library not available');
+        // Fallback to simple pattern
+        const ctx = canvas.getContext('2d');
+        drawFallbackQR(ctx);
     }
 }
 
 // Generate QR code for spend points
 function generateQRCodeSpend(data) {
-    // Simple QR code generation (you can use a library like qrcode.js)
     const canvas = document.getElementById('qrCanvasSpend');
-    if (canvas) {
+    if (canvas && window.QRCode) {
+        // Clear canvas first
         const ctx = canvas.getContext('2d');
-        
-        // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Draw simple QR-like pattern (placeholder)
-        ctx.fillStyle = '#000';
-        ctx.fillRect(50, 50, 100, 100);
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(60, 60, 80, 80);
-        ctx.fillStyle = '#000';
-        ctx.fillRect(70, 70, 60, 60);
-        
-        // Add text
-        ctx.fillStyle = '#000';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('QR Code', 100, 180);
-        ctx.fillText(data.slice(0, 20) + '...', 100, 195);
+        // Generate real QR code
+        QRCode.toCanvas(canvas, data, {
+            width: 200,
+            height: 200,
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        }, function (error) {
+            if (error) {
+                console.error('❌ QR Code generation error:', error);
+                // Fallback to simple pattern
+                drawFallbackQR(ctx);
+            } else {
+                console.log('✅ QR Code generated successfully');
+            }
+        });
+    } else {
+        console.error('❌ QR Code library not available');
+        // Fallback to simple pattern
+        const ctx = canvas.getContext('2d');
+        drawFallbackQR(ctx);
     }
+}
+
+// Fallback QR code pattern
+function drawFallbackQR(ctx) {
+    // Draw simple QR-like pattern (placeholder)
+    ctx.fillStyle = '#000';
+    ctx.fillRect(50, 50, 100, 100);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(60, 60, 80, 80);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(70, 70, 60, 60);
+    
+    // Add text
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('QR Code', 100, 180);
+    ctx.fillText('Fallback', 100, 195);
 }
 
