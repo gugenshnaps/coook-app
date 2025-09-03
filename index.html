@@ -106,8 +106,8 @@
         </div>
     </div>
 
-    <!-- QR Code Library - Try different versions -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <!-- QR Code Library - Use working library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
         // Check if library loaded
         setTimeout(() => {
@@ -116,24 +116,12 @@
             console.log('   - window.qrcode:', !!window.qrcode);
             console.log('   - window.qrcodeGenerator:', !!window.qrcodeGenerator);
             
-            if (!window.QRCode && !window.qrcode && !window.qrcodeGenerator) {
-                console.log('🔄 Trying alternative QR library...');
-                const script = document.createElement('script');
-                script.src = 'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
-                script.onload = () => {
-                    console.log('✅ Alternative QR library loaded');
-                    console.log('   - window.QRCode after load:', !!window.QRCode);
-                };
-                script.onerror = () => {
-                    console.error('❌ Alternative QR library failed');
-                    // Try one more CDN
-                    const script2 = document.createElement('script');
-                    script2.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
-                    script2.onload = () => console.log('✅ Third QR library loaded');
-                    script2.onerror = () => console.error('❌ All QR libraries failed');
-                    document.head.appendChild(script2);
-                };
-                document.head.appendChild(script);
+            if (window.QRCode) {
+                console.log('✅ QRCode library loaded successfully');
+            } else if (window.qrcode) {
+                console.log('✅ qrcode library loaded successfully');
+            } else {
+                console.error('❌ No QR libraries loaded');
             }
         }, 2000);
     </script>
