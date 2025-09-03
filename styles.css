@@ -1488,6 +1488,15 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.cafe-detail-address:hover {
+    color: #4A90E2;
+    background: rgba(74, 144, 226, 0.1);
 }
 
 .cafe-detail-description {

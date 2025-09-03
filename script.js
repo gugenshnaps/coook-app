@@ -313,7 +313,7 @@ function displayCafes() {
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                ${cafe.address ? `<p class="cafe-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
+                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
@@ -365,7 +365,7 @@ function displayCafes() {
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                ${cafe.address ? `<p class="cafe-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
+                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
@@ -441,7 +441,7 @@ function showCafeDetails(cafeId) {
             
             <div class="cafe-detail-info">
                 <p class="cafe-detail-city">${cafe.city}</p>
-                ${cafe.address ? `<p class="cafe-detail-address">📍 ${cafe.address}</p>` : ''}
+                ${cafe.address ? `<p class="cafe-detail-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
                 <p class="cafe-detail-description">${cafe.description || 'Sem descrição'}</p>
                 
                 <!-- Working hours for all days -->
@@ -1152,11 +1152,32 @@ function viewLoyaltyBenefits(cafeId) {
 async function copyAddress(address) {
     try {
         await navigator.clipboard.writeText(address);
-        alert('📍 Endereço copiado: ' + address);
         console.log('✅ Address copied:', address);
+        
+        // Show subtle feedback without alert
+        const addressElement = event.target;
+        const originalText = addressElement.textContent;
+        addressElement.textContent = '✅ Copiado!';
+        addressElement.style.color = '#28A745';
+        
+        // Restore original text after 2 seconds
+        setTimeout(() => {
+            addressElement.textContent = originalText;
+            addressElement.style.color = '';
+        }, 2000);
+        
     } catch (error) {
         console.error('❌ Error copying address:', error);
-        alert('❌ Erro ao copiar endereço');
+        // Show error feedback
+        const addressElement = event.target;
+        const originalText = addressElement.textContent;
+        addressElement.textContent = '❌ Erro ao copiar';
+        addressElement.style.color = '#DC3545';
+        
+        setTimeout(() => {
+            addressElement.textContent = originalText;
+            addressElement.style.color = '';
+        }, 2000);
     }
 }
 
