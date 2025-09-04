@@ -1334,10 +1334,10 @@ function generateQRCode(data) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Use Google Charts API for QR code generation
-        const qrUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(data)}`;
+        // Use QR-Server API for QR code generation (free and reliable)
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
         
-        console.log('✅ Generating QR code with Google Charts API...');
+        console.log('✅ Generating QR code with QR-Server API...');
         console.log('🔗 QR URL:', qrUrl);
         
         // Create image element to load QR code
@@ -1351,15 +1351,32 @@ function generateQRCode(data) {
         };
         
         img.onerror = function() {
-            console.error('❌ Failed to load QR code image');
-            // Show error message
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, 200, 200);
-            ctx.fillStyle = '#FF0000';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('QR CODE', 100, 90);
-            ctx.fillText('ERROR', 100, 110);
+            console.error('❌ QR-Server API failed, trying alternative...');
+            // Try alternative API
+            const altQrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(data)}&size=200`;
+            console.log('🔄 Trying alternative QR API:', altQrUrl);
+            
+            const altImg = new Image();
+            altImg.crossOrigin = 'anonymous';
+            
+            altImg.onload = function() {
+                console.log('✅ Alternative QR code loaded successfully');
+                ctx.drawImage(altImg, 0, 0, 200, 200);
+            };
+            
+            altImg.onerror = function() {
+                console.error('❌ All QR APIs failed');
+                // Show error message
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, 200, 200);
+                ctx.fillStyle = '#FF0000';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('QR CODE', 100, 90);
+                ctx.fillText('ERROR', 100, 110);
+            };
+            
+            altImg.src = altQrUrl;
         };
         
         img.src = qrUrl;
@@ -1381,10 +1398,10 @@ function generateQRCodeSpend(data) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Use Google Charts API for QR code generation
-        const qrUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(data)}`;
+        // Use QR-Server API for QR code generation (free and reliable)
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
         
-        console.log('✅ Generating QR code with Google Charts API...');
+        console.log('✅ Generating QR code with QR-Server API...');
         console.log('🔗 QR URL:', qrUrl);
         
         // Create image element to load QR code
@@ -1398,15 +1415,32 @@ function generateQRCodeSpend(data) {
         };
         
         img.onerror = function() {
-            console.error('❌ Failed to load QR code image');
-            // Show error message
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, 200, 200);
-            ctx.fillStyle = '#FF0000';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('QR CODE', 100, 90);
-            ctx.fillText('ERROR', 100, 110);
+            console.error('❌ QR-Server API failed, trying alternative...');
+            // Try alternative API
+            const altQrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(data)}&size=200`;
+            console.log('🔄 Trying alternative QR API:', altQrUrl);
+            
+            const altImg = new Image();
+            altImg.crossOrigin = 'anonymous';
+            
+            altImg.onload = function() {
+                console.log('✅ Alternative QR code loaded successfully');
+                ctx.drawImage(altImg, 0, 0, 200, 200);
+            };
+            
+            altImg.onerror = function() {
+                console.error('❌ All QR APIs failed');
+                // Show error message
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, 200, 200);
+                ctx.fillStyle = '#FF0000';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('QR CODE', 100, 90);
+                ctx.fillText('ERROR', 100, 110);
+            };
+            
+            altImg.src = altQrUrl;
         };
         
         img.src = qrUrl;
