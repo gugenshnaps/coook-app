@@ -473,9 +473,6 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     background-size: 400% 400%;
     animation: gradientShift 8s ease infinite;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     border-radius: 24px 24px 0 0;
     position: relative;
     overflow: hidden;
@@ -1077,50 +1074,7 @@ body {
     background: rgba(255, 182, 193, 0.9);
 }
 
-/* Cafe name overlay on image */
-.cafe-name-overlay {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    padding: 12px 24px;
-    border-radius: 25px;
-    z-index: 5;
-}
-
-.cafe-name-overlay .cafe-detail-name {
-    color: white;
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    text-align: center;
-}
-
-/* Mobile responsiveness for cafe name overlay */
-@media (max-width: 600px) {
-    .cafe-name-overlay {
-        bottom: 15px;
-        padding: 10px 20px;
-    }
-    
-    .cafe-name-overlay .cafe-detail-name {
-        font-size: 20px;
-    }
-}
-
-@media (max-width: 375px) {
-    .cafe-name-overlay {
-        bottom: 12px;
-        padding: 8px 16px;
-    }
-    
-    .cafe-name-overlay .cafe-detail-name {
-        font-size: 18px;
-    }
-}
+/* Removed - cafe name overlay no longer needed */
 
 @keyframes heartBeat {
     0% { transform: scale(1); }
@@ -1544,16 +1498,35 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center center;
     display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .coffee-icon {
-    font-size: 48px;
-    color: #adb5bd;
+    font-size: 80px;
+    color: white;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
-/* Removed - cafe name now displayed on image overlay */
+.cafe-detail-name {
+    margin: 0 0 12px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    line-height: 1.2;
+    text-align: center;
+}
 
 .cafe-detail-actions {
     display: flex;
