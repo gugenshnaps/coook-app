@@ -106,54 +106,9 @@
         </div>
     </div>
 
-    <!-- QR Code Library - Multiple CDNs for reliability -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <!-- QR Code Library - Using Google Charts API (free and reliable) -->
     <script>
-        // Check QR library loading immediately
-        console.log('🔍 Immediate QR library check:');
-        console.log('   - window.QRCode:', !!window.QRCode);
-        console.log('   - window.qrcode:', !!window.qrcode);
-        
-        // Force load QR library with multiple fallbacks
-        window.addEventListener('load', function() {
-            console.log('🔍 Checking QR libraries after page load...');
-            console.log('   - window.QRCode:', !!window.QRCode);
-            console.log('   - window.qrcode:', !!window.qrcode);
-            
-            if (!window.QRCode) {
-                console.log('🔄 QRCode not found, trying multiple CDNs...');
-                
-                const cdnUrls = [
-                    'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
-                    'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-                    'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js'
-                ];
-                
-                let currentIndex = 0;
-                
-                function tryNextCDN() {
-                    if (currentIndex >= cdnUrls.length) {
-                        console.error('❌ All QR CDNs failed to load!');
-                        return;
-                    }
-                    
-                    const script = document.createElement('script');
-                    script.src = cdnUrls[currentIndex];
-                    script.onload = function() {
-                        console.log('✅ QRCode library loaded from:', cdnUrls[currentIndex]);
-                        console.log('   - window.QRCode after load:', !!window.QRCode);
-                    };
-                    script.onerror = function() {
-                        console.error('❌ Failed to load from:', cdnUrls[currentIndex]);
-                        currentIndex++;
-                        tryNextCDN();
-                    };
-                    document.head.appendChild(script);
-                }
-                
-                tryNextCDN();
-            }
-        });
+        console.log('🔍 Using Google Charts API for QR codes - no external libraries needed!');
     </script>
     <script>
         // Check if library loaded

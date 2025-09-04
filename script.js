@@ -1321,241 +1321,95 @@ async function copyUserCode(code) {
     }
 }
 
-// Generate QR code for earn points
+// Generate QR code for earn points using Google Charts API
 function generateQRCode(data) {
-    console.log('🔍 Starting QR code generation...');
+    console.log('🔍 Starting QR code generation with Google Charts API...');
     console.log('🔍 Data to encode:', data);
-    console.log('🔍 Available QR libraries:');
-    console.log('   - window.QRCode:', !!window.QRCode);
-    console.log('   - window.qrcode:', !!window.qrcode);
-    console.log('   - window.qrcodeGenerator:', !!window.qrcodeGenerator);
     
     const canvas = document.getElementById('qrCanvas');
     console.log('🔍 Canvas element found:', !!canvas);
     
     if (canvas) {
+        // Clear canvas first
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Try different QR libraries
-        if (window.QRCode && window.QRCode.toCanvas) {
-            console.log('✅ Using QRCode.toCanvas...');
-            QRCode.toCanvas(canvas, data, {
-                width: 200,
-                height: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            }, function (error) {
-                if (error) {
-                    console.error('❌ QRCode.toCanvas error:', error);
-                    drawFallbackQR(ctx);
-                } else {
-                    console.log('✅ QR Code generated successfully with QRCode.toCanvas');
-                }
-            });
-        } else if (window.qrcode && window.qrcode.toCanvas) {
-            console.log('✅ Using qrcode.toCanvas...');
-            qrcode.toCanvas(canvas, data, {
-                width: 200,
-                height: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            }, function (error) {
-                if (error) {
-                    console.error('❌ qrcode.toCanvas error:', error);
-                    // Show error instead of fallback
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, 200, 200);
-                    ctx.fillStyle = '#FF0000';
-                    ctx.font = 'bold 12px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('QR GENERATION', 100, 90);
-                    ctx.fillText('ERROR', 100, 110);
-                } else {
-                    console.log('✅ QR Code generated successfully with qrcode.toCanvas');
-                }
-            });
-        } else if (window.qrcodeGenerator) {
-            console.log('✅ Using qrcodeGenerator...');
-            try {
-                const qr = qrcodeGenerator(0, 'M');
-                qr.addData(data);
-                qr.make();
-                
-                const cellSize = 4;
-                const size = qr.getModuleCount() * cellSize;
-                const offset = (200 - size) / 2;
-                
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, 200, 200);
-                ctx.fillStyle = '#000000';
-                
-                for (let row = 0; row < qr.getModuleCount(); row++) {
-                    for (let col = 0; col < qr.getModuleCount(); col++) {
-                        if (qr.isDark(row, col)) {
-                            ctx.fillRect(
-                                offset + col * cellSize,
-                                offset + row * cellSize,
-                                cellSize,
-                                cellSize
-                            );
-                        }
-                    }
-                }
-                console.log('✅ QR Code generated successfully with qrcodeGenerator');
-            } catch (error) {
-                console.error('❌ qrcodeGenerator error:', error);
-                drawFallbackQR(ctx);
-            }
-        } else {
-            console.error('❌ CRITICAL: No QR libraries available for MVP!');
-            console.error('❌ This will break the loyalty system!');
-            
-            // Show error message to user
+        // Use Google Charts API for QR code generation
+        const qrUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(data)}`;
+        
+        console.log('✅ Generating QR code with Google Charts API...');
+        console.log('🔗 QR URL:', qrUrl);
+        
+        // Create image element to load QR code
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = function() {
+            console.log('✅ QR code image loaded successfully');
+            // Draw the QR code image on canvas
+            ctx.drawImage(img, 0, 0, 200, 200);
+        };
+        
+        img.onerror = function() {
+            console.error('❌ Failed to load QR code image');
+            // Show error message
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, 200, 200);
             ctx.fillStyle = '#FF0000';
-            ctx.font = 'bold 14px Arial';
+            ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('QR LIBRARY', 100, 80);
-            ctx.fillText('NOT LOADED', 100, 100);
-            ctx.fillStyle = '#000000';
-            ctx.font = '12px Arial';
-            ctx.fillText('Please refresh page', 100, 130);
-            ctx.fillText('and try again', 100, 150);
-            
-            // Try to reload the page after 3 seconds
-            setTimeout(() => {
-                console.log('🔄 Attempting to reload page to fix QR library...');
-                window.location.reload();
-            }, 3000);
-        }
+            ctx.fillText('QR CODE', 100, 90);
+            ctx.fillText('ERROR', 100, 110);
+        };
+        
+        img.src = qrUrl;
     } else {
         console.error('❌ Canvas element not found');
     }
 }
 
-// Generate QR code for spend points
+// Generate QR code for spend points using Google Charts API
 function generateQRCodeSpend(data) {
-    console.log('🔍 Starting QR code generation (spend)...');
+    console.log('🔍 Starting QR code generation (spend) with Google Charts API...');
     console.log('🔍 Data to encode:', data);
-    console.log('🔍 Available QR libraries:');
-    console.log('   - window.QRCode:', !!window.QRCode);
-    console.log('   - window.qrcode:', !!window.qrcode);
-    console.log('   - window.qrcodeGenerator:', !!window.qrcodeGenerator);
     
     const canvas = document.getElementById('qrCanvasSpend');
     console.log('🔍 Canvas element found:', !!canvas);
     
     if (canvas) {
+        // Clear canvas first
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Try different QR libraries
-        if (window.QRCode && window.QRCode.toCanvas) {
-            console.log('✅ Using QRCode.toCanvas...');
-            QRCode.toCanvas(canvas, data, {
-                width: 200,
-                height: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            }, function (error) {
-                if (error) {
-                    console.error('❌ QRCode.toCanvas error:', error);
-                    drawFallbackQR(ctx);
-                } else {
-                    console.log('✅ QR Code generated successfully with QRCode.toCanvas');
-                }
-            });
-        } else if (window.qrcode && window.qrcode.toCanvas) {
-            console.log('✅ Using qrcode.toCanvas...');
-            qrcode.toCanvas(canvas, data, {
-                width: 200,
-                height: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            }, function (error) {
-                if (error) {
-                    console.error('❌ qrcode.toCanvas error:', error);
-                    // Show error instead of fallback
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, 200, 200);
-                    ctx.fillStyle = '#FF0000';
-                    ctx.font = 'bold 12px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('QR GENERATION', 100, 90);
-                    ctx.fillText('ERROR', 100, 110);
-                } else {
-                    console.log('✅ QR Code generated successfully with qrcode.toCanvas');
-                }
-            });
-        } else if (window.qrcodeGenerator) {
-            console.log('✅ Using qrcodeGenerator...');
-            try {
-                const qr = qrcodeGenerator(0, 'M');
-                qr.addData(data);
-                qr.make();
-                
-                const cellSize = 4;
-                const size = qr.getModuleCount() * cellSize;
-                const offset = (200 - size) / 2;
-                
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, 200, 200);
-                ctx.fillStyle = '#000000';
-                
-                for (let row = 0; row < qr.getModuleCount(); row++) {
-                    for (let col = 0; col < qr.getModuleCount(); col++) {
-                        if (qr.isDark(row, col)) {
-                            ctx.fillRect(
-                                offset + col * cellSize,
-                                offset + row * cellSize,
-                                cellSize,
-                                cellSize
-                            );
-                        }
-                    }
-                }
-                console.log('✅ QR Code generated successfully with qrcodeGenerator');
-            } catch (error) {
-                console.error('❌ qrcodeGenerator error:', error);
-                drawFallbackQR(ctx);
-            }
-        } else {
-            console.error('❌ CRITICAL: No QR libraries available for MVP!');
-            console.error('❌ This will break the loyalty system!');
-            
-            // Show error message to user
+        // Use Google Charts API for QR code generation
+        const qrUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(data)}`;
+        
+        console.log('✅ Generating QR code with Google Charts API...');
+        console.log('🔗 QR URL:', qrUrl);
+        
+        // Create image element to load QR code
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = function() {
+            console.log('✅ QR code image loaded successfully');
+            // Draw the QR code image on canvas
+            ctx.drawImage(img, 0, 0, 200, 200);
+        };
+        
+        img.onerror = function() {
+            console.error('❌ Failed to load QR code image');
+            // Show error message
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, 200, 200);
             ctx.fillStyle = '#FF0000';
-            ctx.font = 'bold 14px Arial';
+            ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('QR LIBRARY', 100, 80);
-            ctx.fillText('NOT LOADED', 100, 100);
-            ctx.fillStyle = '#000000';
-            ctx.font = '12px Arial';
-            ctx.fillText('Please refresh page', 100, 130);
-            ctx.fillText('and try again', 100, 150);
-            
-            // Try to reload the page after 3 seconds
-            setTimeout(() => {
-                console.log('🔄 Attempting to reload page to fix QR library...');
-                window.location.reload();
-            }, 3000);
-        }
+            ctx.fillText('QR CODE', 100, 90);
+            ctx.fillText('ERROR', 100, 110);
+        };
+        
+        img.src = qrUrl;
     } else {
         console.error('❌ Canvas element not found');
     }
