@@ -432,14 +432,14 @@ function showCafeDetails(cafeId) {
                             onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                     </button>
-                </div>
-                <div class="cafe-detail-title">
-                    <h2 class="cafe-detail-name">${cafe.name}</h2>
+                    <!-- Cafe name centered on image -->
+                    <div class="cafe-name-overlay">
+                        <h2 class="cafe-detail-name">${cafe.name}</h2>
+                    </div>
                 </div>
             </div>
             
             <div class="cafe-detail-info">
-                <p class="cafe-detail-city">${cafe.city}</p>
                 ${cafe.address ? `<p class="cafe-detail-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
                 <p class="cafe-detail-description">${cafe.description || 'Sem descrição'}</p>
                 

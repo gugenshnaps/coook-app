@@ -1077,6 +1077,51 @@ body {
     background: rgba(255, 182, 193, 0.9);
 }
 
+/* Cafe name overlay on image */
+.cafe-name-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    border-radius: 25px;
+    z-index: 5;
+}
+
+.cafe-name-overlay .cafe-detail-name {
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+/* Mobile responsiveness for cafe name overlay */
+@media (max-width: 600px) {
+    .cafe-name-overlay {
+        bottom: 15px;
+        padding: 10px 20px;
+    }
+    
+    .cafe-name-overlay .cafe-detail-name {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 375px) {
+    .cafe-name-overlay {
+        bottom: 12px;
+        padding: 8px 16px;
+    }
+    
+    .cafe-name-overlay .cafe-detail-name {
+        font-size: 18px;
+    }
+}
+
 @keyframes heartBeat {
     0% { transform: scale(1); }
     14% { transform: scale(1.3); }
@@ -1499,6 +1544,8 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
 .coffee-icon {
@@ -1506,20 +1553,7 @@ body {
     color: #adb5bd;
 }
 
-.cafe-detail-title {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.cafe-detail-name {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 700;
-    color: #333;
-    line-height: 1.2;
-}
+/* Removed - cafe name now displayed on image overlay */
 
 .cafe-detail-actions {
     display: flex;
