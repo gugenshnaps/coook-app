@@ -282,11 +282,9 @@ async function addCafe() {
     }
     
     try {
-        // Get photo data
-        const photoUrl = await getPhotoBase64();
+        // Get photo data (multiple photos)
+        const photoUrls = await getMultiplePhotoBase64();
         
-
-
         // Generate password for cafe
         const cafePassword = generateSecurePassword();
         
@@ -296,7 +294,8 @@ async function addCafe() {
             address: cafeAddress,
             description: cafeDescription,
             workingHours: workingHours,
-            photoUrl: photoUrl,
+            photoUrls: photoUrls, // Array of photos
+            photoUrl: photoUrls.length > 0 ? photoUrls[0] : null, // First photo for backward compatibility
             createdAt: new Date()
         };
         
@@ -901,6 +900,44 @@ function getPhotoBase64() {
     
     // Return the compressed data URL from preview
     return img.src;
+}
+
+// Get multiple photos as base64 array
+function getMultiplePhotoBase64() {
+    const photoPreview = document.getElementById('photoPreview');
+    const urlPreview = document.getElementById('urlPreview');
+    
+    // Check if we're in file mode or URL mode
+    const photoFileRadio = document.getElementById('photoFile');
+    const isFileMode = photoFileRadio && photoFileRadio.checked;
+    
+    if (isFileMode) {
+        // Get from file preview
+        const photoItems = photoPreview.querySelectorAll('.photo-preview-item');
+        const photoUrls = [];
+        
+        photoItems.forEach(item => {
+            const img = item.querySelector('.photo-preview-img');
+            if (img && img.src) {
+                photoUrls.push(img.src);
+            }
+        });
+        
+        return photoUrls;
+    } else {
+        // Get from URL preview
+        const photoItems = urlPreview.querySelectorAll('.photo-preview-item');
+        const photoUrls = [];
+        
+        photoItems.forEach(item => {
+            const img = item.querySelector('.photo-preview-img');
+            if (img && img.src) {
+                photoUrls.push(img.src);
+            }
+        });
+        
+        return photoUrls;
+    }
 }
 
 // Compress image to base64 for edit form

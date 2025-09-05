@@ -297,12 +297,23 @@ function displayCafes() {
                     ${cafesData.map(cafe => `
                         <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
                             <div class="cafe-photo">
-                                ${cafe.photoUrls && cafe.photoUrls.length > 0 ? 
-                                    `<img src="${cafe.photoUrls[0]}" alt="${cafe.name}" class="cafe-thumbnail">` : 
-                                    cafe.photoUrl ? 
-                                        `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
-                                        `<div class="cafe-placeholder">☕</div>`
-                                }
+                                ${(() => {
+                                    console.log('🔍 Cafe photo data:', {
+                                        name: cafe.name,
+                                        photoUrls: cafe.photoUrls,
+                                        photoUrl: cafe.photoUrl,
+                                        hasPhotoUrls: cafe.photoUrls && cafe.photoUrls.length > 0,
+                                        hasPhotoUrl: !!cafe.photoUrl
+                                    });
+                                    
+                                    if (cafe.photoUrls && cafe.photoUrls.length > 0) {
+                                        return `<img src="${cafe.photoUrls[0]}" alt="${cafe.name}" class="cafe-thumbnail">`;
+                                    } else if (cafe.photoUrl) {
+                                        return `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">`;
+                                    } else {
+                                        return `<div class="cafe-placeholder">☕</div>`;
+                                    }
+                                })()}
                             </div>
                             <div class="cafe-info">
                                 <div class="cafe-header">
