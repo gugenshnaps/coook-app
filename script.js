@@ -793,6 +793,35 @@ function setFallbackUserInfo() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔧 DOM loaded, setting up event listeners...');
     
+    // GLOBAL: Prevent all text selection and highlighting
+    document.addEventListener('selectstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Prevent touch highlighting
+    document.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('touchend', function(e) {
+        e.preventDefault();
+    }, { passive: false });
+    
     // Check QR Code library loading
     setTimeout(() => {
         console.log('🔍 QR Code library check:');

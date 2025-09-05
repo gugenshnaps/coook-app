@@ -40,6 +40,28 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     -webkit-tap-highlight-color: transparent !important;
 }
 
+/* DEBUG: Add red border to see what's being highlighted */
+.photo-carousel * {
+    border: 2px solid red !important;
+}
+
+/* GLOBAL: Disable all text selection and highlighting */
+* {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    -webkit-user-drag: none !important;
+    -khtml-user-drag: none !important;
+    -moz-user-drag: none !important;
+    -o-user-drag: none !important;
+    user-drag: none !important;
+}
+
 /* Specific styles for carousel elements */
 .photo-carousel * {
     -webkit-user-select: none !important;
