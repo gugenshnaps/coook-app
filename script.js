@@ -297,9 +297,11 @@ function displayCafes() {
                     ${cafesData.map(cafe => `
                         <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
                             <div class="cafe-photo">
-                                ${cafe.photoUrl ? 
-                                    `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
-                                    `<div class="cafe-placeholder">☕</div>`
+                                ${cafe.photoUrls && cafe.photoUrls.length > 0 ? 
+                                    `<img src="${cafe.photoUrls[0]}" alt="${cafe.name}" class="cafe-thumbnail">` : 
+                                    cafe.photoUrl ? 
+                                        `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
+                                        `<div class="cafe-placeholder">☕</div>`
                                 }
                             </div>
                             <div class="cafe-info">
@@ -423,9 +425,11 @@ function showCafeDetails(cafeId) {
         modalContent.innerHTML = `
             <div class="cafe-detail-header">
                 <div class="cafe-detail-image">
-                    ${cafe.photoUrl ? 
-                        `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-detail-photo">` : 
-                        `<div class="coffee-icon">☕</div>`
+                    ${cafe.photoUrls && cafe.photoUrls.length > 0 ? 
+                        createPhotoCarousel(cafe.photoUrls, cafe.name) :
+                        cafe.photoUrl ? 
+                            `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-detail-photo">` : 
+                            `<div class="coffee-icon">☕</div>`
                     }
                     <!-- Heart moved to top-left corner of image -->
                     <button class="favorite-btn-modal ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
@@ -459,6 +463,14 @@ function showCafeDetails(cafeId) {
         `;
         
         modal.style.display = 'flex';
+        
+        // Initialize carousel if multiple photos
+        if (cafe.photoUrls && cafe.photoUrls.length > 1) {
+            setTimeout(() => {
+                initializeCarouselTouch();
+            }, 100);
+        }
+        
         console.log('🔧 Cafe details shown:', cafe);
     }
 }
@@ -844,6 +856,120 @@ document.addEventListener('keydown', (e) => {
         closeModal();
     }
 });
+
+// ===== PHOTO CAROUSEL FUNCTIONALITY =====
+
+// Create photo carousel HTML
+function createPhotoCarousel(photoUrls, cafeName) {
+    if (!photoUrls || photoUrls.length === 0) {
+        return '<div class="coffee-icon">☕</div>';
+    }
+    
+    if (photoUrls.length === 1) {
+        return `<img src="${photoUrls[0]}" alt="${cafeName}" class="cafe-detail-photo">`;
+    }
+    
+    const dots = photoUrls.map((_, index) => 
+        `<span class="carousel-dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></span>`
+    ).join('');
+    
+    return `
+        <div class="photo-carousel" id="photoCarousel">
+            <div class="carousel-container">
+                ${photoUrls.map((url, index) => 
+                    `<div class="carousel-slide ${index === 0 ? 'active' : ''}" data-slide="${index}">
+                        <img src="${url}" alt="${cafeName}" class="cafe-detail-photo">
+                    </div>`
+                ).join('')}
+            </div>
+            <div class="carousel-dots">
+                ${dots}
+            </div>
+            <div class="carousel-nav">
+                <button class="carousel-prev" onclick="previousSlide()">‹</button>
+                <button class="carousel-next" onclick="nextSlide()">›</button>
+            </div>
+        </div>
+    `;
+}
+
+// Go to specific slide
+function goToSlide(slideIndex) {
+    const carousel = document.getElementById('photoCarousel');
+    if (!carousel) return;
+    
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const dots = carousel.querySelectorAll('.carousel-dot');
+    
+    // Remove active class from all slides and dots
+    slides.forEach(slide => slide.classList.remove('active'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    // Add active class to current slide and dot
+    if (slides[slideIndex]) {
+        slides[slideIndex].classList.add('active');
+    }
+    if (dots[slideIndex]) {
+        dots[slideIndex].classList.add('active');
+    }
+}
+
+// Go to previous slide
+function previousSlide() {
+    const carousel = document.getElementById('photoCarousel');
+    if (!carousel) return;
+    
+    const activeSlide = carousel.querySelector('.carousel-slide.active');
+    const currentIndex = parseInt(activeSlide.dataset.slide);
+    const totalSlides = carousel.querySelectorAll('.carousel-slide').length;
+    
+    const prevIndex = currentIndex === 0 ? totalSlides - 1 : currentIndex - 1;
+    goToSlide(prevIndex);
+}
+
+// Go to next slide
+function nextSlide() {
+    const carousel = document.getElementById('photoCarousel');
+    if (!carousel) return;
+    
+    const activeSlide = carousel.querySelector('.carousel-slide.active');
+    const currentIndex = parseInt(activeSlide.dataset.slide);
+    const totalSlides = carousel.querySelectorAll('.carousel-slide').length;
+    
+    const nextIndex = currentIndex === totalSlides - 1 ? 0 : currentIndex + 1;
+    goToSlide(nextIndex);
+}
+
+// Add touch/swipe support for mobile
+function initializeCarouselTouch() {
+    const carousel = document.getElementById('photoCarousel');
+    if (!carousel) return;
+    
+    let startX = 0;
+    let endX = 0;
+    
+    carousel.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+    });
+    
+    carousel.addEventListener('touchend', (e) => {
+        endX = e.changedTouches[0].clientX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        const threshold = 50;
+        const diff = startX - endX;
+        
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                nextSlide(); // Swipe left - next slide
+            } else {
+                previousSlide(); // Swipe right - previous slide
+            }
+        }
+    }
+}
 
 // ===== MENU FUNCTIONALITY =====
 
