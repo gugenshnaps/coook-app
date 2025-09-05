@@ -422,11 +422,8 @@ function showCafeDetails(cafeId) {
     if (modal && modalContent) {
         modalContent.innerHTML = `
             <div class="cafe-detail-header">
-                <div class="cafe-detail-image">
-                    ${cafe.photoUrl ? 
-                        `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-detail-photo">` : 
-                        `<div class="coffee-icon">☕</div>`
-                    }
+                <div class="cafe-detail-image" ${cafe.photoUrl ? `style="background-image: url('${cafe.photoUrl}'); background-size: cover; background-position: center center; background-repeat: no-repeat;"` : ''}>
+                    ${!cafe.photoUrl ? `<div class="coffee-icon">☕</div>` : ''}
                     <!-- Heart moved to top-left corner of image -->
                     <button class="favorite-btn-modal ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
                             onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
