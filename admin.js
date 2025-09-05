@@ -574,31 +574,49 @@ function showError(message) {
 
 // Clear cafe form
 function clearCafeForm() {
-    document.getElementById('cafeName').value = '';
-    document.getElementById('cafeCity').value = '';
-    document.getElementById('cafeAddress').value = '';
-    document.getElementById('cafeDescription').value = '';
+    // Clear basic fields
+    const basicFields = ['cafeName', 'cafeCity', 'cafeAddress', 'cafeDescription'];
+    basicFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
     
     // Clear working hours
-    document.getElementById('mondayOpen').value = '';
-    document.getElementById('mondayClose').value = '';
-    document.getElementById('tuesdayOpen').value = '';
-    document.getElementById('tuesdayClose').value = '';
-    document.getElementById('wednesdayOpen').value = '';
-    document.getElementById('wednesdayClose').value = '';
-    document.getElementById('thursdayOpen').value = '';
-    document.getElementById('thursdayClose').value = '';
-    document.getElementById('fridayOpen').value = '';
-    document.getElementById('fridayClose').value = '';
-    document.getElementById('saturdayOpen').value = '';
-    document.getElementById('saturdayClose').value = '';
-    document.getElementById('sundayOpen').value = '';
-    document.getElementById('sundayClose').value = '';
+    const timeFields = [
+        'mondayOpen', 'mondayClose', 'tuesdayOpen', 'tuesdayClose',
+        'wednesdayOpen', 'wednesdayClose', 'thursdayOpen', 'thursdayClose',
+        'fridayOpen', 'fridayClose', 'saturdayOpen', 'saturdayClose',
+        'sundayOpen', 'sundayClose'
+    ];
+    timeFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
     
-    // Clear photo
-    removePhoto();
+    // Clear photo inputs
+    const photoInput = document.getElementById('cafePhotos');
+    if (photoInput) photoInput.value = '';
     
-
+    const photoUrlInput = document.getElementById('cafePhotoUrls');
+    if (photoUrlInput) photoUrlInput.value = '';
+    
+    // Clear photo previews
+    const photoPreview = document.getElementById('photoPreview');
+    if (photoPreview) photoPreview.innerHTML = '';
+    
+    const urlPreview = document.getElementById('urlPreview');
+    if (urlPreview) urlPreview.innerHTML = '';
+    
+    // Reset to file mode
+    const photoFileRadio = document.getElementById('photoFile');
+    if (photoFileRadio) photoFileRadio.checked = true;
+    
+    const fileSection = document.getElementById('fileUploadSection');
+    const urlSection = document.getElementById('urlInputSection');
+    if (fileSection) fileSection.style.display = 'block';
+    if (urlSection) urlSection.style.display = 'none';
+    
+    console.log('✅ Form cleared successfully');
 }
 
 // ===== PHOTO UPLOAD FUNCTIONALITY =====
@@ -702,18 +720,11 @@ function handleMultipleUrlInput(event) {
 
 // Process individual photo file
 function processPhotoFile(file, container, index) {
-    if (file.size > 500 * 1024) {
-        console.log(`📸 Compressing photo ${index + 1}...`);
-        compressImage(file, (compressedDataUrl) => {
-            displayPhotoPreview(compressedDataUrl, container, index, file.name);
-        });
-    } else {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            displayPhotoPreview(e.target.result, container, index, file.name);
-        };
-        reader.readAsDataURL(file);
-    }
+    // Always compress for multiple photos to avoid Firebase size limit
+    console.log(`📸 Compressing photo ${index + 1}...`);
+    compressImage(file, 200 * 1024, (compressedDataUrl) => { // Reduced target size
+        displayPhotoPreview(compressedDataUrl, container, index, file.name);
+    });
 }
 
 // Process individual photo URL
@@ -765,15 +776,15 @@ function handlePhotoUpload(event) {
 }
 
 // Compress image to target size
-function compressImage(file, targetSize, previewElement) {
+function compressImage(file, targetSize, callback) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
     
     img.onload = function() {
-        // Calculate new dimensions (maintain aspect ratio)
+        // Calculate new dimensions (maintain aspect ratio) - more aggressive compression
         let { width, height } = img;
-        const maxDimension = 800;
+        const maxDimension = 400; // Reduced from 800 to 400
         
         if (width > height) {
             if (width > maxDimension) {
@@ -794,26 +805,20 @@ function compressImage(file, targetSize, previewElement) {
         // Draw and compress image
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Try different quality levels
-        let quality = 0.8;
+        // Try different quality levels - more aggressive compression
+        let quality = 0.6; // Reduced from 0.8 to 0.6
         let dataUrl = canvas.toDataURL('image/jpeg', quality);
         
         // Reduce quality until we meet target size
-        while (dataUrl.length > targetSize * 1.5 && quality > 0.1) {
-            quality -= 0.1;
+        while (dataUrl.length > targetSize * 1.2 && quality > 0.05) { // More aggressive
+            quality -= 0.05;
             dataUrl = canvas.toDataURL('image/jpeg', quality);
         }
         
-        // Show preview
-        previewElement.innerHTML = `
-            <img src="${dataUrl}" alt="Preview da foto">
-            <button type="button" class="remove-photo" onclick="removePhoto()">❌ Remover</button>
-            <div class="compression-info">
-                Original: ${(file.size / 1024).toFixed(1)}KB → 
-                Comprimido: ${(dataUrl.length / 1024).toFixed(1)}KB
-            </div>
-        `;
-        previewElement.classList.add('has-image');
+        // Call callback with compressed data
+        if (callback) {
+            callback(dataUrl);
+        }
         
         console.log('📸 Image compressed:', {
             original: file.size,
