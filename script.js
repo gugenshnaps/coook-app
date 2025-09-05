@@ -881,7 +881,7 @@ function createPhotoCarousel(photoUrls, cafeName) {
     }
     
     const dots = photoUrls.map((_, index) => 
-        `<span class="carousel-dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></span>`
+        `<span class="carousel-dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index}); return false;" onmousedown="return false;" ontouchstart="return false;"></span>`
     ).join('');
     
     return `
@@ -897,8 +897,8 @@ function createPhotoCarousel(photoUrls, cafeName) {
                 ${dots}
             </div>
             <div class="carousel-nav">
-                <button class="carousel-prev" onclick="previousSlide()">‹</button>
-                <button class="carousel-next" onclick="nextSlide()">›</button>
+                <button class="carousel-prev" onclick="previousSlide(); return false;" onmousedown="return false;" ontouchstart="return false;">‹</button>
+                <button class="carousel-next" onclick="nextSlide(); return false;" onmousedown="return false;" ontouchstart="return false;">›</button>
             </div>
         </div>
     `;
