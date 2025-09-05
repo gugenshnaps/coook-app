@@ -476,6 +476,9 @@ body {
     border-radius: 24px 24px 0 0;
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cafe-detail-image::before {
@@ -1500,9 +1503,7 @@ body {
     object-fit: cover;
     object-position: center center;
     display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
+    flex-shrink: 0;
 }
 
 .coffee-icon {
@@ -1513,10 +1514,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    flex-shrink: 0;
 }
 
 .cafe-detail-name {
