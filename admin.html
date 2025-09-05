@@ -118,29 +118,29 @@
                     </div>
                     
                                     <div class="photo-upload-group">
-                    <label for="cafePhoto">Foto do Café:</label>
+                    <label for="cafePhotos">Fotos do Café (Múltiplas):</label>
                     <div class="photo-options">
                         <div class="photo-option">
                             <input type="radio" id="photoFile" name="photoType" value="file" checked>
-                            <label for="photoFile">Upload de arquivo</label>
+                            <label for="photoFile">Upload de arquivos</label>
                         </div>
                         <div class="photo-option">
                             <input type="radio" id="photoUrl" name="photoType" value="url">
-                            <label for="photoUrl">Link da internet</label>
+                            <label for="photoUrl">Links da internet</label>
                         </div>
                     </div>
                     
                     <!-- File upload -->
                     <div id="fileUploadSection" class="photo-section">
-                        <input type="file" id="cafePhoto" accept="image/*" class="photo-input">
-                        <div class="photo-info">Máximo: 500KB. Formatos: JPG, PNG, WebP</div>
+                        <input type="file" id="cafePhotos" accept="image/*" multiple class="photo-input">
+                        <div class="photo-info">Máximo: 500KB cada. Formatos: JPG, PNG, WebP. Múltiplas fotos permitidas.</div>
                         <div id="photoPreview" class="photo-preview"></div>
                     </div>
                     
                     <!-- URL input -->
                     <div id="urlInputSection" class="photo-section" style="display: none;">
-                        <input type="url" id="cafePhotoUrl" placeholder="https://exemplo.com/foto.jpg" class="photo-url-input">
-                        <div class="photo-info">Cole o link da foto do café</div>
+                        <textarea id="cafePhotoUrls" placeholder="https://exemplo.com/foto1.jpg&#10;https://exemplo.com/foto2.jpg&#10;https://exemplo.com/foto3.jpg" class="photo-url-input" rows="3"></textarea>
+                        <div class="photo-info">Cole os links das fotos do café (um por linha)</div>
                         <div id="urlPreview" class="photo-preview"></div>
                     </div>
                 </div>

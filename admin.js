@@ -606,9 +606,9 @@ function clearCafeForm() {
 
 // Initialize photo upload functionality
 function initializePhotoUpload() {
-    const photoInput = document.getElementById('cafePhoto');
+    const photoInput = document.getElementById('cafePhotos');
     const photoPreview = document.getElementById('photoPreview');
-    const photoUrlInput = document.getElementById('cafePhotoUrl');
+    const photoUrlInput = document.getElementById('cafePhotoUrls');
     const urlPreview = document.getElementById('urlPreview');
     
     // Radio button change handlers
@@ -622,15 +622,15 @@ function initializePhotoUpload() {
     
     // File upload handler
     if (photoInput && photoPreview) {
-        photoInput.addEventListener('change', handlePhotoUpload);
+        photoInput.addEventListener('change', handleMultiplePhotoUpload);
     }
     
     // URL input handler
     if (photoUrlInput && urlPreview) {
-        photoUrlInput.addEventListener('input', handleUrlInput);
+        photoUrlInput.addEventListener('input', handleMultipleUrlInput);
     }
     
-    console.log('📸 Photo upload initialized');
+    console.log('📸 Multiple photo upload initialized');
 }
 
 // Switch between file upload and URL input
@@ -642,20 +642,106 @@ function switchPhotoMode(mode) {
         fileSection.style.display = 'block';
         urlSection.style.display = 'none';
         // Clear URL input
-        document.getElementById('cafePhotoUrl').value = '';
+        document.getElementById('cafePhotoUrls').value = '';
         document.getElementById('urlPreview').innerHTML = '';
     } else {
         fileSection.style.display = 'none';
         urlSection.style.display = 'block';
         // Clear file input
-        document.getElementById('cafePhoto').value = '';
+        document.getElementById('cafePhotos').value = '';
         document.getElementById('photoPreview').innerHTML = '';
     }
     
     console.log('📸 Switched to photo mode:', mode);
 }
 
-// Handle photo upload and preview with compression
+// Handle multiple photo upload and preview with compression
+function handleMultiplePhotoUpload(event) {
+    const files = Array.from(event.target.files);
+    const photoPreview = document.getElementById('photoPreview');
+    
+    if (files.length === 0) {
+        photoPreview.innerHTML = '';
+        return;
+    }
+    
+    console.log(`📸 Processing ${files.length} photos...`);
+    
+    // Clear previous previews
+    photoPreview.innerHTML = '';
+    
+    // Process each file
+    files.forEach((file, index) => {
+        if (file && file.type.startsWith('image/')) {
+            processPhotoFile(file, photoPreview, index);
+        }
+    });
+}
+
+// Handle multiple URL input
+function handleMultipleUrlInput(event) {
+    const urls = event.target.value.split('\n').filter(url => url.trim());
+    const urlPreview = document.getElementById('urlPreview');
+    
+    if (urls.length === 0) {
+        urlPreview.innerHTML = '';
+        return;
+    }
+    
+    console.log(`🔗 Processing ${urls.length} URLs...`);
+    
+    // Clear previous previews
+    urlPreview.innerHTML = '';
+    
+    // Process each URL
+    urls.forEach((url, index) => {
+        if (url.trim()) {
+            processPhotoUrl(url.trim(), urlPreview, index);
+        }
+    });
+}
+
+// Process individual photo file
+function processPhotoFile(file, container, index) {
+    if (file.size > 500 * 1024) {
+        console.log(`📸 Compressing photo ${index + 1}...`);
+        compressImage(file, (compressedDataUrl) => {
+            displayPhotoPreview(compressedDataUrl, container, index, file.name);
+        });
+    } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            displayPhotoPreview(e.target.result, container, index, file.name);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Process individual photo URL
+function processPhotoUrl(url, container, index) {
+    displayPhotoPreview(url, container, index, `URL ${index + 1}`);
+}
+
+// Display photo preview
+function displayPhotoPreview(src, container, index, name) {
+    const photoDiv = document.createElement('div');
+    photoDiv.className = 'photo-preview-item';
+    photoDiv.innerHTML = `
+        <img src="${src}" alt="${name}" class="photo-preview-img">
+        <div class="photo-preview-info">
+            <span class="photo-preview-name">${name}</span>
+            <button type="button" onclick="removePhotoPreview(this)" class="remove-photo-btn">×</button>
+        </div>
+    `;
+    container.appendChild(photoDiv);
+}
+
+// Remove photo preview
+function removePhotoPreview(button) {
+    button.closest('.photo-preview-item').remove();
+}
+
+// Handle single photo upload (legacy)
 function handlePhotoUpload(event) {
     const file = event.target.files[0];
     const photoPreview = document.getElementById('photoPreview');

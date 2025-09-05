@@ -423,6 +423,66 @@ body {
     display: block;
 }
 
+/* Multiple photo preview styles */
+.photo-preview-item {
+    display: inline-block;
+    margin: 8px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: white;
+}
+
+.photo-preview-item .photo-preview-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.photo-preview-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.photo-preview-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+}
+
+.remove-photo-btn {
+    background: rgba(255, 0, 0, 0.8);
+    border: none;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.remove-photo-btn:hover {
+    background: rgba(255, 0, 0, 1);
+    transform: scale(1.1);
+}
+
 /* Photo options and sections */
 .photo-options {
     display: flex;
