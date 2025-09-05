@@ -960,35 +960,46 @@ function initializeCarouselTouch() {
     let endX = 0;
     let isSwipe = false;
     
+    // Prevent all default behaviors
+    const preventDefault = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+    };
+    
     // Prevent default touch behaviors
     carousel.addEventListener('touchstart', (e) => {
+        preventDefault(e);
         startX = e.touches[0].clientX;
         isSwipe = false;
-        // Prevent default to avoid selection
-        e.preventDefault();
     }, { passive: false });
     
     carousel.addEventListener('touchmove', (e) => {
-        // Prevent scrolling while swiping
-        e.preventDefault();
+        preventDefault(e);
     }, { passive: false });
     
     carousel.addEventListener('touchend', (e) => {
+        preventDefault(e);
         endX = e.changedTouches[0].clientX;
         handleSwipe();
-        // Prevent default to avoid selection
-        e.preventDefault();
     }, { passive: false });
     
-    // Prevent context menu on long press
-    carousel.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-    });
+    // Prevent all possible selection events
+    carousel.addEventListener('contextmenu', preventDefault);
+    carousel.addEventListener('selectstart', preventDefault);
+    carousel.addEventListener('dragstart', preventDefault);
+    carousel.addEventListener('mousedown', preventDefault);
+    carousel.addEventListener('mouseup', preventDefault);
+    carousel.addEventListener('click', preventDefault);
     
-    // Prevent text selection
-    carousel.addEventListener('selectstart', (e) => {
-        e.preventDefault();
-    });
+    // Add CSS class to force no selection
+    carousel.style.webkitUserSelect = 'none';
+    carousel.style.mozUserSelect = 'none';
+    carousel.style.msUserSelect = 'none';
+    carousel.style.userSelect = 'none';
+    carousel.style.webkitTouchCallout = 'none';
+    carousel.style.webkitTapHighlightColor = 'transparent';
     
     function handleSwipe() {
         const threshold = 50;
