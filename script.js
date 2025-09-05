@@ -958,14 +958,36 @@ function initializeCarouselTouch() {
     
     let startX = 0;
     let endX = 0;
+    let isSwipe = false;
     
+    // Prevent default touch behaviors
     carousel.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
-    });
+        isSwipe = false;
+        // Prevent default to avoid selection
+        e.preventDefault();
+    }, { passive: false });
+    
+    carousel.addEventListener('touchmove', (e) => {
+        // Prevent scrolling while swiping
+        e.preventDefault();
+    }, { passive: false });
     
     carousel.addEventListener('touchend', (e) => {
         endX = e.changedTouches[0].clientX;
         handleSwipe();
+        // Prevent default to avoid selection
+        e.preventDefault();
+    }, { passive: false });
+    
+    // Prevent context menu on long press
+    carousel.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+    
+    // Prevent text selection
+    carousel.addEventListener('selectstart', (e) => {
+        e.preventDefault();
     });
     
     function handleSwipe() {
@@ -973,6 +995,7 @@ function initializeCarouselTouch() {
         const diff = startX - endX;
         
         if (Math.abs(diff) > threshold) {
+            isSwipe = true;
             if (diff > 0) {
                 nextSlide(); // Swipe left - next slide
             } else {
