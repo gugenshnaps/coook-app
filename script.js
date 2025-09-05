@@ -926,8 +926,8 @@ function createPhotoCarousel(photoUrls, cafeName) {
                 ${dots}
             </div>
             <div class="carousel-nav">
-                <button class="carousel-prev" onclick="previousSlide(); return false;" onmousedown="return false;" ontouchstart="return false;">‹</button>
-                <button class="carousel-next" onclick="nextSlide(); return false;" onmousedown="return false;" ontouchstart="return false;">›</button>
+                <button class="carousel-prev" onclick="previousSlide(); return false;" onmousedown="return false;" ontouchstart="return false;" onfocus="this.blur();" onblur="this.blur();" tabindex="-1">‹</button>
+                <button class="carousel-next" onclick="nextSlide(); return false;" onmousedown="return false;" ontouchstart="return false;" onfocus="this.blur();" onblur="this.blur();" tabindex="-1">›</button>
             </div>
         </div>
     `;
@@ -965,6 +965,10 @@ function previousSlide() {
     
     const prevIndex = currentIndex === 0 ? totalSlides - 1 : currentIndex - 1;
     goToSlide(prevIndex);
+    
+    // Force blur on all buttons to prevent focus
+    const buttons = carousel.querySelectorAll('button');
+    buttons.forEach(button => button.blur());
 }
 
 // Go to next slide
@@ -978,6 +982,10 @@ function nextSlide() {
     
     const nextIndex = currentIndex === totalSlides - 1 ? 0 : currentIndex + 1;
     goToSlide(nextIndex);
+    
+    // Force blur on all buttons to prevent focus
+    const buttons = carousel.querySelectorAll('button');
+    buttons.forEach(button => button.blur());
 }
 
 // Add touch/swipe support for mobile
