@@ -40,13 +40,10 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     -webkit-tap-highlight-color: transparent !important;
 }
 
-/* DEBUG: Add red border to see what's being highlighted */
-.photo-carousel * {
-    border: 2px solid red !important;
-}
+/* DEBUG: Red borders removed - carousel should work normally now */
 
-/* GLOBAL: Disable all text selection and highlighting */
-* {
+/* GLOBAL: Disable text selection only for specific elements */
+button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carousel-slide, .carousel-slide img {
     -webkit-user-select: none !important;
     -moz-user-select: none !important;
     -ms-user-select: none !important;

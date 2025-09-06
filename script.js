@@ -793,7 +793,7 @@ function setFallbackUserInfo() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔧 DOM loaded, setting up event listeners...');
     
-    // GLOBAL: Prevent all text selection and highlighting
+    // GLOBAL: Prevent text selection only (not touch events)
     document.addEventListener('selectstart', function(e) {
         e.preventDefault();
         return false;
@@ -808,19 +808,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         return false;
     });
-    
-    // Prevent touch highlighting
-    document.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-    }, { passive: false });
-    
-    document.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-    }, { passive: false });
-    
-    document.addEventListener('touchend', function(e) {
-        e.preventDefault();
-    }, { passive: false });
     
     // Check QR Code library loading
     setTimeout(() => {
