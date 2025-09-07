@@ -453,6 +453,7 @@ function showCafeDetails(cafeId) {
             <div class="cafe-detail-info">
                 <h2 class="cafe-detail-name">${cafe.name}</h2>
                 ${cafe.address ? `<p class="cafe-detail-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
+                ${cafe.telegram ? `<p class="cafe-detail-telegram" onclick="openTelegramChat('${cafe.telegram}')">💬 Escrever no Telegram</p>` : ''}
                 <p class="cafe-detail-description">${cafe.description || 'Sem descrição'}</p>
                 
                 <!-- Working hours for all days -->
@@ -1030,17 +1031,43 @@ function initializeCarouselTouch() {
     const nextButton = carousel.querySelector('.carousel-next');
     
     if (prevButton) {
+        // Multiple event types for better reliability
         prevButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             previousSlide();
-        }, { passive: true });
+        }, { passive: false });
+        
+        prevButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+        
+        prevButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            previousSlide();
+        });
     }
     
     if (nextButton) {
+        // Multiple event types for better reliability
         nextButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             nextSlide();
-        }, { passive: true });
+        }, { passive: false });
+        
+        nextButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+        
+        nextButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            nextSlide();
+        });
     }
     
     function handleSwipe() {
@@ -1412,6 +1439,25 @@ async function copyAddress(address) {
             addressElement.style.color = '';
         }, 2000);
     }
+}
+
+// Open Telegram chat
+function openTelegramChat(telegramContact) {
+    let telegramUrl;
+    
+    // Check if it's already a full URL
+    if (telegramContact.startsWith('https://t.me/')) {
+        telegramUrl = telegramContact;
+    } else if (telegramContact.startsWith('@')) {
+        // Remove @ and create URL
+        telegramUrl = `https://t.me/${telegramContact.substring(1)}`;
+    } else {
+        // Assume it's a username without @
+        telegramUrl = `https://t.me/${telegramContact}`;
+    }
+    
+    // Open in new tab/window
+    window.open(telegramUrl, '_blank');
 }
 
 // Show earn points modal with QR code and 8-digit code

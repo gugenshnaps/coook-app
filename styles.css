@@ -1883,6 +1883,29 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     background: rgba(74, 144, 226, 0.1);
 }
 
+.cafe-detail-telegram {
+    font-size: 14px;
+    color: #0088cc;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: 500;
+    background-color: #f0f8ff;
+    border: 1px solid #e1f0ff;
+}
+
+.cafe-detail-telegram:hover {
+    color: #0066aa;
+    background: #e1f0ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 136, 204, 0.1);
+}
+
 .cafe-detail-description {
     font-size: 15px;
     color: #555;
