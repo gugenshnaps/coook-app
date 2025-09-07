@@ -1251,17 +1251,26 @@ async function toggleFavorite(cafeId, cafeName, cafeCity, cafeDescription) {
 
 // Update heart icon in modal
 function updateModalHeartIcon(cafeId) {
-    const modal = document.getElementById('cafeDetailModal');
-    if (!modal || !modal.classList.contains('show')) {
+    console.log('🔍 DEBUG: updateModalHeartIcon called with cafeId:', cafeId);
+    
+    const modal = document.getElementById('modal');
+    console.log('🔍 DEBUG: Modal found:', !!modal);
+    
+    if (!modal || modal.style.display === 'none') {
+        console.log('🔍 DEBUG: Modal not open, returning');
         return; // Modal is not open
     }
     
     const heartIcon = modal.querySelector('.favorite-btn-modal');
+    console.log('🔍 DEBUG: Heart icon found:', !!heartIcon);
+    
     if (!heartIcon) {
+        console.log('🔍 DEBUG: Heart icon not found, returning');
         return; // Heart icon not found
     }
     
     const isFavorite = isCafeInFavorites(cafeId);
+    console.log('🔍 DEBUG: Is favorite:', isFavorite);
     
     // Add animation class
     heartIcon.classList.add('heart-animation');
