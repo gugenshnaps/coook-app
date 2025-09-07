@@ -1244,6 +1244,42 @@ async function toggleFavorite(cafeId, cafeName, cafeCity, cafeDescription) {
     // Refresh the display to show updated favorite status
     console.log('🔍 DEBUG: Refreshing display...');
     displayCafes();
+    
+    // Update heart icon in modal if it's open
+    updateModalHeartIcon(cafeId);
+}
+
+// Update heart icon in modal
+function updateModalHeartIcon(cafeId) {
+    const modal = document.getElementById('cafeDetailModal');
+    if (!modal || !modal.classList.contains('show')) {
+        return; // Modal is not open
+    }
+    
+    const heartIcon = modal.querySelector('.favorite-btn-modal');
+    if (!heartIcon) {
+        return; // Heart icon not found
+    }
+    
+    const isFavorite = isCafeInFavorites(cafeId);
+    
+    // Add animation class
+    heartIcon.classList.add('heart-animation');
+    
+    if (isFavorite) {
+        heartIcon.classList.add('favorited');
+        heartIcon.innerHTML = '❤️';
+    } else {
+        heartIcon.classList.remove('favorited');
+        heartIcon.innerHTML = '🤍';
+    }
+    
+    // Remove animation class after animation completes
+    setTimeout(() => {
+        heartIcon.classList.remove('heart-animation');
+    }, 600);
+    
+    console.log('💖 Modal heart icon updated:', isFavorite ? '❤️' : '🤍');
 }
 
 // Check if cafe is in favorites

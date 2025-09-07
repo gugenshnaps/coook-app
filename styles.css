@@ -1134,6 +1134,11 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     background: rgba(255, 182, 193, 0.9);
 }
 
+/* Heart animation for modal */
+.favorite-btn-modal.heart-animation {
+    animation: heartBeat 0.6s ease-in-out;
+}
+
 /* Photo Carousel Styles */
 .photo-carousel {
     position: relative;
