@@ -1357,6 +1357,24 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     transform: scale(1.1);
 }
 
+/* Mobile-specific button styles */
+@media (max-width: 768px) {
+    .carousel-prev,
+    .carousel-next {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    
+    .carousel-prev:active,
+    .carousel-next:active {
+        background: rgba(0, 0, 0, 0.8) !important;
+        transform: scale(0.95) !important;
+    }
+}
+
 /* Mobile responsiveness for carousel */
 @media (max-width: 600px) {
     .carousel-dots {

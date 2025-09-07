@@ -897,7 +897,7 @@ function createPhotoCarousel(photoUrls, cafeName) {
     }
     
     const dots = photoUrls.map((_, index) => 
-        `<span class="carousel-dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index}); return false;" onmousedown="return false;" ontouchstart="return false;"></span>`
+        `<span class="carousel-dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index}); return false;"></span>`
     ).join('');
     
     return `
@@ -913,8 +913,8 @@ function createPhotoCarousel(photoUrls, cafeName) {
                 ${dots}
             </div>
             <div class="carousel-nav">
-                <button class="carousel-prev" onclick="previousSlide(); return false;" onmousedown="return false;" ontouchstart="return false;" onfocus="this.blur();" onblur="this.blur();" tabindex="-1">‹</button>
-                <button class="carousel-next" onclick="nextSlide(); return false;" onmousedown="return false;" ontouchstart="return false;" onfocus="this.blur();" onblur="this.blur();" tabindex="-1">›</button>
+                <button class="carousel-prev" onclick="previousSlide(); return false;" onfocus="this.blur();" onblur="this.blur();" tabindex="-1">‹</button>
+                <button class="carousel-next" onclick="nextSlide(); return false;" onfocus="this.blur();" onblur="this.blur();" tabindex="-1">›</button>
             </div>
         </div>
     `;
@@ -1024,6 +1024,24 @@ function initializeCarouselTouch() {
     carousel.style.userSelect = 'none';
     carousel.style.webkitTouchCallout = 'none';
     carousel.style.webkitTapHighlightColor = 'transparent';
+    
+    // Add touch event listeners for navigation buttons
+    const prevButton = carousel.querySelector('.carousel-prev');
+    const nextButton = carousel.querySelector('.carousel-next');
+    
+    if (prevButton) {
+        prevButton.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            previousSlide();
+        }, { passive: true });
+    }
+    
+    if (nextButton) {
+        nextButton.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            nextSlide();
+        }, { passive: true });
+    }
     
     function handleSwipe() {
         const threshold = 50;
