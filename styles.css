@@ -408,10 +408,10 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
 .cafe-info {
     padding: 16px;
     position: relative;
-    flex: 1; /* Занимает доступное пространство */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Равномерно распределяет контент */
+    flex: 1 !important; /* Занимает доступное пространство */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important; /* Равномерно распределяет контент */
 }
 
 .cafe-name {
@@ -1564,7 +1564,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     color: #333;
 }
 
-.cafe-info {
+.cafe-info-modal {
     background: #f8f9fa;
     padding: 16px;
     border-radius: 12px;
@@ -1788,10 +1788,11 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     cursor: pointer;
     transition: all 0.3s ease;
     width: 100%;
-    margin-top: auto; /* Прижимает кнопку к низу карточки */
+    margin-top: auto !important; /* Прижимает кнопку к низу карточки */
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    align-self: flex-end; /* Выравнивает кнопку по низу */
+    align-self: flex-end !important; /* Выравнивает кнопку по низу */
+    flex-shrink: 0 !important; /* Кнопка не сжимается */
 }
 
 .btn-details:hover {

@@ -1695,7 +1695,7 @@ function showEarnPoints(cafeId, cafeName) {
     const modalContent = `
         <div class="earn-points-modal">
             <h2>⬆️ Acumular Pontos</h2>
-            <div class="cafe-info">
+            <div class="cafe-info-modal">
                 <h3>${cafeName}</h3>
                 <p>📱 Mostre este código para o barista ou administrador</p>
             </div>
@@ -1745,7 +1745,7 @@ function showSpendPoints(cafeId, cafeName) {
     const modalContent = `
         <div class="spend-points-modal">
             <h2>⬇️ Gastar Pontos</h2>
-            <div class="cafe-info">
+            <div class="cafe-info-modal">
                 <h3>${cafeName}</h3>
                 <p>📱 Mostre este código para o barista ou administrador</p>
             </div>
