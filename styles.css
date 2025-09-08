@@ -1436,7 +1436,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
 .cafe-address {
     font-size: 12px;
     color: #666;
-    margin: 8px 0 4px 0; /* Добавляем отступ сверху 8px */
+    margin: 8px 0 12px 0; /* Добавляем отступ сверху 8px и снизу 12px */
     display: -webkit-box;
     -webkit-line-clamp: 2; /* Адрес на 2 строки */
     line-clamp: 2; /* Стандартное свойство для совместимости */
