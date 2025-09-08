@@ -411,7 +411,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     flex: 1 !important; /* Занимает доступное пространство */
     display: flex !important;
     flex-direction: column !important;
-    justify-content: space-between !important; /* Равномерно распределяет контент */
+    justify-content: flex-start !important; /* Элементы идут сверху вниз */
 }
 
 .cafe-name {
@@ -1783,7 +1783,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     cursor: pointer;
     transition: all 0.3s ease;
     width: 100%;
-    margin-top: auto !important; /* Прижимает кнопку к низу карточки */
+    margin-top: 16px !important; /* Фиксированный отступ от адреса */
     text-transform: uppercase;
     letter-spacing: 0.5px;
     align-self: flex-end !important; /* Выравнивает кнопку по низу */
