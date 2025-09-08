@@ -327,7 +327,7 @@ function displayCafes() {
                                     </button>
                                 </div>
                                 ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
-                                <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
+                                <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
                                 </button>
@@ -379,7 +379,7 @@ function displayCafes() {
                                     </button>
                                 </div>
                                 ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
-                                <p class="cafe-description">${cafe.description || 'Sem descrição'}</p>
+                                <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
                                 </button>
@@ -452,6 +452,7 @@ function showCafeDetails(cafeId) {
             
             <div class="cafe-detail-info">
                 <h2 class="cafe-detail-name">${cafe.name}</h2>
+                ${cafe.categories ? `<p class="cafe-detail-categories">${cafe.categories}</p>` : ''}
                 ${cafe.address ? `<p class="cafe-detail-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
                 ${cafe.telegram ? `<p class="cafe-detail-telegram" onclick="openTelegramChat('${cafe.telegram}')">💬 Escrever no Telegram</p>` : ''}
                 <p class="cafe-detail-description">${cafe.description || 'Sem descrição'}</p>

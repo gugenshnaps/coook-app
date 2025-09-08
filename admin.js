@@ -235,6 +235,7 @@ async function addCafe() {
     const cafeCity = document.getElementById('cafeCity').value.trim();
     const cafeAddress = document.getElementById('cafeAddress').value.trim();
     const cafeDescription = document.getElementById('cafeDescription').value.trim();
+    const cafeCategories = document.getElementById('cafeCategories').value.trim();
     const cafeTelegram = document.getElementById('cafeTelegram').value.trim();
     
     // Get working hours for each day
@@ -294,6 +295,7 @@ async function addCafe() {
             city: cafeCity,
             address: cafeAddress,
             description: cafeDescription,
+            categories: cafeCategories, // Categories of the establishment
             telegram: cafeTelegram, // Telegram contact
             workingHours: workingHours,
             photoUrls: photoUrls, // Array of photos
@@ -577,7 +579,7 @@ function showError(message) {
 // Clear cafe form
 function clearCafeForm() {
     // Clear basic fields
-    const basicFields = ['cafeName', 'cafeCity', 'cafeAddress', 'cafeDescription', 'cafeTelegram'];
+    const basicFields = ['cafeName', 'cafeCity', 'cafeAddress', 'cafeDescription', 'cafeCategories', 'cafeTelegram'];
     basicFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) field.value = '';
