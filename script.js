@@ -326,8 +326,8 @@ function displayCafes() {
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
+                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
                                 </button>
@@ -378,8 +378,8 @@ function displayCafes() {
                                         ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
+                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
                                 </button>
