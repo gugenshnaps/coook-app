@@ -8,6 +8,178 @@ let qrScanner = null;
 let qrScannerSpend = null;
 let currentCustomer = null;
 
+// ===== LOYALTY POINTS SYSTEM =====
+
+// Add points to user's loyalty account
+async function addLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, manualCode) {
+    try {
+        console.log('🎯 Adding loyalty points:', { userId, cafeId, points, orderAmount });
+        
+        // Get user loyalty data
+        const loyaltyData = await getUserLoyaltyData(userId, cafeId);
+        if (!loyaltyData) {
+            throw new Error('Failed to get loyalty data');
+        }
+        
+        // Update points
+        const newTotalPoints = loyaltyData.totalPoints + points;
+        const newVisitCount = loyaltyData.visitCount + 1;
+        
+        // Determine new level based on total points
+        let newLevel = 'Bronze';
+        if (newTotalPoints >= 1000) newLevel = 'Platinum';
+        else if (newTotalPoints >= 500) newLevel = 'Gold';
+        else if (newTotalPoints >= 100) newLevel = 'Silver';
+        
+        // Update loyalty record
+        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
+        await window.firebase.updateDoc(window.firebase.doc(loyaltyRef, loyaltyData.id), {
+            totalPoints: newTotalPoints,
+            lastVisit: new Date(),
+            visitCount: newVisitCount,
+            level: newLevel
+        });
+        
+        // Create transaction record
+        await createLoyaltyTransaction(userId, cafeId, 'earn', points, orderAmount, qrCode, manualCode);
+        
+        console.log('✅ Points added successfully:', { 
+            points, 
+            newTotalPoints, 
+            newLevel, 
+            visitCount: newVisitCount 
+        });
+        
+        return {
+            success: true,
+            totalPoints: newTotalPoints,
+            level: newLevel,
+            visitCount: newVisitCount
+        };
+        
+    } catch (error) {
+        console.error('❌ Error adding loyalty points:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Spend points from user's loyalty account
+async function spendLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, manualCode) {
+    try {
+        console.log('💸 Spending loyalty points:', { userId, cafeId, points, orderAmount });
+        
+        // Get user loyalty data
+        const loyaltyData = await getUserLoyaltyData(userId, cafeId);
+        if (!loyaltyData) {
+            throw new Error('Failed to get loyalty data');
+        }
+        
+        // Check if user has enough points
+        if (loyaltyData.totalPoints < points) {
+            throw new Error('Insufficient points');
+        }
+        
+        // Update points
+        const newTotalPoints = loyaltyData.totalPoints - points;
+        
+        // Determine new level based on remaining points
+        let newLevel = 'Bronze';
+        if (newTotalPoints >= 1000) newLevel = 'Platinum';
+        else if (newTotalPoints >= 500) newLevel = 'Gold';
+        else if (newTotalPoints >= 100) newLevel = 'Silver';
+        
+        // Update loyalty record
+        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
+        await window.firebase.updateDoc(window.firebase.doc(loyaltyRef, loyaltyData.id), {
+            totalPoints: newTotalPoints,
+            level: newLevel
+        });
+        
+        // Create transaction record
+        await createLoyaltyTransaction(userId, cafeId, 'spend', points, orderAmount, qrCode, manualCode);
+        
+        console.log('✅ Points spent successfully:', { 
+            points, 
+            newTotalPoints, 
+            newLevel 
+        });
+        
+        return {
+            success: true,
+            totalPoints: newTotalPoints,
+            level: newLevel
+        };
+        
+    } catch (error) {
+        console.error('❌ Error spending loyalty points:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Get or create user loyalty data for a specific cafe
+async function getUserLoyaltyData(userId, cafeId) {
+    try {
+        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
+        const userLoyaltyQuery = window.firebase.query(
+            loyaltyRef,
+            window.firebase.where('userId', '==', userId),
+            window.firebase.where('cafeId', '==', cafeId)
+        );
+        
+        const loyaltySnapshot = await window.firebase.getDocs(userLoyaltyQuery);
+        
+        if (!loyaltySnapshot.empty) {
+            const loyaltyDoc = loyaltySnapshot.docs[0];
+            return { id: loyaltyDoc.id, ...loyaltyDoc.data() };
+        } else {
+            // Create new loyalty record
+            const newLoyaltyData = {
+                userId: userId,
+                cafeId: cafeId,
+                totalPoints: 0,
+                lastVisit: null,
+                visitCount: 0,
+                level: 'Bronze',
+                createdAt: new Date()
+            };
+            
+            const loyaltyDoc = await window.firebase.addDoc(loyaltyRef, newLoyaltyData);
+            newLoyaltyData.id = loyaltyDoc.id;
+            
+            console.log('✅ New loyalty record created for user:', userId, 'cafe:', cafeId);
+            return newLoyaltyData;
+        }
+    } catch (error) {
+        console.error('❌ Error getting user loyalty data:', error);
+        return null;
+    }
+}
+
+// Create loyalty transaction record
+async function createLoyaltyTransaction(userId, cafeId, type, points, orderAmount, qrCode, manualCode) {
+    try {
+        const transactionRef = window.firebase.collection(window.firebase.db, 'loyalty_transactions');
+        
+        const transactionData = {
+            userId: userId,
+            cafeId: cafeId,
+            type: type, // 'earn' or 'spend'
+            points: points,
+            orderAmount: orderAmount,
+            qrCode: qrCode,
+            manualCode: manualCode,
+            timestamp: new Date(),
+            status: 'confirmed'
+        };
+        
+        await window.firebase.addDoc(transactionRef, transactionData);
+        console.log('✅ Transaction record created:', transactionData);
+        
+    } catch (error) {
+        console.error('❌ Error creating transaction record:', error);
+    }
+}
+
 // Wait for Firebase to initialize
 function waitForFirebase() {
     if (window.firebase && window.firebase.db) {
@@ -737,9 +909,22 @@ async function confirmEarnPoints() {
     }
     
     try {
-        // Here you would create a loyalty transaction record
-        // For now, we'll just show success
-        showSuccess(`✅ ${pointsToEarn} pontos confirmados para ${currentCustomer.name} (pedido de R$ ${orderAmount.toFixed(2)})!`);
+        // Add loyalty points using the new system
+        const result = await addLoyaltyPoints(
+            currentCustomer.userId,
+            currentCafe.id,
+            pointsToEarn,
+            orderAmount,
+            currentCustomer.qrCode,
+            currentCustomer.manualCode
+        );
+        
+        if (result.success) {
+            showSuccess(`✅ ${pointsToEarn} pontos confirmados para ${currentCustomer.name} (pedido de R$ ${orderAmount.toFixed(2)})!\n🎯 Total: ${result.totalPoints} pontos | Nível: ${result.level}`);
+        } else {
+            showError('Erro ao adicionar pontos: ' + result.error);
+            return;
+        }
         
         // Close modal
         closeModal('earnPointsModal');
@@ -795,10 +980,26 @@ async function confirmSpendPoints() {
     }
     
     try {
-        // Here you would create a loyalty transaction record
-        // For now, we'll just show success
+        // Calculate points to spend
+        const pointsToSpend = Math.floor(document.getElementById('pointsToSpend').value) || 0;
         const discountAmount = orderAmount - finalAmount;
-        showSuccess(`✅ Desconto aplicado para ${currentCustomer.name}! Valor final: R$ ${finalAmount.toFixed(2)} (desconto: R$ ${discountAmount.toFixed(2)})`);
+        
+        // Spend loyalty points using the new system
+        const result = await spendLoyaltyPoints(
+            currentCustomer.userId,
+            currentCafe.id,
+            pointsToSpend,
+            orderAmount,
+            currentCustomer.qrCode,
+            currentCustomer.manualCode
+        );
+        
+        if (result.success) {
+            showSuccess(`✅ Desconto aplicado para ${currentCustomer.name}! Valor final: R$ ${finalAmount.toFixed(2)} (desconto: R$ ${discountAmount.toFixed(2)})\n🎯 Total restante: ${result.totalPoints} pontos | Nível: ${result.level}`);
+        } else {
+            showError('Erro ao gastar pontos: ' + result.error);
+            return;
+        }
         
         // Close modal
         closeModal('spendPointsModal');
