@@ -802,7 +802,10 @@ function displayCustomerInfoSpend(customer) {
     
     customerName.textContent = customer.name;
     customerPoints.textContent = customer.points;
-    discountValue.textContent = `R$ ${(customer.points * 0.10).toFixed(2)}`;
+    
+    // Calculate discount value (1 point = R$ 0.10, but should be configurable)
+    const pointsToMoneyRate = 0.10; // This should come from loyalty settings
+    discountValue.textContent = `R$ ${(customer.points * pointsToMoneyRate).toFixed(2)}`;
     
     customerInfo.style.display = 'block';
 }
@@ -885,7 +888,7 @@ async function confirmEarnPoints() {
         );
         
         if (result.success) {
-            showSuccess(`✅ ${pointsToEarn} pontos confirmados para ${currentCustomer.name} (pedido de R$ ${orderAmount.toFixed(2)})!\n🎯 Total: ${result.totalPoints} pontos | Nível: ${result.level}`);
+            showSuccess(`✅ ${pointsToEarn} pontos confirmados para ${currentCustomer.name} (pedido de R$ ${orderAmount.toFixed(2)})!\n🎯 Total: ${result.totalPoints} pontos`);
         } else {
             showError('Erro ao adicionar pontos: ' + result.error);
             return;
@@ -922,8 +925,9 @@ function calculateFinalAmount() {
         return;
     }
     
-    // Convert points to discount (1 point = R$ 0.10)
-    const discountAmount = Math.min(customerPoints * 0.10, orderAmount * 0.5); // Max 50% discount
+    // Convert points to discount (1 point = R$ 0.10, but should be configurable)
+    const pointsToMoneyRate = 0.10; // This should come from loyalty settings
+    const discountAmount = Math.min(customerPoints * pointsToMoneyRate, orderAmount * 0.5); // Max 50% discount
     const finalAmount = Math.max(orderAmount - discountAmount, 0);
     
     document.getElementById('finalAmount').textContent = `R$ ${finalAmount.toFixed(2)}`;
@@ -945,9 +949,10 @@ async function confirmSpendPoints() {
     }
     
     try {
-        // Calculate points to spend
-        const pointsToSpend = Math.floor(document.getElementById('pointsToSpend').value) || 0;
+        // Calculate points to spend based on discount amount
         const discountAmount = orderAmount - finalAmount;
+        const pointsToMoneyRate = 0.10; // This should come from loyalty settings
+        const pointsToSpend = Math.floor(discountAmount / pointsToMoneyRate);
         
         // Spend loyalty points using the new system
         const result = await spendLoyaltyPoints(
@@ -960,7 +965,7 @@ async function confirmSpendPoints() {
         );
         
         if (result.success) {
-            showSuccess(`✅ Desconto aplicado para ${currentCustomer.name}! Valor final: R$ ${finalAmount.toFixed(2)} (desconto: R$ ${discountAmount.toFixed(2)})\n🎯 Total restante: ${result.totalPoints} pontos | Nível: ${result.level}`);
+            showSuccess(`✅ Desconto aplicado para ${currentCustomer.name}! Valor final: R$ ${finalAmount.toFixed(2)} (desconto: R$ ${discountAmount.toFixed(2)})\n🎯 Total restante: ${result.totalPoints} pontos`);
         } else {
             showError('Erro ao gastar pontos: ' + result.error);
             return;
