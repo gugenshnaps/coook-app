@@ -1,6 +1,8 @@
 // Coook Application Logic - Firebase Version
 // This file handles the main functionality for Coook using Firebase
 
+import "./firebase-config.js";
+
 // Debug information
 console.log('🔍 === COOK APP DEBUG INFO ===');
 console.log('🔍 User Agent:', navigator.userAgent);
@@ -11,8 +13,12 @@ console.log('🔍 Current URL:', window.location.href);
 console.log('🔍 === END DEBUG INFO ===');
 
 // Wait for Firebase to be available before proceeding
-if (!window.firebase || !window.firebase.db) {
-    console.log('⏳ Firebase not ready yet, waiting...');
+async function waitForFirebase() {
+    while (!window.firebase || !window.firebase.db) {
+        console.log('⏳ Firebase not ready yet, waiting...');
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    console.log('✅ Firebase is ready!');
 }
 
 // Global variables
@@ -562,9 +568,6 @@ async function initializeApp() {
         // Initialize Telegram WebApp if available
         initializeTelegramWebApp();
         
-        // Initialize user system
-        await initializeUserSystem();
-        
         // Load saved city
         loadSavedCity();
         
@@ -583,6 +586,9 @@ async function initializeApp() {
         }
         
         console.log('✅ Firebase is ready, loading data...');
+        
+        // Initialize user system after Firebase is ready
+        await initializeUserSystem();
         
         // Load cities and cafes from Firebase
         await loadCities();
