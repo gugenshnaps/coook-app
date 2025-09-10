@@ -1,5 +1,12 @@
 // Cafe TMA - Sistema de Lealdade JavaScript
 
+import { 
+    findUserByCode, 
+    createLoyaltyAccount, 
+    updateLoyaltyPoints, 
+    getLoyaltyPoints 
+} from "./firebase-config.js";
+
 // Global variables
 let currentCafe = null;
 let cafes = [];
@@ -15,46 +22,24 @@ async function addLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, man
     try {
         console.log('🎯 Adding loyalty points:', { userId, cafeId, points, orderAmount });
         
-        // Get user loyalty data
-        const loyaltyData = await getUserLoyaltyData(userId, cafeId);
-        if (!loyaltyData) {
-            throw new Error('Failed to get loyalty data');
-        }
+        // Create loyalty account if it doesn't exist
+        await createLoyaltyAccount(userId, cafeId);
         
-        // Update points
-        const newTotalPoints = loyaltyData.totalPoints + points;
-        const newVisitCount = loyaltyData.visitCount + 1;
-        
-        // Determine new level based on total points
-        let newLevel = 'Bronze';
-        if (newTotalPoints >= 1000) newLevel = 'Platinum';
-        else if (newTotalPoints >= 500) newLevel = 'Gold';
-        else if (newTotalPoints >= 100) newLevel = 'Silver';
-        
-        // Update loyalty record
-        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
-        await window.firebase.updateDoc(window.firebase.doc(loyaltyRef, loyaltyData.id), {
-            totalPoints: newTotalPoints,
-            lastVisit: new Date(),
-            visitCount: newVisitCount,
-            level: newLevel
-        });
+        // Update points using the new function
+        const newPoints = await updateLoyaltyPoints(userId, cafeId, points);
         
         // Create transaction record
         await createLoyaltyTransaction(userId, cafeId, 'earn', points, orderAmount, qrCode, manualCode);
         
         console.log('✅ Points added successfully:', { 
             points, 
-            newTotalPoints, 
-            newLevel, 
-            visitCount: newVisitCount 
+            newPoints
         });
         
         return {
             success: true,
-            totalPoints: newTotalPoints,
-            level: newLevel,
-            visitCount: newVisitCount
+            pointsAdded: points,
+            totalPoints: newPoints
         };
         
     } catch (error) {
@@ -68,46 +53,29 @@ async function spendLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, m
     try {
         console.log('💸 Spending loyalty points:', { userId, cafeId, points, orderAmount });
         
-        // Get user loyalty data
-        const loyaltyData = await getUserLoyaltyData(userId, cafeId);
-        if (!loyaltyData) {
-            throw new Error('Failed to get loyalty data');
-        }
+        // Get current points
+        const currentPoints = await getLoyaltyPoints(userId, cafeId);
         
         // Check if user has enough points
-        if (loyaltyData.totalPoints < points) {
+        if (currentPoints < points) {
             throw new Error('Insufficient points');
         }
         
-        // Update points
-        const newTotalPoints = loyaltyData.totalPoints - points;
-        
-        // Determine new level based on remaining points
-        let newLevel = 'Bronze';
-        if (newTotalPoints >= 1000) newLevel = 'Platinum';
-        else if (newTotalPoints >= 500) newLevel = 'Gold';
-        else if (newTotalPoints >= 100) newLevel = 'Silver';
-        
-        // Update loyalty record
-        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
-        await window.firebase.updateDoc(window.firebase.doc(loyaltyRef, loyaltyData.id), {
-            totalPoints: newTotalPoints,
-            level: newLevel
-        });
+        // Update points (subtract points)
+        const newPoints = await updateLoyaltyPoints(userId, cafeId, -points);
         
         // Create transaction record
         await createLoyaltyTransaction(userId, cafeId, 'spend', points, orderAmount, qrCode, manualCode);
         
         console.log('✅ Points spent successfully:', { 
             points, 
-            newTotalPoints, 
-            newLevel 
+            newPoints
         });
         
         return {
             success: true,
-            totalPoints: newTotalPoints,
-            level: newLevel
+            pointsSpent: points,
+            totalPoints: newPoints
         };
         
     } catch (error) {
@@ -119,36 +87,17 @@ async function spendLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, m
 // Get or create user loyalty data for a specific cafe
 async function getUserLoyaltyData(userId, cafeId) {
     try {
-        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
-        const userLoyaltyQuery = window.firebase.query(
-            loyaltyRef,
-            window.firebase.where('userId', '==', userId),
-            window.firebase.where('cafeId', '==', cafeId)
-        );
+        // Create loyalty account if it doesn't exist
+        await createLoyaltyAccount(userId, cafeId);
         
-        const loyaltySnapshot = await window.firebase.getDocs(userLoyaltyQuery);
+        // Get current points
+        const points = await getLoyaltyPoints(userId, cafeId);
         
-        if (!loyaltySnapshot.empty) {
-            const loyaltyDoc = loyaltySnapshot.docs[0];
-            return { id: loyaltyDoc.id, ...loyaltyDoc.data() };
-        } else {
-            // Create new loyalty record
-            const newLoyaltyData = {
-                userId: userId,
-                cafeId: cafeId,
-                totalPoints: 0,
-                lastVisit: null,
-                visitCount: 0,
-                level: 'Bronze',
-                createdAt: new Date()
-            };
-            
-            const loyaltyDoc = await window.firebase.addDoc(loyaltyRef, newLoyaltyData);
-            newLoyaltyData.id = loyaltyDoc.id;
-            
-            console.log('✅ New loyalty record created for user:', userId, 'cafe:', cafeId);
-            return newLoyaltyData;
-        }
+        return {
+            userId: userId,
+            cafeId: cafeId,
+            totalPoints: points
+        };
     } catch (error) {
         console.error('❌ Error getting user loyalty data:', error);
         return null;
@@ -708,12 +657,11 @@ async function applyManualCode() {
     try {
         console.log('⌨️ Processing manual code:', code);
         
-        // Convert 8-digit code to user ID (simple mapping for demo)
-        // In real app, this would be a proper lookup table
-        const userId = await convertCodeToUserId(code);
+        // Find user by code using the new function
+        const userData = await findUserByCode(code);
         
-        if (userId) {
-            await loadCustomerData(userId, 'earn');
+        if (userData) {
+            await loadCustomerData(userData.telegramId, 'earn');
         } else {
             showError('Código inválido! Cliente não encontrado.');
         }
@@ -741,11 +689,11 @@ async function applyManualCodeSpend() {
     try {
         console.log('⌨️ Processing manual code for spending:', code);
         
-        // Convert 8-digit code to user ID
-        const userId = await convertCodeToUserId(code);
+        // Find user by code using the new function
+        const userData = await findUserByCode(code);
         
-        if (userId) {
-            await loadCustomerData(userId, 'spend');
+        if (userData) {
+            await loadCustomerData(userData.telegramId, 'spend');
         } else {
             showError('Código inválido! Cliente não encontrado.');
         }
@@ -780,13 +728,30 @@ async function loadCustomerData(userId, mode) {
     try {
         console.log('👤 Loading customer data for user:', userId, 'mode:', mode);
         
-        // For demo purposes, we'll create mock customer data
-        // In real app, this would query Firebase for user data
+        // Get real user data from Firebase
+        const userRef = window.firebase.collection(window.firebase.db, 'users');
+        const userQuery = window.firebase.query(
+            userRef,
+            window.firebase.where('telegramId', '==', userId)
+        );
+        
+        const userSnapshot = await window.firebase.getDocs(userQuery);
+        
+        if (userSnapshot.empty) {
+            throw new Error('User not found');
+        }
+        
+        const userDoc = userSnapshot.docs[0];
+        const userData = userDoc.data();
+        
+        // Get loyalty points for this cafe
+        const points = await getLoyaltyPoints(userId, currentCafe.id);
         
         const customerData = {
             id: userId,
-            name: `Cliente ${userId}`,
-            points: Math.floor(Math.random() * 100) + 10, // Random points 10-110
+            userId: userId,
+            name: `${userData.firstName} ${userData.lastName || ''}`.trim(),
+            points: points,
             status: 'Ativo'
         };
         

@@ -1,7 +1,10 @@
 // ===== SIMPLE USER SYSTEM FOR COOK APP =====
 
+import { createUserCode, getUserCode } from "./firebase-config.js";
+
 // Current user data - make it global for access from script.js
 window.currentUser = null;
+window.currentUserCode = null;
 
 // Initialize user system
 async function initializeUserSystem() {
@@ -20,6 +23,8 @@ async function initializeUserSystem() {
             console.log('✅ User system initialized for:', window.currentUser.firstName);
             // Load user's favorites
             await loadUserFavorites();
+            // Initialize user code
+            await initializeUserCode(telegramUser.id.toString());
         }
     } else {
         console.log('⚠️ No Telegram user data available');
@@ -283,4 +288,26 @@ function isCafeInFavorites(cafeId) {
 // Get current user
 function getCurrentUser() {
     return window.currentUser;
+}
+
+// Create or get user code when user first enters
+async function initializeUserCode(telegramId) {
+    try {
+        let userCode = await getUserCode(telegramId);
+
+        if (!userCode) {
+            userCode = await createUserCode(telegramId);
+            console.log('✅ New user code created:', userCode);
+        } else {
+            console.log('✅ Existing user code found:', userCode);
+        }
+
+        // Store user code globally
+        window.currentUserCode = userCode;
+
+        return userCode;
+    } catch (error) {
+        console.error('Error initializing user code:', error);
+        throw error;
+    }
 }
