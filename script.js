@@ -551,6 +551,12 @@ function handleCafeCardClick(event, cafeId) {
     showCafeDetails(cafeId);
 }
 
+// Make functions globally available
+window.handleCafeCardClick = handleCafeCardClick;
+window.showCafeDetails = showCafeDetails;
+window.toggleFavorite = toggleFavorite;
+window.closeModal = closeModal;
+
 // Initialize app
 async function initializeApp() {
     console.log('🔧 Initializing Coook app...');
