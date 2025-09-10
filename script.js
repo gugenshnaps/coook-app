@@ -286,6 +286,8 @@ function displayCafes() {
     console.log('🔧 currentCity:', currentCity);
     console.log('🔧 cafesData length:', cafesData.length);
     console.log('🔧 cafesData:', cafesData);
+    console.log('🔧 cafesList element:', cafesList);
+    console.log('🔧 cafesList current innerHTML length:', cafesList.innerHTML.length);
     
     if (!currentCity) {
         console.log('🔧 No city selected, showing ALL cafes');
@@ -298,7 +300,8 @@ function displayCafes() {
                 </div>
             `;
         } else {
-            cafesList.innerHTML = `
+            console.log('🔧 Creating HTML for', cafesData.length, 'cafes');
+            const cafesHTML = `
                 <h3 class="cafe-section-header">Todos os cafés (${cafesData.length})</h3>
                 <div class="cafes-grid">
                     ${cafesData.map(cafe => `
@@ -343,6 +346,9 @@ function displayCafes() {
                     `).join('')}
                 </div>
             `;
+            console.log('🔧 Setting innerHTML for cafes list');
+            cafesList.innerHTML = cafesHTML;
+            console.log('🔧 HTML set, cafes list length:', cafesList.children.length);
         }
         
         // Add event listeners to favorite buttons
