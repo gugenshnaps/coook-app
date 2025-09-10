@@ -91,8 +91,6 @@ function saveSelectedCity(city) {
 
 // Load cities from Firebase
 async function loadCities() {
-    console.log('🔧 Starting to load cities from Firebase...');
-    
     if (!window.firebase || !window.firebase.db) {
         console.error('❌ Firebase not initialized');
         showCitiesError();
@@ -109,7 +107,7 @@ async function loadCities() {
                 ...doc.data()
             }));
             
-            console.log('🔧 Cities loaded from Firebase:', citiesData);
+            console.log('🔧 Cities loaded:', citiesData.length);
             populateCitySelect(citiesData.map(city => city.name));
             
             // Set up real-time listener for cities
@@ -173,8 +171,6 @@ function setupCitiesListener() {
 
 // Load cafes from Firebase
 async function loadCafes() {
-    console.log('🔧 Starting to load cafes from Firebase...');
-    
     if (!window.firebase || !window.firebase.db) {
         console.error('❌ Firebase not initialized');
         showCafesError();
@@ -191,7 +187,7 @@ async function loadCafes() {
                 ...doc.data()
             }));
             
-            console.log('🔧 Cafes loaded from Firebase:', cafesData);
+            console.log('🔧 Cafes loaded:', cafesData.length);
             
             // Set up real-time listener for cafes (this will also display cafes)
             setupCafesListener();
@@ -282,15 +278,7 @@ function displayCafes() {
         return;
     }
     
-    console.log('🔧 displayCafes called with:');
-    console.log('🔧 currentCity:', currentCity);
-    console.log('🔧 cafesData length:', cafesData.length);
-    console.log('🔧 cafesData:', cafesData);
-    console.log('🔧 cafesList element:', cafesList);
-    console.log('🔧 cafesList current innerHTML length:', cafesList.innerHTML.length);
-    
     if (!currentCity) {
-        console.log('🔧 No city selected, showing ALL cafes');
         // Show ALL cafes when no city is selected
         if (cafesData.length === 0) {
             cafesList.innerHTML = `
@@ -300,7 +288,6 @@ function displayCafes() {
                 </div>
             `;
         } else {
-            console.log('🔧 Creating HTML for', cafesData.length, 'cafes');
             
             // Pre-calculate favorites to avoid multiple calls
             const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
@@ -342,9 +329,7 @@ function displayCafes() {
                 </div>
             `;
             
-            console.log('🔧 Setting innerHTML for cafes list');
             cafesList.innerHTML = cafesHTML;
-            console.log('🔧 HTML set, cafes list length:', cafesList.children.length);
         }
         
         // Add event listeners to favorite buttons
@@ -353,10 +338,8 @@ function displayCafes() {
         return;
     }
     
-    console.log('🔧 City selected, filtering cafes for:', currentCity);
     // Show cafes for selected city
     const cityCafes = cafesData.filter(cafe => cafe.city === currentCity);
-    console.log('🔧 Filtered cafes:', cityCafes.length, 'cafes found');
     
     if (cityCafes.length === 0) {
         cafesList.innerHTML = `
@@ -405,8 +388,6 @@ function displayCafes() {
         
         cafesList.innerHTML = cafesHTML;
     }
-    
-    console.log('🔧 Cafes displayed for city:', currentCity, 'Count:', cityCafes.length);
     
     // Add event listeners to favorite buttons
     addFavoriteButtonListeners();
@@ -575,10 +556,7 @@ async function initializeApp() {
     console.log('🔧 Initializing Coook app...');
     
     try {
-        // Initialize Telegram WebApp if available
-        initializeTelegramWebApp();
-        
-        // Load saved city
+        // Load saved city (fast, no async)
         loadSavedCity();
         
         // Wait for Firebase to be ready
@@ -597,10 +575,7 @@ async function initializeApp() {
         
         console.log('✅ Firebase is ready, loading data...');
         
-        // Initialize user system after Firebase is ready
-        await initializeUserSystem();
-        
-        // Load cities and cafes from Firebase
+        // Load cities and cafes FIRST (most important for user experience)
         await loadCities();
         await loadCafes();
         
@@ -608,6 +583,13 @@ async function initializeApp() {
         initializeMenu();
         
         console.log('✅ App initialized successfully');
+        
+        // Initialize Telegram WebApp and user system in background (non-blocking)
+        setTimeout(() => {
+            initializeTelegramWebApp();
+            initializeUserSystem();
+        }, 100);
+        
     } catch (error) {
         console.error('❌ Error initializing app:', error);
     }
