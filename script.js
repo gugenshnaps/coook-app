@@ -301,51 +301,47 @@ function displayCafes() {
             `;
         } else {
             console.log('🔧 Creating HTML for', cafesData.length, 'cafes');
+            
+            // Pre-calculate favorites to avoid multiple calls
+            const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
+            
             const cafesHTML = `
                 <h3 class="cafe-section-header">Todos os cafés (${cafesData.length})</h3>
                 <div class="cafes-grid">
-                    ${cafesData.map(cafe => `
-                        <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
-                            <div class="cafe-photo">
-                                ${(() => {
-                                    console.log('🔍 Cafe photo data:', {
-                                        name: cafe.name,
-                                        photoUrls: cafe.photoUrls,
-                                        photoUrl: cafe.photoUrl,
-                                        hasPhotoUrls: cafe.photoUrls && cafe.photoUrls.length > 0,
-                                        hasPhotoUrl: !!cafe.photoUrl
-                                    });
-                                    
-                                    if (cafe.photoUrls && cafe.photoUrls.length > 0) {
-                                        return `<img src="${cafe.photoUrls[0]}" alt="${cafe.name}" class="cafe-thumbnail">`;
-                                    } else if (cafe.photoUrl) {
-                                        return `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">`;
-                                    } else {
-                                        return `<div class="cafe-placeholder">☕</div>`;
-                                    }
-                                })()}
-                            </div>
-                            <div class="cafe-info">
-                                <div class="cafe-header">
-                                    <h3 class="cafe-name">${cafe.name}</h3>
-                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
-                                            data-cafe-id="${cafe.id}" 
-                                            data-cafe-name="${cafe.name}" 
-                                            data-cafe-city="${cafe.city}" 
-                                            data-cafe-description="${cafe.description || ''}">
-                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                    ${cafesData.map(cafe => {
+                        const isFavorite = favoritesSet.has(cafe.id);
+                        const photoHTML = cafe.photoUrls && cafe.photoUrls.length > 0 
+                            ? `<img src="${cafe.photoUrls[0]}" alt="${cafe.name}" class="cafe-thumbnail">`
+                            : cafe.photoUrl 
+                                ? `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">`
+                                : `<div class="cafe-placeholder">☕</div>`;
+                        
+                        return `
+                            <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
+                                <div class="cafe-photo">${photoHTML}</div>
+                                <div class="cafe-info">
+                                    <div class="cafe-header">
+                                        <h3 class="cafe-name">${cafe.name}</h3>
+                                        <button class="favorite-btn ${isFavorite ? 'favorited' : ''}" 
+                                                data-cafe-id="${cafe.id}" 
+                                                data-cafe-name="${cafe.name}" 
+                                                data-cafe-city="${cafe.city}" 
+                                                data-cafe-description="${cafe.description || ''}">
+                                            ${isFavorite ? '❤️' : '🤍'}
+                                        </button>
+                                    </div>
+                                    <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
+                                    ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
+                                    <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
+                                        VER DETALHES
                                     </button>
                                 </div>
-                                <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
-                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
-                                <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
-                                    VER DETALHES
-                                </button>
                             </div>
-                        </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
             `;
+            
             console.log('🔧 Setting innerHTML for cafes list');
             cafesList.innerHTML = cafesHTML;
             console.log('🔧 HTML set, cafes list length:', cafesList.children.length);
@@ -360,7 +356,7 @@ function displayCafes() {
     console.log('🔧 City selected, filtering cafes for:', currentCity);
     // Show cafes for selected city
     const cityCafes = cafesData.filter(cafe => cafe.city === currentCity);
-    console.log('🔧 Filtered cafes:', cityCafes);
+    console.log('🔧 Filtered cafes:', cityCafes.length, 'cafes found');
     
     if (cityCafes.length === 0) {
         cafesList.innerHTML = `
@@ -369,26 +365,30 @@ function displayCafes() {
             </div>
         `;
     } else {
-        cafesList.innerHTML = `
+        // Pre-calculate favorites to avoid multiple calls
+        const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
+        
+        const cafesHTML = `
             <h3 class="cafe-section-header">Cafés em ${currentCity} (${cityCafes.length})</h3>
             <div class="cafes-grid">
-                ${cityCafes.map(cafe => `
-                    <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
-                        <div class="cafe-photo">
-                            ${cafe.photoUrl ? 
-                                `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
-                                `<div class="cafe-placeholder">☕</div>`
-                            }
-                        </div>
-                                                    <div class="cafe-info">
+                ${cityCafes.map(cafe => {
+                    const isFavorite = favoritesSet.has(cafe.id);
+                    const photoHTML = cafe.photoUrl ? 
+                        `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
+                        `<div class="cafe-placeholder">☕</div>`;
+                    
+                    return `
+                        <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
+                            <div class="cafe-photo">${photoHTML}</div>
+                            <div class="cafe-info">
                                 <div class="cafe-header">
                                     <h3 class="cafe-name">${cafe.name}</h3>
-                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
+                                    <button class="favorite-btn ${isFavorite ? 'favorited' : ''}" 
                                             data-cafe-id="${cafe.id}" 
                                             data-cafe-name="${cafe.name}" 
                                             data-cafe-city="${cafe.city}" 
                                             data-cafe-description="${cafe.description || ''}">
-                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                                        ${isFavorite ? '❤️' : '🤍'}
                                     </button>
                                 </div>
                                 <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
@@ -397,10 +397,13 @@ function displayCafes() {
                                     VER DETALHES
                                 </button>
                             </div>
-                    </div>
-                `).join('')}
+                        </div>
+                    `;
+                }).join('')}
             </div>
         `;
+        
+        cafesList.innerHTML = cafesHTML;
     }
     
     console.log('🔧 Cafes displayed for city:', currentCity, 'Count:', cityCafes.length);
@@ -1479,18 +1482,11 @@ async function createLoyaltyTransaction(userId, cafeId, type, points, orderAmoun
 
 // Check if cafe is in favorites
 function isCafeInFavorites(cafeId) {
-    console.log('🔍 DEBUG: isCafeInFavorites called with cafeId:', cafeId);
-    console.log('🔍 DEBUG: window.currentUser:', window.currentUser);
-    console.log('🔍 DEBUG: window.currentUser.favorites:', window.currentUser?.favorites);
-    
     if (!window.currentUser || !window.currentUser.favorites) {
-        console.log('🔍 DEBUG: No user or no favorites, returning false');
         return false;
     }
     
-    const result = window.currentUser.favorites.some(fav => fav.cafeId === cafeId);
-    console.log('🔍 DEBUG: Result:', result);
-    return result;
+    return window.currentUser.favorites.some(fav => fav.cafeId === cafeId);
 }
 
 // Add cafe to favorites - now managed by user-system.js
