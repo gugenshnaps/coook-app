@@ -4,6 +4,147 @@
 import "./firebase-config.js";
 import "./user-system.js";
 
+// Global functions for HTML onclick handlers
+window.handleCafeCardClick = function(event, cafeId) {
+    // Check if click was on a button or interactive element
+    if (event.target.closest('.favorite-btn') || 
+        event.target.closest('button') || 
+        event.target.tagName === 'BUTTON') {
+        console.log('🔍 DEBUG: Click on button, not opening card');
+        return; // Don't open card if clicking on button
+    }
+    
+    console.log('🔍 DEBUG: Opening cafe card for:', cafeId);
+    showCafeDetails(cafeId);
+};
+
+window.showCafeDetails = function(cafeId) {
+    const cafe = cafesData.find(c => c.id === cafeId);
+    if (!cafe) {
+        console.error('❌ Cafe not found:', cafeId);
+        return;
+    }
+    
+    currentCafe = cafe;
+    
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    
+    if (modal && modalContent) {
+        modalContent.innerHTML = `
+            <div class="cafe-detail-header">
+                <div class="cafe-detail-image">
+                    ${cafe.photoUrls && cafe.photoUrls.length > 0 ? 
+                        createPhotoCarousel(cafe.photoUrls, cafe.name) :
+                        cafe.photoUrl ? 
+                            `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-detail-photo">` : 
+                            `<div class="coffee-icon">☕</div>`
+                    }
+                    <!-- Heart moved to top-left corner of image -->
+                    <button class="favorite-btn-modal ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
+                            onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cafe-detail-info">
+                <h2 class="cafe-detail-name">${cafe.name}</h2>
+                <div class="cafe-detail-categories">${cafe.categories || 'Estabelecimento'}</div>
+                <div class="cafe-detail-city">${cafe.city}</div>
+                ${cafe.address ? `<div class="cafe-detail-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</div>` : ''}
+                ${cafe.telegram ? `<div class="cafe-detail-telegram" onclick="openTelegramChat('${cafe.telegram}')">📱 ${cafe.telegram}</div>` : ''}
+                ${cafe.description ? `<div class="cafe-detail-description">${cafe.description}</div>` : ''}
+                
+                ${cafe.workingHours ? `
+                    <div class="cafe-detail-working-hours">
+                        <h3>Horário de Funcionamento</h3>
+                        <div class="working-hours-list">
+                            ${formatWorkingHours(cafe.workingHours)}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="cafe-detail-actions">
+                    <button class="loyalty-earn-btn" onclick="showEarnPoints('${cafe.id}', '${cafe.name}')">
+                        ACUMULAR PONTOS
+                    </button>
+                    <button class="loyalty-spend-btn" onclick="showSpendPoints('${cafe.id}', '${cafe.name}')">
+                        GASTAR PONTOS
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        modal.style.display = 'block';
+        
+        // Initialize carousel if multiple photos exist
+        if (cafe.photoUrls && cafe.photoUrls.length > 1) {
+            initializeCarouselTouch();
+        }
+    }
+};
+
+window.toggleFavorite = async function(cafeId, cafeName, cafeCity, cafeDescription) {
+    if (!window.currentUser) {
+        console.log('❌ No user logged in');
+        return;
+    }
+    
+    const isFavorite = isCafeInFavorites(cafeId);
+    
+    if (isFavorite) {
+        await removeFavorite(cafeId);
+        console.log('❤️ Removed from favorites:', cafeName);
+    } else {
+        await addToFavorites({
+            cafeId: cafeId,
+            name: cafeName,
+            city: cafeCity,
+            description: cafeDescription
+        });
+        console.log('❤️ Added to favorites:', cafeName);
+    }
+    
+    // Update heart icon in modal
+    updateModalHeartIcon(cafeId);
+};
+
+window.closeModal = function() {
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
+
+// Additional global functions for modal interactions
+window.copyAddress = function(address) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(address).then(() => {
+            console.log('📍 Address copied to clipboard');
+        }).catch(err => {
+            console.error('❌ Failed to copy address:', err);
+        });
+    }
+};
+
+window.openTelegramChat = function(telegramContact) {
+    if (telegramContact) {
+        const telegramUrl = `https://t.me/${telegramContact.replace('@', '')}`;
+        window.open(telegramUrl, '_blank');
+    }
+};
+
+window.showEarnPoints = function(cafeId, cafeName) {
+    // Placeholder for earn points functionality
+    console.log('💰 Earn points for:', cafeName);
+};
+
+window.showSpendPoints = function(cafeId, cafeName) {
+    // Placeholder for spend points functionality
+    console.log('💸 Spend points for:', cafeName);
+};
+
 // Debug information
 console.log('🔍 === COOK APP DEBUG INFO ===');
 console.log('🔍 User Agent:', navigator.userAgent);
@@ -551,11 +692,7 @@ function handleCafeCardClick(event, cafeId) {
     showCafeDetails(cafeId);
 }
 
-// Make functions globally available
-window.handleCafeCardClick = handleCafeCardClick;
-window.showCafeDetails = showCafeDetails;
-window.toggleFavorite = toggleFavorite;
-window.closeModal = closeModal;
+// Functions are now defined globally at the top of the file
 
 // Initialize app
 async function initializeApp() {
