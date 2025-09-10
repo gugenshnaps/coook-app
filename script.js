@@ -2,6 +2,7 @@
 // This file handles the main functionality for Coook using Firebase
 
 import "./firebase-config.js";
+import "./user-system.js";
 
 // Debug information
 console.log('🔍 === COOK APP DEBUG INFO ===');

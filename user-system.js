@@ -311,3 +311,11 @@ async function initializeUserCode(telegramId) {
         throw error;
     }
 }
+
+// Make functions available globally
+window.initializeUserSystem = initializeUserSystem;
+window.initializeUserCode = initializeUserCode;
+window.addToFavorites = addToFavorites;
+window.removeFavorite = removeFavorite;
+window.isCafeInFavorites = isCafeInFavorites;
+window.getCurrentUser = getCurrentUser;
