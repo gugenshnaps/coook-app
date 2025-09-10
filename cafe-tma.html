@@ -8,18 +8,9 @@
     
     <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import "./firebase-config.js";
+        
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCBv4tfDPHboApf6CXtUqLIReQA4KzjQJg",
-            authDomain: "coook-app.firebaseapp.com",
-            projectId: "coook-app",
-            storageBucket: "coook-app.firebasestorage.app",
-            messagingSenderId: "1027223490741",
-            appId: "1:1027223490741:web:a56a826d5d16d517f2aefc",
-            measurementId: "G-1XZV0W4QPR"
-        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
