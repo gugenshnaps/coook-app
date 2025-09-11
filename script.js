@@ -1359,35 +1359,132 @@ function initializeMenu() {
 }
 
 // Show loyalty information
-function showLoyalty() {
+async function showLoyalty() {
     console.log('🎯 Loyalty button clicked');
     
-    // Create modal content
-    const modalContent = `
-        <div class="loyalty-modal">
-            <h2>🎯 Minha Lealdade</h2>
-            <div class="loyalty-stats">
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">Cafés Visitados</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">Pontos Acumulados</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">Bronze</span>
-                    <span class="stat-label">Nível Atual</span>
-                </div>
-            </div>
-            <div class="loyalty-info">
-                <p>🌟 Visite cafés para acumular pontos e subir de nível!</p>
-                <p>🎁 Desbloqueie benefícios exclusivos conforme sua lealdade cresce.</p>
-            </div>
-        </div>
-    `;
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para ver sua lealdade!');
+        return;
+    }
     
-    showModal(modalContent, 'Minha Lealdade');
+    try {
+        // Show loading state
+        const loadingContent = `
+            <div class="loyalty-modal">
+                <h2>🎯 Minha Lealdade</h2>
+                <div class="loading">Carregando seus dados de lealdade...</div>
+            </div>
+        `;
+        showModal(loadingContent, 'Minha Lealdade');
+        
+        // Load user's loyalty data
+        const loyaltyData = await loadUserLoyaltyData();
+        
+        // Create modal content with real data
+        const modalContent = `
+            <div class="loyalty-modal">
+                <h2>🎯 Minha Lealdade</h2>
+                
+                <div class="loyalty-cafes">
+                    <h3>🏪 Meus Cafés</h3>
+                    ${loyaltyData.cafes.length > 0 ? 
+                        loyaltyData.cafes.map(cafe => `
+                            <div class="loyalty-cafe-item">
+                                <div class="cafe-info">
+                                    <h4>${cafe.name}</h4>
+                                    <p class="cafe-location">📍 ${cafe.city}</p>
+                                </div>
+                                <div class="cafe-points">
+                                    <span class="points-number">${cafe.points}</span>
+                                    <span class="points-label">pontos</span>
+                                </div>
+                            </div>
+                        `).join('') :
+                        '<div class="no-cafes">Nenhum café visitado ainda. Visite cafés para acumular pontos!</div>'
+                    }
+                </div>
+                
+                <div class="loyalty-info">
+                    <p>🌟 Visite cafés para acumular pontos e desbloquear benefícios!</p>
+                    <p>🎁 Mostre seu código de 8 dígitos para ganhar pontos em cada visita.</p>
+                    <p>💡 Cada café tem sua própria sistema de pontos e benefícios.</p>
+                </div>
+            </div>
+        `;
+        
+        showModal(modalContent, 'Minha Lealdade');
+        
+    } catch (error) {
+        console.error('❌ Error loading loyalty data:', error);
+        const errorContent = `
+            <div class="loyalty-modal">
+                <h2>🎯 Minha Lealdade</h2>
+                <div class="error-message">
+                    <p>❌ Erro ao carregar dados de lealdade</p>
+                    <p>Tente novamente mais tarde.</p>
+                </div>
+            </div>
+        `;
+        showModal(errorContent, 'Minha Lealdade');
+    }
+}
+
+// Load user's loyalty data from Firebase
+async function loadUserLoyaltyData() {
+    try {
+        const userId = window.currentUser.id;
+        console.log('🔍 Loading loyalty data for user:', userId);
+        
+        // Get all loyalty records for this user
+        const loyaltyQuery = window.firebase.query(
+            window.firebase.collection(window.firebase.db, 'user_loyalty_points'),
+            window.firebase.where('telegramId', '==', userId)
+        );
+        
+        const loyaltySnapshot = await window.firebase.getDocs(loyaltyQuery);
+        
+        if (loyaltySnapshot.empty) {
+            return {
+                cafes: []
+            };
+        }
+        
+        // Get cafe information for each cafe
+        const cafes = [];
+        
+        for (const doc of loyaltySnapshot.docs) {
+            const loyaltyData = doc.data();
+            const cafeId = loyaltyData.cafeId;
+            const points = loyaltyData.points || 0;
+            
+            // Find cafe information
+            const cafe = cafesData.find(c => c.id === cafeId);
+            if (cafe) {
+                cafes.push({
+                    id: cafeId,
+                    name: cafe.name,
+                    city: cafe.city,
+                    points: points
+                });
+            }
+        }
+        
+        // Sort cafes by points (highest first)
+        cafes.sort((a, b) => b.points - a.points);
+        
+        console.log('✅ Loyalty data loaded:', {
+            cafesCount: cafes.length,
+            cafes
+        });
+        
+        return {
+            cafes
+        };
+        
+    } catch (error) {
+        console.error('❌ Error loading loyalty data:', error);
+        throw error;
+    }
 }
 
 // Show favorites
