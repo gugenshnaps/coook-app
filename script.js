@@ -136,13 +136,123 @@ window.openTelegramChat = function(telegramContact) {
 };
 
 window.showEarnPoints = function(cafeId, cafeName) {
-    // Placeholder for earn points functionality
-    console.log('💰 Earn points for:', cafeName);
+    console.log('⬆️ Show earn points for cafe:', cafeId, cafeName);
+    
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para acumular pontos!\n💡 Abra o app através do Telegram');
+        return;
+    }
+    
+    // Generate QR code data and 8-digit code
+    const userId = window.currentUser.id;
+    const timestamp = Date.now();
+    const qrData = `${userId}:${cafeId}:${timestamp}`;
+    const userCode = generateUserCode(userId, cafeId, timestamp);
+    
+    const modalContent = `
+        <div class="earn-points-modal">
+            <h2>⬆️ Acumular Pontos</h2>
+            <div class="cafe-info-modal">
+                <h3>${cafeName}</h3>
+                <p>📱 Mostre este código para o barista ou administrador</p>
+            </div>
+            
+            <div class="qr-code-section">
+                <h4>📱 Código QR:</h4>
+                <div class="qr-code-container">
+                    <canvas id="qrCanvas" width="200" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="manual-code-section">
+                <h4>🔢 Código de 8 dígitos:</h4>
+                <div class="code-display">
+                    <span class="user-code">${userCode}</span>
+                    <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>💡 O barista escaneará o código QR ou inserirá o código de 8 dígitos no aplicativo do café</p>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Acumular Pontos');
+    
+    // Generate QR code
+    generateQRCode(qrData);
 };
 
 window.showSpendPoints = function(cafeId, cafeName) {
-    // Placeholder for spend points functionality
-    console.log('💸 Spend points for:', cafeName);
+    console.log('⬇️ Show spend points for cafe:', cafeId, cafeName);
+    
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para gastar pontos!\n💡 Abra o app através do Telegram');
+        return;
+    }
+    
+    // Generate QR code data and 8-digit code
+    const userId = window.currentUser.id;
+    const timestamp = Date.now();
+    const qrData = `${userId}:${cafeId}:${timestamp}`;
+    const userCode = generateUserCode(userId, cafeId, timestamp);
+    
+    const modalContent = `
+        <div class="spend-points-modal">
+            <h2>⬇️ Gastar Pontos</h2>
+            <div class="cafe-info-modal">
+                <h3>${cafeName}</h3>
+                <p>📱 Mostre este código para o barista ou administrador</p>
+            </div>
+            
+            <div class="qr-code-section">
+                <h4>📱 Código QR:</h4>
+                <div class="qr-code-container">
+                    <canvas id="qrCanvasSpend" width="200" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="manual-code-section">
+                <h4>🔢 Código de 8 dígitos:</h4>
+                <div class="code-display">
+                    <span class="user-code">${userCode}</span>
+                    <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>💡 O barista escaneará o código QR ou inserirá o código de 8 dígitos no aplicativo do café</p>
+                <p>💰 Após o escaneamento, será mostrado seu saldo de pontos e recalculado o valor do pedido</p>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Gastar Pontos');
+    
+    // Generate QR code
+    generateQRCodeSpend(qrData);
+};
+
+// Additional global functions for loyalty system
+window.copyUserCode = function(code) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).then(() => {
+            console.log('📋 User code copied to clipboard:', code);
+        }).catch(err => {
+            console.error('❌ Failed to copy user code:', err);
+        });
+    }
+};
+
+window.showModal = function(content, title) {
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    
+    if (modal && modalContent) {
+        modalContent.innerHTML = content;
+        modal.style.display = 'block';
+    }
 };
 
 // Debug information
