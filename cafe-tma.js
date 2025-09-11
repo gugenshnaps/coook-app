@@ -762,7 +762,7 @@ async function loadCustomerData(userId, mode) {
         const customerData = {
             id: userId,
             userId: userId,
-            name: `${userData.firstName} ${userData.lastName || ''}`.trim(),
+            name: `${userData.firstName || 'Unknown'} ${userData.lastName || ''}`.trim(),
             points: points,
             status: 'Ativo'
         };
@@ -919,7 +919,7 @@ async function confirmEarnPoints() {
         // Refresh daily stats
         loadDailyStats();
         
-        console.log('✅ Points earned:', pointsToEarn, 'for customer:', currentCustomer.name, 'order:', orderAmount);
+        console.log('✅ Points earned:', pointsToEarn, 'for customer:', currentCustomer?.name || 'Unknown', 'order:', orderAmount);
         
     } catch (error) {
         console.error('❌ Error confirming points:', error);

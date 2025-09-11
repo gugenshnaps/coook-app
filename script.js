@@ -1433,6 +1433,12 @@ async function loadUserLoyaltyData() {
         const userId = window.currentUser.id;
         console.log('🔍 Loading loyalty data for user:', userId);
         
+        // Ensure cafes are loaded
+        if (cafesData.length === 0) {
+            console.log('📚 Loading cafes data first...');
+            await loadCafes();
+        }
+        
         // Get all loyalty records for this user
         const loyaltyQuery = window.firebase.query(
             window.firebase.collection(window.firebase.db, 'user_loyalty_points'),
