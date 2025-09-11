@@ -131,6 +131,10 @@ async function createLoyaltyTransaction(userId, cafeId, type, points, orderAmoun
 
 // Wait for Firebase to initialize
 function waitForFirebase() {
+    console.log('🔍 Checking Firebase availability...');
+    console.log('   - window.firebase:', !!window.firebase);
+    console.log('   - window.firebase.db:', !!(window.firebase && window.firebase.db));
+    
     if (window.firebase && window.firebase.db) {
         console.log('🔥 Firebase ready, initializing cafe TMA...');
         initializeCafeTMA();
@@ -165,6 +169,13 @@ async function initializeCafeTMA() {
 async function loadCafes() {
     try {
         console.log('📚 Loading cafes from Firebase...');
+        console.log('   - Firebase available:', !!window.firebase);
+        console.log('   - Firebase.db available:', !!(window.firebase && window.firebase.db));
+        
+        if (!window.firebase || !window.firebase.db) {
+            throw new Error('Firebase not initialized');
+        }
+        
         const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
         const cafesSnapshot = await window.firebase.getDocs(cafesRef);
         
@@ -177,6 +188,7 @@ async function loadCafes() {
         });
         
         console.log('✅ Cafes loaded:', cafes.length);
+        console.log('   - Cafe names:', cafes.map(c => c.name));
     } catch (error) {
         console.error('❌ Error loading cafes:', error);
         throw error;
