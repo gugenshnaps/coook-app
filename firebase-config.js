@@ -126,18 +126,18 @@ export async function findUserByCode(userCode) {
     }
 }
 
-export async function createLoyaltyAccount(userId, cafeId) {
+export async function createLoyaltyAccount(telegramId, cafeId) {
     try {
         const loyaltyQuery = query(
             collection(db, 'user_loyalty_points'),
-            where('userId', '==', userId),
+            where('telegramId', '==', telegramId),
             where('cafeId', '==', cafeId)
         );
         const loyaltySnapshot = await getDocs(loyaltyQuery);
 
         if (loyaltySnapshot.empty) {
             await addDoc(collection(db, 'user_loyalty_points'), {
-                userId: userId,
+                telegramId: telegramId,
                 cafeId: cafeId,
                 points: 0,
                 lastUpdated: new Date()
@@ -149,11 +149,11 @@ export async function createLoyaltyAccount(userId, cafeId) {
     }
 }
 
-export async function updateLoyaltyPoints(userId, cafeId, pointsChange) {
+export async function updateLoyaltyPoints(telegramId, cafeId, pointsChange) {
     try {
         const loyaltyQuery = query(
             collection(db, 'user_loyalty_points'),
-            where('userId', '==', userId),
+            where('telegramId', '==', telegramId),
             where('cafeId', '==', cafeId)
         );
         const loyaltySnapshot = await getDocs(loyaltyQuery);
@@ -178,11 +178,11 @@ export async function updateLoyaltyPoints(userId, cafeId, pointsChange) {
     }
 }
 
-export async function getLoyaltyPoints(userId, cafeId) {
+export async function getLoyaltyPoints(telegramId, cafeId) {
     try {
         const loyaltyQuery = query(
             collection(db, 'user_loyalty_points'),
-            where('userId', '==', userId),
+            where('telegramId', '==', telegramId),
             where('cafeId', '==', cafeId)
         );
         const loyaltySnapshot = await getDocs(loyaltyQuery);
