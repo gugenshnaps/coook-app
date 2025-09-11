@@ -145,9 +145,8 @@ window.showEarnPoints = function(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const timestamp = Date.now();
-    const qrData = `${userId}:${cafeId}:${timestamp}`;
-    const userCode = generateUserCode(userId, cafeId, timestamp);
+    const qrData = `${userId}:${cafeId}:${userCode}`;
+    const userCode = window.currentUserCode || '00000000';
     
     const modalContent = `
         <div class="earn-points-modal">
@@ -194,9 +193,8 @@ window.showSpendPoints = function(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const timestamp = Date.now();
-    const qrData = `${userId}:${cafeId}:${timestamp}`;
-    const userCode = generateUserCode(userId, cafeId, timestamp);
+    const qrData = `${userId}:${cafeId}:${userCode}`;
+    const userCode = window.currentUserCode || '00000000';
     
     const modalContent = `
         <div class="spend-points-modal">
@@ -2030,9 +2028,8 @@ function showEarnPoints(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const timestamp = Date.now();
-    const qrData = `${userId}:${cafeId}:${timestamp}`;
-    const userCode = generateUserCode(userId, cafeId, timestamp);
+    const qrData = `${userId}:${cafeId}:${userCode}`;
+    const userCode = window.currentUserCode || '00000000';
     
     const modalContent = `
         <div class="earn-points-modal">
@@ -2080,9 +2077,8 @@ function showSpendPoints(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const timestamp = Date.now();
-    const qrData = `${userId}:${cafeId}:${timestamp}`;
-    const userCode = generateUserCode(userId, cafeId, timestamp);
+    const qrData = `${userId}:${cafeId}:${userCode}`;
+    const userCode = window.currentUserCode || '00000000';
     
     const modalContent = `
         <div class="spend-points-modal">
@@ -2123,7 +2119,7 @@ function showSpendPoints(cafeId, cafeName) {
 // Generate 8-digit user code that matches QR code data
 function generateUserCode(userId, cafeId, timestamp) {
     // Create the same data as QR code
-    const qrData = `${userId}:${cafeId}:${timestamp}`;
+    const qrData = `${userId}:${cafeId}:${userCode}`;
     
     // Generate hash from QR data
     let hash = 0;

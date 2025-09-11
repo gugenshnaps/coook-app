@@ -197,3 +197,71 @@ export async function getLoyaltyPoints(telegramId, cafeId) {
         throw error;
     }
 }
+
+// Get user code by telegram ID
+export async function getUserCode(telegramId) {
+    try {
+        const codeQuery = query(
+            collection(db, 'user_codes'),
+            where('telegramId', '==', telegramId),
+            where('isActive', '==', true)
+        );
+        const codeSnapshot = await getDocs(codeQuery);
+
+        if (codeSnapshot.empty) {
+            return null;
+        }
+
+        return codeSnapshot.docs[0].data().userCode;
+    } catch (error) {
+        console.error('Error getting user code:', error);
+        throw error;
+    }
+}
+
+// Create new user code
+export async function createUserCode(telegramId) {
+    try {
+        // Generate unique 8-digit code
+        let userCode;
+        let isUnique = false;
+        let attempts = 0;
+        
+        while (!isUnique && attempts < 10) {
+            userCode = Math.floor(10000000 + Math.random() * 90000000).toString();
+            
+            // Check if code already exists
+            const existingCodeQuery = query(
+                collection(db, 'user_codes'),
+                where('userCode', '==', userCode),
+                where('isActive', '==', true)
+            );
+            const existingSnapshot = await getDocs(existingCodeQuery);
+            
+            if (existingSnapshot.empty) {
+                isUnique = true;
+            }
+            attempts++;
+        }
+        
+        if (!isUnique) {
+            throw new Error('Could not generate unique user code');
+        }
+        
+        // Save user code to Firebase
+        const userCodeData = {
+            telegramId: telegramId,
+            userCode: userCode,
+            isActive: true,
+            createdAt: new Date()
+        };
+        
+        await addDoc(collection(db, 'user_codes'), userCodeData);
+        
+        console.log('✅ User code created:', userCode);
+        return userCode;
+    } catch (error) {
+        console.error('Error creating user code:', error);
+        throw error;
+    }
+}
