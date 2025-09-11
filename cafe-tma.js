@@ -1108,6 +1108,23 @@ document.addEventListener('DOMContentLoaded', function() {
     waitForFirebase();
 });
 
+// Make functions globally available for onclick attributes
+window.loginCafe = loginCafe;
+window.logout = logout;
+window.closeModal = closeModal;
+window.startQRScanner = startQRScanner;
+window.stopQRScanner = stopQRScanner;
+window.startQRScannerSpend = startQRScannerSpend;
+window.stopQRScannerSpend = stopQRScannerSpend;
+window.applyManualCode = applyManualCode;
+window.applyManualCodeSpend = applyManualCodeSpend;
+window.confirmEarnPoints = confirmEarnPoints;
+window.confirmSpendPoints = confirmSpendPoints;
+window.showEarnPoints = showEarnPoints;
+window.showSpendPoints = showSpendPoints;
+window.showLoyaltySettings = showLoyaltySettings;
+window.saveLoyaltySettings = saveLoyaltySettings;
+
 // Close modals when clicking outside
 window.addEventListener('click', function(event) {
     const modals = document.querySelectorAll('.modal');
