@@ -116,7 +116,11 @@ async function createOrGetUser(telegramUser) {
         if (!userSnapshot.empty) {
             // User exists, return user data
             const userDoc = userSnapshot.docs[0];
-            const userData = { id: userDoc.id, ...userDoc.data() };
+            const userData = { 
+                id: userDoc.data().telegramId, // Use telegramId as the main ID
+                firebaseId: userDoc.id, // Keep Firebase ID for reference
+                ...userDoc.data() 
+            };
             console.log('✅ Existing user found:', userData.firstName);
             return userData;
         } else {
@@ -131,7 +135,8 @@ async function createOrGetUser(telegramUser) {
             };
             
             const userDoc = await window.firebase.addDoc(usersRef, newUser);
-            newUser.id = userDoc.id;
+            newUser.id = newUser.telegramId; // Use telegramId as the main ID
+            newUser.firebaseId = userDoc.id; // Keep Firebase ID for reference
             
             console.log('✅ New user created:', newUser.firstName);
             return newUser;
