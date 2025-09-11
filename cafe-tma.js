@@ -23,13 +23,19 @@ async function addLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, man
         console.log('🎯 Adding loyalty points:', { userId, cafeId, points, orderAmount });
         
         // Create loyalty account if it doesn't exist
+        console.log('🔧 Creating loyalty account...');
         await createLoyaltyAccount(userId, cafeId);
+        console.log('✅ Loyalty account created/verified');
         
         // Update points using the new function
+        console.log('🔧 Updating loyalty points...');
         const newPoints = await updateLoyaltyPoints(userId, cafeId, points);
+        console.log('✅ Loyalty points updated:', newPoints);
         
         // Create transaction record
+        console.log('🔧 Creating transaction record...');
         await createLoyaltyTransaction(userId, cafeId, 'earn', points, orderAmount, qrCode, manualCode);
+        console.log('✅ Transaction record created');
         
         console.log('✅ Points added successfully:', { 
             points, 
@@ -115,8 +121,8 @@ async function createLoyaltyTransaction(userId, cafeId, type, points, orderAmoun
             type: type, // 'earn' or 'spend'
             points: points,
             orderAmount: orderAmount,
-            qrCode: qrCode,
-            manualCode: manualCode,
+            qrCode: qrCode || null,
+            manualCode: manualCode || null,
             timestamp: new Date(),
             status: 'confirmed'
         };
@@ -764,7 +770,9 @@ async function loadCustomerData(userId, mode) {
             userId: userId,
             name: `${userData.firstName || 'Unknown'} ${userData.lastName || ''}`.trim(),
             points: points,
-            status: 'Ativo'
+            status: 'Ativo',
+            qrCode: null, // QR code not available in manual mode
+            manualCode: null // Manual code not available in manual mode
         };
         
         currentCustomer = customerData;
