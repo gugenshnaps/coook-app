@@ -145,8 +145,8 @@ window.showEarnPoints = function(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const qrData = `${userId}:${cafeId}:${userCode}`;
     const userCode = window.currentUserCode || '00000000';
+    const qrData = `${userId}:${cafeId}:${userCode}`;
     
     const modalContent = `
         <div class="earn-points-modal">
@@ -193,8 +193,8 @@ window.showSpendPoints = function(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const qrData = `${userId}:${cafeId}:${userCode}`;
     const userCode = window.currentUserCode || '00000000';
+    const qrData = `${userId}:${cafeId}:${userCode}`;
     
     const modalContent = `
         <div class="spend-points-modal">
@@ -2028,8 +2028,8 @@ function showEarnPoints(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const qrData = `${userId}:${cafeId}:${userCode}`;
     const userCode = window.currentUserCode || '00000000';
+    const qrData = `${userId}:${cafeId}:${userCode}`;
     
     const modalContent = `
         <div class="earn-points-modal">
@@ -2077,8 +2077,8 @@ function showSpendPoints(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const qrData = `${userId}:${cafeId}:${userCode}`;
     const userCode = window.currentUserCode || '00000000';
+    const qrData = `${userId}:${cafeId}:${userCode}`;
     
     const modalContent = `
         <div class="spend-points-modal">
