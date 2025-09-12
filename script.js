@@ -1388,14 +1388,9 @@ async function showLoyalty() {
                     ${loyaltyData.cafes.length > 0 ? 
                         loyaltyData.cafes.map(cafe => `
                             <div class="loyalty-cafe-item">
-                                <div class="cafe-photo">
-                                    ${cafe.photoUrl ? 
-                                        `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` :
-                                        `<div class="cafe-placeholder">☕</div>`
-                                    }
-                                </div>
                                 <div class="cafe-info">
                                     <h4>${cafe.name}</h4>
+                                    <p class="cafe-location">📍 ${cafe.address || cafe.city}</p>
                                 </div>
                                 <div class="cafe-points">
                                     <span class="points-number">${cafe.points}</span>
@@ -1473,8 +1468,8 @@ async function loadUserLoyaltyData() {
                     id: cafeId,
                     name: cafe.name,
                     city: cafe.city,
-                    points: points,
-                    photoUrl: cafe.photoUrls && cafe.photoUrls.length > 0 ? cafe.photoUrls[0] : cafe.photoUrl
+                    address: cafe.address,
+                    points: points
                 });
             }
         }
