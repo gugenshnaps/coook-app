@@ -878,6 +878,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
 
 .loyalty-cafe-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     background: rgba(255, 255, 255, 0.9);
     padding: 15px;
@@ -886,7 +887,6 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     border: 1px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    gap: 15px;
 }
 
 .loyalty-cafe-item:hover {
@@ -894,33 +894,8 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
-.cafe-photo {
-    width: 60px;
-    height: 60px;
-    border-radius: 10px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #e0e0e0;
-}
-
-.cafe-thumbnail {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.cafe-placeholder {
-    font-size: 24px;
-    color: #999;
-}
-
 .cafe-info {
     flex: 1;
-    min-width: 0;
 }
 
 .cafe-info h4 {
