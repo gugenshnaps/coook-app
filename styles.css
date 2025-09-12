@@ -878,7 +878,6 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
 
 .loyalty-cafe-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     background: rgba(255, 255, 255, 0.9);
     padding: 15px;
@@ -887,11 +886,35 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     border: 1px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    gap: 15px;
 }
 
 .loyalty-cafe-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.cafe-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cafe-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cafe-placeholder {
+    font-size: 20px;
+    color: #adb5bd;
 }
 
 .cafe-info {
@@ -902,7 +925,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     color: #333;
     font-size: 16px;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin: 0;
 }
 
 .cafe-location {
