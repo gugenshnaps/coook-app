@@ -1396,6 +1396,7 @@ async function showLoyalty() {
                                 </div>
                                 <div class="cafe-info">
                                     <h4>${cafe.name}</h4>
+                                    <p class="cafe-location">📍 ${cafe.city}</p>
                                 </div>
                                 <div class="cafe-points">
                                     <span class="points-number">${cafe.points}</span>
