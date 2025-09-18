@@ -221,8 +221,7 @@ async function addCity() {
         const readableId = cityName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
         const cityData = {
             name: cityName,
-            id: readableId,
-            slug: readableId
+            id: readableId
         };
         
         console.log('🔧 Adding city with data:', cityData);
