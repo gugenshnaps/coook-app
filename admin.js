@@ -51,9 +51,11 @@ async function loadCities() {
         
         cities = [];
         citiesSnapshot.forEach((doc) => {
+            const cityData = doc.data();
             cities.push({
-                id: doc.id,
-                ...doc.data()
+                firebaseId: doc.id,  // Firebase document ID for deletion
+                id: cityData.id,     // Readable ID (if exists)
+                ...cityData
             });
         });
         
@@ -99,9 +101,11 @@ function setupCitiesListener() {
             console.log('Cities updated in real-time');
             cities = [];
             snapshot.forEach((doc) => {
+                const cityData = doc.data();
                 cities.push({
-                    id: doc.id,
-                    ...doc.data()
+                    firebaseId: doc.id,  // Firebase document ID for deletion
+                    id: cityData.id,     // Readable ID (if exists)
+                    ...cityData
                 });
             });
             displayCities();
@@ -144,15 +148,20 @@ function displayCities() {
         return;
     }
     
-    citiesList.innerHTML = cities.map(city => `
-        <div class="city-item">
-            <div class="city-info">
-                <h3>${city.name}</h3>
-                <p>ID: ${city.id}</p>
+    citiesList.innerHTML = cities.map(city => {
+        // Show readable ID if available, otherwise show "Firebase ID"
+        const displayId = city.id || `Firebase: ${city.firebaseId || 'auto'}`;
+        
+        return `
+            <div class="city-item">
+                <div class="city-info">
+                    <h3>${city.name}</h3>
+                    <p>ID: ${displayId}</p>
+                </div>
+                <button onclick="deleteCity('${city.firebaseId || city.id}')" class="delete-btn">🗑️</button>
             </div>
-            <button onclick="deleteCity('${city.id}')" class="delete-btn">🗑️</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Display cafes in the UI
