@@ -208,13 +208,12 @@ async function addCity() {
             return;
         }
         
-        // Create city object
+        // Create city object (без кастомного ID)
         const cityData = {
-            name: cityName,
-            id: cityName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+            name: cityName
         };
         
-        // Add to Firebase
+        // Add to Firebase (Firebase автоматически создаст ID)
         const citiesRef = window.firebase.collection(window.firebase.db, 'cities');
         await window.firebase.addDoc(citiesRef, cityData);
         
