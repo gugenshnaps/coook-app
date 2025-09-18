@@ -650,42 +650,11 @@ let citiesData = [];
 let currentCity = null;
 let currentCafe = null;
 
-// Load saved city from localStorage
+// Load saved city from localStorage (simplified - main logic moved to populateCitySelect)
 function loadSavedCity() {
-    const savedCity = localStorage.getItem('coook_selected_city');
-    console.log('🔧 loadSavedCity called, savedCity from localStorage:', savedCity);
-    
-    if (savedCity) {
-        currentCity = savedCity;
-        console.log('🔧 Loaded saved city:', currentCity);
-        
-        // Update city select to show selected city
-        const citySelect = document.getElementById('citySelect');
-        if (citySelect) {
-            citySelect.value = savedCity;
-        }
-        
-        // Show "Show all" button if city is selected
-        const showAllBtn = document.getElementById('showAllCafes');
-        if (showAllBtn) {
-            showAllBtn.style.display = 'block';
-        }
-    } else {
-        currentCity = null;
-        console.log('🔧 No saved city found, currentCity set to null');
-        
-        // Update city select to show default option
-        const citySelect = document.getElementById('citySelect');
-        if (citySelect) {
-            citySelect.value = '';
-        }
-        
-        // Hide "Show all" button if no city is selected
-        const showAllBtn = document.getElementById('showAllCafes');
-        if (showAllBtn) {
-            showAllBtn.style.display = 'none';
-        }
-    }
+    // Reset currentCity to null initially - will be restored in populateCitySelect
+    currentCity = null;
+    console.log('🔧 currentCity reset to null, will be restored in populateCitySelect');
 }
 
 // Save selected city to localStorage
@@ -699,12 +668,6 @@ function saveSelectedCity(city) {
         localStorage.setItem('coook_selected_city', city);
     } else {
         localStorage.removeItem('coook_selected_city');
-    }
-    
-    // Show/hide "Show all" button
-    const showAllBtn = document.getElementById('showAllCafes');
-    if (showAllBtn) {
-        showAllBtn.style.display = city ? 'block' : 'none';
     }
     
     console.log('🔧 New currentCity:', currentCity);
@@ -888,6 +851,19 @@ function populateCitySelect(cities) {
         option.textContent = city;
         citySelect.appendChild(option);
     });
+
+    // Restore saved city selection after populating options
+    const savedCity = localStorage.getItem('coook_selected_city');
+    if (savedCity && cities.includes(savedCity)) {
+        citySelect.value = savedCity;
+        currentCity = savedCity;
+        console.log('🔧 Restored saved city in dropdown:', savedCity);
+    } else if (savedCity && !cities.includes(savedCity)) {
+        // Clear invalid saved city
+        localStorage.removeItem('coook_selected_city');
+        currentCity = null;
+        console.log('🔧 Cleared invalid saved city:', savedCity);
+    }
     
     console.log('🔧 City select populated with:', cities);
 }
@@ -1119,28 +1095,7 @@ function closeModal() {
 }
 
 // Show all cafes regardless of city selection
-function showAllCafes() {
-    console.log('🔧 showAllCafes called');
-    currentCity = null;
-    localStorage.removeItem('coook_selected_city');
-    
-    // Update city select
-    const citySelect = document.getElementById('citySelect');
-    if (citySelect) {
-        citySelect.value = '';
-    }
-    
-    // Hide show all button
-    const showAllBtn = document.getElementById('showAllCafes');
-    if (showAllBtn) {
-        showAllBtn.style.display = 'none';
-    }
-    
-    // Display all cafes
-    displayCafes();
-    
-    console.log('🔧 All cafes will be shown');
-}
+// Function removed - no longer using "Show all cafes" button
 
 // Show cities error
 function showCitiesError() {
@@ -1521,11 +1476,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Show all cafes button
-    const showAllBtn = document.getElementById('showAllCafes');
-    if (showAllBtn) {
-        showAllBtn.addEventListener('click', showAllCafes);
-    }
+    // Show all cafes button removed
     
     // Modal close
     const modal = document.getElementById('modal');
