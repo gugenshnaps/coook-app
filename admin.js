@@ -209,15 +209,21 @@ async function addCity() {
         }
         
         // Create city object with readable ID
+        const readableId = cityName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
         const cityData = {
             name: cityName,
-            id: cityName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-            slug: cityName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+            id: readableId,
+            slug: readableId
         };
+        
+        console.log('🔧 Adding city with data:', cityData);
         
         // Add to Firebase (Firebase создаст автоматический ID как primaryKey)
         const citiesRef = window.firebase.collection(window.firebase.db, 'cities');
-        await window.firebase.addDoc(citiesRef, cityData);
+        const docRef = await window.firebase.addDoc(citiesRef, cityData);
+        
+        console.log('✅ City added to Firebase with document ID:', docRef.id);
+        console.log('✅ City data that was sent:', cityData);
         
         // Clear input
         cityNameInput.value = '';
