@@ -10,41 +10,11 @@
     <!-- Firebase SDK -->
     <script type="module">
         // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import "./firebase-config.js";
+        
 
         // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCBv4tfDPHboApf6CXtUqLIReQA4KzjQJg",
-            authDomain: "coook-app.firebaseapp.com",
-            projectId: "coook-app",
-            storageBucket: "coook-app.firebasestorage.app",
-            messagingSenderId: "1027223490741",
-            appId: "1:1027223490741:web:a56a826d5d16d517f2aefc",
-            measurementId: "G-1XZV0W4QPR"
-        };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Make Firebase available globally with the structure expected by script.js
-        window.firebase = { 
-            db, 
-            collection, 
-            getDocs, 
-            addDoc, 
-            updateDoc, 
-            deleteDoc, 
-            doc, 
-            onSnapshot, 
-            query, 
-            where, 
-            orderBy,
-            arrayUnion
-        };
-        
-        console.log('🔥 Firebase initialized successfully!');
         console.log('🔥 Firebase functions available:', Object.keys(window.firebase));
     </script>
     
@@ -111,9 +81,9 @@
         console.log('🔍 Using QR-Server API for QR codes - no external libraries needed!');
     </script>
     <script>
-        // Check if library loaded
+        // Check if library loaded (delayed to not block initial loading)
         setTimeout(() => {
-            console.log('🔍 QR Library check after 2 seconds:');
+            console.log('🔍 QR Library check (background):');
             console.log('   - window.QRCode:', !!window.QRCode);
             console.log('   - window.qrcode:', !!window.qrcode);
             console.log('   - window.qrcodeGenerator:', !!window.qrcodeGenerator);
@@ -123,12 +93,12 @@
             } else if (window.qrcode) {
                 console.log('✅ qrcode library loaded successfully');
             } else {
-                console.error('❌ No QR libraries loaded');
+                console.log('ℹ️ No QR libraries loaded (using QR-Server API instead)');
             }
-        }, 2000);
+        }, 5000); // Delayed to 5 seconds to not block initial loading
     </script>
     
-    <script src="user-system.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="user-system.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

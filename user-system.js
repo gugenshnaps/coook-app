@@ -1,7 +1,10 @@
 // ===== SIMPLE USER SYSTEM FOR COOK APP =====
 
+import { createUserCode, getUserCode } from "./firebase-config.js";
+
 // Current user data - make it global for access from script.js
 window.currentUser = null;
+window.currentUserCode = null;
 
 // Initialize user system
 async function initializeUserSystem() {
@@ -20,6 +23,8 @@ async function initializeUserSystem() {
             console.log('✅ User system initialized for:', window.currentUser.firstName);
             // Load user's favorites
             await loadUserFavorites();
+            // Initialize user code
+            await initializeUserCode(telegramUser.id.toString());
         }
     } else {
         console.log('⚠️ No Telegram user data available');
@@ -111,7 +116,11 @@ async function createOrGetUser(telegramUser) {
         if (!userSnapshot.empty) {
             // User exists, return user data
             const userDoc = userSnapshot.docs[0];
-            const userData = { id: userDoc.id, ...userDoc.data() };
+            const userData = { 
+                id: userDoc.data().telegramId, // Use telegramId as the main ID
+                firebaseId: userDoc.id, // Keep Firebase ID for reference
+                ...userDoc.data() 
+            };
             console.log('✅ Existing user found:', userData.firstName);
             return userData;
         } else {
@@ -126,7 +135,8 @@ async function createOrGetUser(telegramUser) {
             };
             
             const userDoc = await window.firebase.addDoc(usersRef, newUser);
-            newUser.id = userDoc.id;
+            newUser.id = newUser.telegramId; // Use telegramId as the main ID
+            newUser.firebaseId = userDoc.id; // Keep Firebase ID for reference
             
             console.log('✅ New user created:', newUser.firstName);
             return newUser;
@@ -269,6 +279,18 @@ async function removeFavorite(cafeId) {
         window.currentUser.favorites = window.currentUser.favorites.filter(fav => fav.cafeId !== cafeId);
         
         console.log('✅ Cafe removed from favorites');
+        
+        // Update the favorites modal if it's currently open
+        if (window.currentModal && window.currentModal.includes('Favoritos')) {
+            // Check if modal is actually visible
+            const modal = document.getElementById('modal');
+            if (modal && modal.style.display === 'flex') {
+                // Re-render the favorites modal with updated data
+                if (typeof window.showFavorites === 'function') {
+                    window.showFavorites();
+                }
+            }
+        }
     } catch (error) {
         console.error('❌ Error removing from favorites:', error);
     }
@@ -284,3 +306,33 @@ function isCafeInFavorites(cafeId) {
 function getCurrentUser() {
     return window.currentUser;
 }
+
+// Create or get user code when user first enters
+async function initializeUserCode(telegramId) {
+    try {
+        let userCode = await getUserCode(telegramId);
+
+        if (!userCode) {
+            userCode = await createUserCode(telegramId);
+            console.log('✅ New user code created:', userCode);
+        } else {
+            console.log('✅ Existing user code found:', userCode);
+        }
+
+        // Store user code globally
+        window.currentUserCode = userCode;
+
+        return userCode;
+    } catch (error) {
+        console.error('Error initializing user code:', error);
+        throw error;
+    }
+}
+
+// Make functions available globally
+window.initializeUserSystem = initializeUserSystem;
+window.initializeUserCode = initializeUserCode;
+window.addToFavorites = addToFavorites;
+window.removeFavorite = removeFavorite;
+window.isCafeInFavorites = isCafeInFavorites;
+window.getCurrentUser = getCurrentUser;

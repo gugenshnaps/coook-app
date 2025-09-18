@@ -411,7 +411,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     flex: 1 !important; /* Занимает доступное пространство */
     display: flex !important;
     flex-direction: column !important;
-    justify-content: space-between !important; /* Равномерно распределяет контент */
+    justify-content: flex-start !important; /* Элементы идут сверху вниз */
 }
 
 .cafe-name {
@@ -436,16 +436,11 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
 
 .cafe-categories {
     font-size: 12px;
-    color: #4A90E2;
-    font-weight: 600;
+    color: #666;
+    font-weight: 500;
     line-height: 1.3;
-    margin: 8px 0;
-    padding: 4px 8px;
-    background: rgba(74, 144, 226, 0.1);
-    border-radius: 12px;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin: 4px 0 4px 0; /* Уменьшаем отступ снизу до 4px */
+    text-align: left;
     flex: 1; /* Занимает доступное пространство */
 }
 
@@ -770,6 +765,17 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     margin-left: 12px;
 }
 
+/* Loading spinner */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(74, 144, 226, 0.2);
+    border-radius: 50%;
+    border-top-color: #4A90E2;
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto 20px;
+}
+
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
@@ -868,6 +874,312 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     line-height: 1.5;
 }
 
+/* Loyalty cafes list */
+.loyalty-cafes {
+    margin: 20px 0;
+}
+
+.loyalty-cafes h3 {
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.loyalty-cafe-item {
+    display: flex;
+    flex-direction: row;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    gap: 10px;
+    min-height: 70px;
+    align-items: center;
+}
+
+.loyalty-cafe-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.cafe-main-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.cafe-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.cafe-info h4 {
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    display: block;
+    line-height: 1.1;
+}
+
+.cafe-location {
+    color: #666;
+    font-size: 10px;
+    margin: 2px 0 0 0;
+    display: block;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    line-height: 1.2;
+    max-height: 24px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.cafe-points {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    flex-shrink: 0;
+    margin-top: 10px;
+}
+
+.cafe-actions {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    flex-direction: column;
+    min-width: 100px;
+    flex-shrink: 0;
+}
+
+.action-btn {
+    padding: 8px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    white-space: nowrap;
+    width: 100%;
+    height: 28px;
+}
+
+.apply-loyalty-btn {
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    color: white;
+}
+
+.apply-loyalty-btn:hover {
+    background: linear-gradient(135deg, #357ABD, #2E6BA8);
+    transform: translateY(-1px);
+}
+
+.view-history-btn {
+    background: linear-gradient(135deg, #28A745, #20C997);
+    color: white;
+}
+
+.view-history-btn:hover {
+    background: linear-gradient(135deg, #20C997, #1EA085);
+    transform: translateY(-1px);
+}
+
+.points-number {
+    font-size: 16px;
+    font-weight: 700;
+    color: #4A90E2;
+    line-height: 1;
+}
+
+.points-label {
+    font-size: 8px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 1px;
+}
+
+.no-cafes {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 2px dashed rgba(0, 0, 0, 0.1);
+}
+
+/* History Modal Styles */
+.history-modal {
+    padding: 20px;
+}
+
+.history-modal h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.history-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.history-stats .stat-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.history-stats .stat-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.history-stats .stat-value {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #4A90E2;
+}
+
+.history-list h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.history-item.earn {
+    border-left: 4px solid #28A745;
+}
+
+.history-item.spend {
+    border-left: 4px solid #FF6B6B;
+}
+
+.history-icon {
+    font-size: 24px;
+    margin-right: 15px;
+    width: 40px;
+    text-align: center;
+}
+
+.history-details {
+    flex: 1;
+}
+
+.history-type {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.history-amount {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.history-description {
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+.history-date {
+    color: #999;
+    font-size: 11px;
+}
+
+.history-points {
+    font-size: 18px;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 60px;
+}
+
+.history-points.earn {
+    background: #d4edda;
+    color: #155724;
+}
+
+.history-points.spend {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.no-history {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+}
+
+.error-message {
+    text-align: center;
+    color: #e74c3c;
+    padding: 20px;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.error-message p {
+    margin: 5px 0;
+}
+
 /* Favorites */
 .empty-favorites {
     padding: 40px 20px;
@@ -950,6 +1262,59 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     
     .stat-number {
         font-size: 24px;
+    }
+    
+    .cafe-main-info {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 0;
+        justify-content: flex-start;
+    }
+    
+    .cafe-points {
+        align-self: flex-start;
+        margin-top: 8px;
+    }
+    
+    .cafe-location {
+        max-height: 20px; /* Even smaller on mobile */
+        font-size: 9px;
+        line-height: 1.1;
+    }
+    
+    .cafe-actions {
+        flex-direction: column;
+        gap: 3px;
+        min-width: 80px;
+        justify-content: center;
+    }
+    
+    .action-btn {
+        font-size: 9px;
+        padding: 6px 8px;
+        width: 100%;
+        height: 24px;
+    }
+    
+    .history-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .history-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .history-icon {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+    
+    .history-points {
+        align-self: flex-end;
+        min-width: auto;
     }
 }
 
@@ -1441,7 +1806,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
 .cafe-address {
     font-size: 12px;
     color: #666;
-    margin: 4px 0;
+    margin: 2px 0 14px 0; /* Отступ сверху 2px, снизу 14px */
     display: -webkit-box;
     -webkit-line-clamp: 2; /* Адрес на 2 строки */
     line-clamp: 2; /* Стандартное свойство для совместимости */
@@ -1788,7 +2153,7 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     cursor: pointer;
     transition: all 0.3s ease;
     width: 100%;
-    margin-top: auto !important; /* Прижимает кнопку к низу карточки */
+    margin-top: 16px !important; /* Фиксированный отступ от адреса */
     text-transform: uppercase;
     letter-spacing: 0.5px;
     align-self: flex-end !important; /* Выравнивает кнопку по низу */

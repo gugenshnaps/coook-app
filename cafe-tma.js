@@ -1,5 +1,17 @@
 // Cafe TMA - Sistema de Lealdade JavaScript
 
+import { 
+    findUserByCode, 
+    createLoyaltyAccount, 
+    updateLoyaltyPoints, 
+    getLoyaltyPoints,
+    db,
+    collection,
+    getDocs,
+    query,
+    where
+} from "./firebase-config.js";
+
 // Global variables
 let currentCafe = null;
 let cafes = [];
@@ -7,6 +19,7 @@ let loyaltySettings = null;
 let qrScanner = null;
 let qrScannerSpend = null;
 let currentCustomer = null;
+let statsUpdateInterval = null;
 
 // ===== LOYALTY POINTS SYSTEM =====
 
@@ -15,46 +28,30 @@ async function addLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, man
     try {
         console.log('🎯 Adding loyalty points:', { userId, cafeId, points, orderAmount });
         
-        // Get user loyalty data
-        const loyaltyData = await getUserLoyaltyData(userId, cafeId);
-        if (!loyaltyData) {
-            throw new Error('Failed to get loyalty data');
-        }
+        // Create loyalty account if it doesn't exist
+        console.log('🔧 Creating loyalty account...');
+        await createLoyaltyAccount(userId, cafeId);
+        console.log('✅ Loyalty account created/verified');
         
-        // Update points
-        const newTotalPoints = loyaltyData.totalPoints + points;
-        const newVisitCount = loyaltyData.visitCount + 1;
-        
-        // Determine new level based on total points
-        let newLevel = 'Bronze';
-        if (newTotalPoints >= 1000) newLevel = 'Platinum';
-        else if (newTotalPoints >= 500) newLevel = 'Gold';
-        else if (newTotalPoints >= 100) newLevel = 'Silver';
-        
-        // Update loyalty record
-        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
-        await window.firebase.updateDoc(window.firebase.doc(loyaltyRef, loyaltyData.id), {
-            totalPoints: newTotalPoints,
-            lastVisit: new Date(),
-            visitCount: newVisitCount,
-            level: newLevel
-        });
+        // Update points using the new function
+        console.log('🔧 Updating loyalty points...');
+        const newPoints = await updateLoyaltyPoints(userId, cafeId, points);
+        console.log('✅ Loyalty points updated:', newPoints);
         
         // Create transaction record
+        console.log('🔧 Creating transaction record...');
         await createLoyaltyTransaction(userId, cafeId, 'earn', points, orderAmount, qrCode, manualCode);
+        console.log('✅ Transaction record created');
         
         console.log('✅ Points added successfully:', { 
             points, 
-            newTotalPoints, 
-            newLevel, 
-            visitCount: newVisitCount 
+            newPoints
         });
         
         return {
             success: true,
-            totalPoints: newTotalPoints,
-            level: newLevel,
-            visitCount: newVisitCount
+            pointsAdded: points,
+            totalPoints: newPoints
         };
         
     } catch (error) {
@@ -68,46 +65,29 @@ async function spendLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, m
     try {
         console.log('💸 Spending loyalty points:', { userId, cafeId, points, orderAmount });
         
-        // Get user loyalty data
-        const loyaltyData = await getUserLoyaltyData(userId, cafeId);
-        if (!loyaltyData) {
-            throw new Error('Failed to get loyalty data');
-        }
+        // Get current points
+        const currentPoints = await getLoyaltyPoints(userId, cafeId);
         
         // Check if user has enough points
-        if (loyaltyData.totalPoints < points) {
+        if (currentPoints < points) {
             throw new Error('Insufficient points');
         }
         
-        // Update points
-        const newTotalPoints = loyaltyData.totalPoints - points;
-        
-        // Determine new level based on remaining points
-        let newLevel = 'Bronze';
-        if (newTotalPoints >= 1000) newLevel = 'Platinum';
-        else if (newTotalPoints >= 500) newLevel = 'Gold';
-        else if (newTotalPoints >= 100) newLevel = 'Silver';
-        
-        // Update loyalty record
-        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
-        await window.firebase.updateDoc(window.firebase.doc(loyaltyRef, loyaltyData.id), {
-            totalPoints: newTotalPoints,
-            level: newLevel
-        });
+        // Update points (subtract points)
+        const newPoints = await updateLoyaltyPoints(userId, cafeId, -points);
         
         // Create transaction record
         await createLoyaltyTransaction(userId, cafeId, 'spend', points, orderAmount, qrCode, manualCode);
         
         console.log('✅ Points spent successfully:', { 
             points, 
-            newTotalPoints, 
-            newLevel 
+            newPoints
         });
         
         return {
             success: true,
-            totalPoints: newTotalPoints,
-            level: newLevel
+            pointsSpent: points,
+            totalPoints: newPoints
         };
         
     } catch (error) {
@@ -119,36 +99,17 @@ async function spendLoyaltyPoints(userId, cafeId, points, orderAmount, qrCode, m
 // Get or create user loyalty data for a specific cafe
 async function getUserLoyaltyData(userId, cafeId) {
     try {
-        const loyaltyRef = window.firebase.collection(window.firebase.db, 'user_loyalty_points');
-        const userLoyaltyQuery = window.firebase.query(
-            loyaltyRef,
-            window.firebase.where('userId', '==', userId),
-            window.firebase.where('cafeId', '==', cafeId)
-        );
+        // Create loyalty account if it doesn't exist
+        await createLoyaltyAccount(userId, cafeId);
         
-        const loyaltySnapshot = await window.firebase.getDocs(userLoyaltyQuery);
+        // Get current points
+        const points = await getLoyaltyPoints(userId, cafeId);
         
-        if (!loyaltySnapshot.empty) {
-            const loyaltyDoc = loyaltySnapshot.docs[0];
-            return { id: loyaltyDoc.id, ...loyaltyDoc.data() };
-        } else {
-            // Create new loyalty record
-            const newLoyaltyData = {
-                userId: userId,
-                cafeId: cafeId,
-                totalPoints: 0,
-                lastVisit: null,
-                visitCount: 0,
-                level: 'Bronze',
-                createdAt: new Date()
-            };
-            
-            const loyaltyDoc = await window.firebase.addDoc(loyaltyRef, newLoyaltyData);
-            newLoyaltyData.id = loyaltyDoc.id;
-            
-            console.log('✅ New loyalty record created for user:', userId, 'cafe:', cafeId);
-            return newLoyaltyData;
-        }
+        return {
+            userId: userId,
+            cafeId: cafeId,
+            totalPoints: points
+        };
     } catch (error) {
         console.error('❌ Error getting user loyalty data:', error);
         return null;
@@ -166,8 +127,8 @@ async function createLoyaltyTransaction(userId, cafeId, type, points, orderAmoun
             type: type, // 'earn' or 'spend'
             points: points,
             orderAmount: orderAmount,
-            qrCode: qrCode,
-            manualCode: manualCode,
+            qrCode: qrCode || null,
+            manualCode: manualCode || null,
             timestamp: new Date(),
             status: 'confirmed'
         };
@@ -182,6 +143,10 @@ async function createLoyaltyTransaction(userId, cafeId, type, points, orderAmoun
 
 // Wait for Firebase to initialize
 function waitForFirebase() {
+    console.log('🔍 Checking Firebase availability...');
+    console.log('   - window.firebase:', !!window.firebase);
+    console.log('   - window.firebase.db:', !!(window.firebase && window.firebase.db));
+    
     if (window.firebase && window.firebase.db) {
         console.log('🔥 Firebase ready, initializing cafe TMA...');
         initializeCafeTMA();
@@ -216,6 +181,13 @@ async function initializeCafeTMA() {
 async function loadCafes() {
     try {
         console.log('📚 Loading cafes from Firebase...');
+        console.log('   - Firebase available:', !!window.firebase);
+        console.log('   - Firebase.db available:', !!(window.firebase && window.firebase.db));
+        
+        if (!window.firebase || !window.firebase.db) {
+            throw new Error('Firebase not initialized');
+        }
+        
         const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
         const cafesSnapshot = await window.firebase.getDocs(cafesRef);
         
@@ -228,6 +200,7 @@ async function loadCafes() {
         });
         
         console.log('✅ Cafes loaded:', cafes.length);
+        console.log('   - Cafe names:', cafes.map(c => c.name));
     } catch (error) {
         console.error('❌ Error loading cafes:', error);
         throw error;
@@ -308,7 +281,7 @@ async function loginCafe() {
                 await loadLoyaltySettings(cafeId);
                 
                 // Show dashboard
-                showDashboard();
+                await showDashboard();
                 
                 console.log('✅ Login successful for cafe:', cafe.name);
             }
@@ -462,7 +435,7 @@ function updateLoyaltySettingsUI() {
 }
 
 // Show dashboard
-function showDashboard() {
+async function showDashboard() {
     document.getElementById('loginScreen').classList.remove('active');
     document.getElementById('dashboardScreen').classList.add('active');
     
@@ -471,7 +444,13 @@ function showDashboard() {
     document.getElementById('cafeLocation').textContent = `${currentCafe.city} - ${currentCafe.address}`;
     
     // Load daily statistics
-    loadDailyStats();
+    await loadDailyStats();
+    
+    // Set up real-time updates every 30 seconds
+    if (statsUpdateInterval) {
+        clearInterval(statsUpdateInterval);
+    }
+    statsUpdateInterval = setInterval(loadDailyStats, 30000); // Update every 30 seconds
     
     console.log('✅ Dashboard shown for cafe:', currentCafe.name);
 }
@@ -479,15 +458,63 @@ function showDashboard() {
 // Load daily statistics
 async function loadDailyStats() {
     try {
-        // For now, we'll use placeholder data
-        // In the future, this will load real statistics from Firebase
-        document.getElementById('dailyVisitors').textContent = '12';
-        document.getElementById('dailyTransactions').textContent = '8';
-        document.getElementById('dailyPoints').textContent = '156';
+        const today = new Date();
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
         
-        console.log('📊 Daily stats loaded (placeholder)');
+        console.log('📊 Loading daily stats for:', currentCafe.id);
+        console.log('📅 Date range:', startOfDay.toISOString(), 'to', endOfDay.toISOString());
+        
+        // Get today's loyalty transactions for this cafe
+        const loyaltyHistoryRef = collection(db, 'loyaltyHistory');
+        const q = query(
+            loyaltyHistoryRef,
+            where('cafeId', '==', currentCafe.id),
+            where('timestamp', '>=', startOfDay),
+            where('timestamp', '<', endOfDay)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        let visitors = new Set();
+        let transactions = 0;
+        let pointsDistributed = 0;
+        
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            
+            // Count unique visitors
+            if (data.userCode) {
+                visitors.add(data.userCode);
+            }
+            
+            // Count transactions
+            transactions++;
+            
+            // Count points distributed (only for 'earn' transactions)
+            if (data.type === 'earn' && data.points) {
+                pointsDistributed += data.points;
+            }
+        });
+        
+        // Update the UI with real data
+        document.getElementById('dailyVisitors').textContent = visitors.size;
+        document.getElementById('dailyTransactions').textContent = transactions;
+        document.getElementById('dailyPoints').textContent = pointsDistributed;
+        
+        console.log('📊 Real daily stats loaded:', {
+            visitors: visitors.size,
+            transactions: transactions,
+            pointsDistributed: pointsDistributed
+        });
+        
     } catch (error) {
         console.error('❌ Error loading daily stats:', error);
+        
+        // Fallback to zero values if there's an error
+        document.getElementById('dailyVisitors').textContent = '0';
+        document.getElementById('dailyTransactions').textContent = '0';
+        document.getElementById('dailyPoints').textContent = '0';
     }
 }
 
@@ -708,12 +735,11 @@ async function applyManualCode() {
     try {
         console.log('⌨️ Processing manual code:', code);
         
-        // Convert 8-digit code to user ID (simple mapping for demo)
-        // In real app, this would be a proper lookup table
-        const userId = await convertCodeToUserId(code);
+        // Find user by code using the new function
+        const userData = await findUserByCode(code);
         
-        if (userId) {
-            await loadCustomerData(userId, 'earn');
+        if (userData) {
+            await loadCustomerData(userData.telegramId, 'earn');
         } else {
             showError('Código inválido! Cliente não encontrado.');
         }
@@ -741,11 +767,11 @@ async function applyManualCodeSpend() {
     try {
         console.log('⌨️ Processing manual code for spending:', code);
         
-        // Convert 8-digit code to user ID
-        const userId = await convertCodeToUserId(code);
+        // Find user by code using the new function
+        const userData = await findUserByCode(code);
         
-        if (userId) {
-            await loadCustomerData(userId, 'spend');
+        if (userData) {
+            await loadCustomerData(userData.telegramId, 'spend');
         } else {
             showError('Código inválido! Cliente não encontrado.');
         }
@@ -780,14 +806,33 @@ async function loadCustomerData(userId, mode) {
     try {
         console.log('👤 Loading customer data for user:', userId, 'mode:', mode);
         
-        // For demo purposes, we'll create mock customer data
-        // In real app, this would query Firebase for user data
+        // Get real user data from Firebase
+        const userRef = window.firebase.collection(window.firebase.db, 'users');
+        const userQuery = window.firebase.query(
+            userRef,
+            window.firebase.where('telegramId', '==', userId)
+        );
+        
+        const userSnapshot = await window.firebase.getDocs(userQuery);
+        
+        if (userSnapshot.empty) {
+            throw new Error('User not found');
+        }
+        
+        const userDoc = userSnapshot.docs[0];
+        const userData = userDoc.data();
+        
+        // Get loyalty points for this cafe
+        const points = await getLoyaltyPoints(userId, currentCafe.id);
         
         const customerData = {
             id: userId,
-            name: `Cliente ${userId}`,
-            points: Math.floor(Math.random() * 100) + 10, // Random points 10-110
-            status: 'Ativo'
+            userId: userId,
+            name: `${userData.firstName || 'Unknown'} ${userData.lastName || ''}`.trim(),
+            points: points,
+            status: 'Ativo',
+            qrCode: null, // QR code not available in manual mode
+            manualCode: null // Manual code not available in manual mode
         };
         
         currentCustomer = customerData;
@@ -837,7 +882,10 @@ function displayCustomerInfoSpend(customer) {
     
     customerName.textContent = customer.name;
     customerPoints.textContent = customer.points;
-    discountValue.textContent = `R$ ${(customer.points * 0.10).toFixed(2)}`;
+    
+    // Calculate discount value (1 point = R$ 0.10, but should be configurable)
+    const pointsToMoneyRate = 0.10; // This should come from loyalty settings
+    discountValue.textContent = `R$ ${(customer.points * pointsToMoneyRate).toFixed(2)}`;
     
     customerInfo.style.display = 'block';
 }
@@ -920,7 +968,7 @@ async function confirmEarnPoints() {
         );
         
         if (result.success) {
-            showSuccess(`✅ ${pointsToEarn} pontos confirmados para ${currentCustomer.name} (pedido de R$ ${orderAmount.toFixed(2)})!\n🎯 Total: ${result.totalPoints} pontos | Nível: ${result.level}`);
+            showSuccess(`✅ ${pointsToEarn} pontos confirmados para ${currentCustomer.name} (pedido de R$ ${orderAmount.toFixed(2)})!\n🎯 Total: ${result.totalPoints} pontos`);
         } else {
             showError('Erro ao adicionar pontos: ' + result.error);
             return;
@@ -939,7 +987,7 @@ async function confirmEarnPoints() {
         // Refresh daily stats
         loadDailyStats();
         
-        console.log('✅ Points earned:', pointsToEarn, 'for customer:', currentCustomer.name, 'order:', orderAmount);
+        console.log('✅ Points earned:', pointsToEarn, 'for customer:', currentCustomer?.name || 'Unknown', 'order:', orderAmount);
         
     } catch (error) {
         console.error('❌ Error confirming points:', error);
@@ -957,8 +1005,9 @@ function calculateFinalAmount() {
         return;
     }
     
-    // Convert points to discount (1 point = R$ 0.10)
-    const discountAmount = Math.min(customerPoints * 0.10, orderAmount * 0.5); // Max 50% discount
+    // Convert points to discount (1 point = R$ 0.10, but should be configurable)
+    const pointsToMoneyRate = 0.10; // This should come from loyalty settings
+    const discountAmount = Math.min(customerPoints * pointsToMoneyRate, orderAmount * 0.5); // Max 50% discount
     const finalAmount = Math.max(orderAmount - discountAmount, 0);
     
     document.getElementById('finalAmount').textContent = `R$ ${finalAmount.toFixed(2)}`;
@@ -980,9 +1029,10 @@ async function confirmSpendPoints() {
     }
     
     try {
-        // Calculate points to spend
-        const pointsToSpend = Math.floor(document.getElementById('pointsToSpend').value) || 0;
+        // Calculate points to spend based on discount amount
         const discountAmount = orderAmount - finalAmount;
+        const pointsToMoneyRate = 0.10; // This should come from loyalty settings
+        const pointsToSpend = Math.floor(discountAmount / pointsToMoneyRate);
         
         // Spend loyalty points using the new system
         const result = await spendLoyaltyPoints(
@@ -995,7 +1045,7 @@ async function confirmSpendPoints() {
         );
         
         if (result.success) {
-            showSuccess(`✅ Desconto aplicado para ${currentCustomer.name}! Valor final: R$ ${finalAmount.toFixed(2)} (desconto: R$ ${discountAmount.toFixed(2)})\n🎯 Total restante: ${result.totalPoints} pontos | Nível: ${result.level}`);
+            showSuccess(`✅ Desconto aplicado para ${currentCustomer.name}! Valor final: R$ ${finalAmount.toFixed(2)} (desconto: R$ ${discountAmount.toFixed(2)})\n🎯 Total restante: ${result.totalPoints} pontos`);
         } else {
             showError('Erro ao gastar pontos: ' + result.error);
             return;
@@ -1087,6 +1137,12 @@ function logout() {
     currentCafe = null;
     loyaltySettings = null;
     
+    // Clear stats update interval
+    if (statsUpdateInterval) {
+        clearInterval(statsUpdateInterval);
+        statsUpdateInterval = null;
+    }
+    
     document.getElementById('dashboardScreen').classList.remove('active');
     document.getElementById('loginScreen').classList.add('active');
     
@@ -1125,6 +1181,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     waitForFirebase();
 });
+
+// Make functions globally available for onclick attributes
+window.loginCafe = loginCafe;
+window.logout = logout;
+window.closeModal = closeModal;
+window.startQRScanner = startQRScanner;
+window.stopQRScanner = stopQRScanner;
+window.startQRScannerSpend = startQRScannerSpend;
+window.stopQRScannerSpend = stopQRScannerSpend;
+window.applyManualCode = applyManualCode;
+window.applyManualCodeSpend = applyManualCodeSpend;
+window.confirmEarnPoints = confirmEarnPoints;
+window.confirmSpendPoints = confirmSpendPoints;
+window.showEarnPoints = showEarnPoints;
+window.showSpendPoints = showSpendPoints;
+window.showLoyaltySettings = showLoyaltySettings;
+window.saveLoyaltySettings = saveLoyaltySettings;
 
 // Close modals when clicking outside
 window.addEventListener('click', function(event) {

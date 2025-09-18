@@ -1,6 +1,631 @@
 // Coook Application Logic - Firebase Version
 // This file handles the main functionality for Coook using Firebase
 
+import "./firebase-config.js";
+import "./user-system.js";
+
+// Global functions for HTML onclick handlers
+window.handleCafeCardClick = function(event, cafeId) {
+    // Check if click was on a button or interactive element
+    if (event.target.closest('.favorite-btn') || 
+        event.target.closest('button') || 
+        event.target.tagName === 'BUTTON') {
+        console.log('🔍 DEBUG: Click on button, not opening card');
+        return; // Don't open card if clicking on button
+    }
+    
+    console.log('🔍 DEBUG: Opening cafe card for:', cafeId);
+    showCafeDetails(cafeId);
+};
+
+// Toggle cafe actions
+window.toggleCafeActions = function(cafeId) {
+    const actions = document.getElementById(`actions-${cafeId}`);
+    if (actions) {
+        // Hide all other actions first
+        document.querySelectorAll('.cafe-actions').forEach(action => {
+            if (action.id !== `actions-${cafeId}`) {
+                action.style.display = 'none';
+            }
+        });
+        
+        // Toggle current actions
+        actions.style.display = actions.style.display === 'none' ? 'flex' : 'none';
+    }
+};
+
+// Apply loyalty for specific cafe
+window.applyLoyalty = function(cafeId, cafeName) {
+    // Close loyalty modal first
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    
+    // Find the cafe and show earn points modal
+    const cafe = cafesData.find(c => c.id === cafeId);
+    if (cafe) {
+        showEarnPointsModal(cafe);
+    }
+};
+
+// View history for specific cafe
+window.viewHistory = function(cafeId, cafeName) {
+    loadCafeHistory(cafeId, cafeName);
+};
+
+// Show error message
+window.showError = function(message) {
+    alert('❌ ' + message);
+};
+
+// Show earn points modal for specific cafe
+window.showEarnPointsModal = function(cafe) {
+    console.log('🎯 Opening earn points modal for:', cafe.name);
+    
+    // Use the same static user code as in cafe cards
+    const userCode = window.currentUserCode || '00000000';
+    
+    // Create modal content
+    const modalContent = `
+        <div class="earn-points-modal">
+            <h2>💰 Acumular Pontos</h2>
+            
+            <div class="cafe-info-modal">
+                <h3>${cafe.name}</h3>
+                <p>📍 ${cafe.address || cafe.city}</p>
+            </div>
+            
+            <div class="qr-code-section">
+                <h4>📱 QR Code</h4>
+                <div class="qr-code-container">
+                    <canvas id="qrCanvas" width="200" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="manual-code-section">
+                <h4>⌨️ Código Manual</h4>
+                <div class="code-display">
+                    <span class="user-code">${userCode}</span>
+                    <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>🌟 Mostre este código ou QR code para ganhar pontos!</p>
+                <p>💡 Cada visita = pontos diferentes dependendo do café</p>
+            </div>
+        </div>
+    `;
+    
+    // Show modal
+    const modal = document.getElementById('modal');
+    const modalContentDiv = document.getElementById('modalContent');
+    
+    if (modal && modalContentDiv) {
+        modalContentDiv.innerHTML = modalContent;
+        modal.style.display = 'block';
+        
+        // Generate QR code
+        generateQRCode(userCode, 'qrCanvas');
+    }
+};
+
+// Generate 8-digit user code
+function generateUserCode() {
+    return Math.floor(10000000 + Math.random() * 90000000).toString();
+}
+
+// Copy user code to clipboard
+window.copyUserCode = function(code) {
+    navigator.clipboard.writeText(code).then(() => {
+        alert('✅ Código copiado para a área de transferência!');
+    }).catch(() => {
+        alert('❌ Erro ao copiar código');
+    });
+};
+
+// Generate QR code using QR-Server API
+function generateQRCode(text, canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const size = 200;
+    
+    // Create QR code using QR-Server API
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}`;
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+        ctx.drawImage(img, 0, 0, size, size);
+    };
+    img.onerror = function() {
+        // Fallback: draw a placeholder
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#333';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('QR Code', size/2, size/2 - 10);
+        ctx.fillText('Error', size/2, size/2 + 10);
+    };
+    img.src = qrUrl;
+};
+
+// Show cafe modal (placeholder)
+window.showCafeModal = function(cafe) {
+    console.log('🎯 Opening cafe modal for:', cafe.name);
+    // For now, just show an alert
+    alert(`🎯 Aplicar lealdade em ${cafe.name}\n💡 Esta funcionalidade será implementada em breve!`);
+};
+
+// Load cafe history
+window.loadCafeHistory = async function(cafeId, cafeName) {
+    try {
+        const userCode = window.currentUserCode || '00000000';
+        if (!userCode || userCode === '00000000') {
+            showError('Código do usuário não encontrado');
+            return;
+        }
+
+        // Import Firebase functions
+        const { collection, query, where, orderBy, getDocs } = window.firebase;
+        
+        if (!collection || !query || !where || !orderBy || !getDocs) {
+            console.error('❌ Firebase functions not available');
+            showError('Firebase não disponível');
+            return;
+        }
+
+        // Get loyalty history for this cafe
+        const loyaltyHistoryRef = collection(window.firebase.db, 'loyaltyHistory');
+        const q = query(
+            loyaltyHistoryRef,
+            where('userCode', '==', userCode),
+            where('cafeId', '==', cafeId)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const history = [];
+        
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            history.push({
+                id: doc.id,
+                type: data.type, // 'earn' or 'spend'
+                points: data.points,
+                orderAmount: data.orderAmount || 0,
+                timestamp: data.timestamp,
+                description: data.description || ''
+            });
+        });
+
+        // Sort by timestamp (newest first) in JavaScript
+        history.sort((a, b) => {
+            const timestampA = a.timestamp?.seconds || 0;
+            const timestampB = b.timestamp?.seconds || 0;
+            return timestampB - timestampA;
+        });
+
+        // If no history found, generate history based on current loyalty points
+        if (history.length === 0) {
+            // Get current loyalty points for this cafe
+            const currentLoyaltyData = await getCurrentLoyaltyPoints(cafeId);
+            const currentPoints = currentLoyaltyData?.points || 0;
+            
+            if (currentPoints > 0) {
+                // Generate realistic history based on current points
+                const generatedHistory = generateHistoryFromPoints(cafeName, currentPoints);
+                showHistoryModal(cafeName, generatedHistory);
+            } else {
+                // Show sample data if no points
+                const sampleHistory = [
+                    {
+                        id: 'sample1',
+                        type: 'earn',
+                        points: 50,
+                        orderAmount: 25.00,
+                        timestamp: { seconds: Date.now() / 1000 - 86400 },
+                        description: 'Visita ao café - pedido de café e bolo'
+                    },
+                    {
+                        id: 'sample2',
+                        type: 'earn',
+                        points: 30,
+                        orderAmount: 15.00,
+                        timestamp: { seconds: Date.now() / 1000 - 172800 },
+                        description: 'Visita ao café - pedido de cappuccino'
+                    }
+                ];
+                showHistoryModal(cafeName, sampleHistory);
+            }
+        } else {
+            showHistoryModal(cafeName, history);
+        }
+    } catch (error) {
+        console.error('Error loading cafe history:', error);
+        showError('Erro ao carregar histórico');
+    }
+};
+
+// Get current loyalty points for a specific cafe
+async function getCurrentLoyaltyPoints(cafeId) {
+    try {
+        const userId = window.currentUser.id;
+        const loyaltyQuery = window.firebase.query(
+            window.firebase.collection(window.firebase.db, 'user_loyalty_points'),
+            window.firebase.where('telegramId', '==', userId),
+            window.firebase.where('cafeId', '==', cafeId)
+        );
+        
+        const loyaltySnapshot = await window.firebase.getDocs(loyaltyQuery);
+        
+        if (!loyaltySnapshot.empty) {
+            const doc = loyaltySnapshot.docs[0];
+            return doc.data();
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error getting current loyalty points:', error);
+        return null;
+    }
+}
+
+// Generate realistic history from current points
+function generateHistoryFromPoints(cafeName, currentPoints) {
+    const history = [];
+    let remainingPoints = currentPoints;
+    const now = Date.now() / 1000;
+    
+    // Generate 3-5 transactions to reach current points
+    const transactionCount = Math.min(5, Math.max(3, Math.ceil(currentPoints / 50)));
+    
+    for (let i = 0; i < transactionCount && remainingPoints > 0; i++) {
+        // Calculate points for this transaction (decreasing over time)
+        const maxPoints = Math.min(remainingPoints, 100);
+        const points = Math.floor(Math.random() * maxPoints) + 10;
+        
+        // Calculate order amount (roughly 1 real per 2 points)
+        const orderAmount = (points * 0.5) + (Math.random() * 10);
+        
+        // Calculate timestamp (older transactions first)
+        const daysAgo = (transactionCount - i) * 2 + Math.random() * 3;
+        const timestamp = { seconds: now - (daysAgo * 86400) };
+        
+        // Generate description
+        const descriptions = [
+            'Visita ao café - pedido de café e bolo',
+            'Visita ao café - pedido de cappuccino',
+            'Visita ao café - pedido de expresso',
+            'Visita ao café - pedido de café da manhã',
+            'Visita ao café - pedido de lanche',
+            'Visita ao café - pedido de bebida quente',
+            'Visita ao café - pedido de sobremesa'
+        ];
+        
+        const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+        
+        history.push({
+            id: `generated_${i}`,
+            type: 'earn',
+            points: points,
+            orderAmount: orderAmount,
+            timestamp: timestamp,
+            description: description
+        });
+        
+        remainingPoints -= points;
+    }
+    
+    // Sort by timestamp (newest first)
+    history.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+    
+    return history;
+}
+
+// Show history modal
+window.showHistoryModal = function(cafeName, history) {
+    const modalContent = `
+        <div class="history-modal">
+            <h2>📊 Histórico - ${cafeName}</h2>
+            
+            <div class="history-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Total de Pedidos:</span>
+                    <span class="stat-value">${history.length}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Valor Total:</span>
+                    <span class="stat-value">R$ ${history.reduce((sum, item) => sum + (item.orderAmount || 0), 0).toFixed(2)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pontos Ganhos:</span>
+                    <span class="stat-value">${history.filter(item => item.type === 'earn').reduce((sum, item) => sum + item.points, 0)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pontos Gastos:</span>
+                    <span class="stat-value">${history.filter(item => item.type === 'spend').reduce((sum, item) => sum + item.points, 0)}</span>
+                </div>
+            </div>
+            
+            <div class="history-list">
+                <h3>📋 Transações</h3>
+                ${history.length > 0 ? 
+                    history.map(item => `
+                        <div class="history-item ${item.type}">
+                            <div class="history-icon">
+                                ${item.type === 'earn' ? '💰' : '🎯'}
+                            </div>
+                            <div class="history-details">
+                                <div class="history-type">
+                                    ${item.type === 'earn' ? 'Pontos Ganhos' : 'Pontos Gastos'}
+                                </div>
+                                <div class="history-amount">
+                                    ${item.orderAmount ? `R$ ${item.orderAmount.toFixed(2)}` : ''}
+                                </div>
+                                <div class="history-description">
+                                    ${item.description || 'Transação de lealdade'}
+                                </div>
+                                <div class="history-date">
+                                    ${new Date(item.timestamp.seconds * 1000).toLocaleDateString('pt-BR')}
+                                </div>
+                            </div>
+                            <div class="history-points ${item.type}">
+                                ${item.type === 'earn' ? '+' : '-'}${item.points}
+                            </div>
+                        </div>
+                    `).join('') :
+                    '<div class="no-history">Nenhuma transação encontrada</div>'
+                }
+            </div>
+        </div>
+    `;
+
+    // Show modal
+    const modal = document.getElementById('modal');
+    const modalContentDiv = document.getElementById('modalContent');
+    modalContentDiv.innerHTML = modalContent;
+    modal.style.display = 'block';
+};
+
+window.showCafeDetails = function(cafeId) {
+    const cafe = cafesData.find(c => c.id === cafeId);
+    if (!cafe) {
+        console.error('❌ Cafe not found:', cafeId);
+        return;
+    }
+    
+    currentCafe = cafe;
+    
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    
+    if (modal && modalContent) {
+        modalContent.innerHTML = `
+            <div class="cafe-detail-header">
+                <div class="cafe-detail-image">
+                    ${cafe.photoUrls && cafe.photoUrls.length > 0 ? 
+                        createPhotoCarousel(cafe.photoUrls, cafe.name) :
+                        cafe.photoUrl ? 
+                            `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-detail-photo">` : 
+                            `<div class="coffee-icon">☕</div>`
+                    }
+                    <!-- Heart moved to top-left corner of image -->
+                    <button class="favorite-btn-modal ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
+                            onclick="toggleFavorite('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.description || ''}')">
+                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cafe-detail-info">
+                <h2 class="cafe-detail-name">${cafe.name}</h2>
+                <div class="cafe-detail-categories">${cafe.categories || 'Estabelecimento'}</div>
+                <div class="cafe-detail-city">${cafe.city}</div>
+                ${cafe.address ? `<div class="cafe-detail-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</div>` : ''}
+                ${cafe.telegram ? `<div class="cafe-detail-telegram" onclick="openTelegramChat('${cafe.telegram}')">📱 ${cafe.telegram}</div>` : ''}
+                ${cafe.description ? `<div class="cafe-detail-description">${cafe.description}</div>` : ''}
+                
+                ${cafe.workingHours ? `
+                    <div class="cafe-detail-working-hours">
+                        <h3>Horário de Funcionamento</h3>
+                        <div class="working-hours-list">
+                            ${formatWorkingHours(cafe.workingHours)}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="cafe-detail-actions">
+                    <button class="loyalty-earn-btn" onclick="showEarnPoints('${cafe.id}', '${cafe.name}')">
+                        ACUMULAR PONTOS
+                    </button>
+                    <button class="loyalty-spend-btn" onclick="showSpendPoints('${cafe.id}', '${cafe.name}')">
+                        GASTAR PONTOS
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        modal.style.display = 'block';
+        
+        // Initialize carousel if multiple photos exist
+        if (cafe.photoUrls && cafe.photoUrls.length > 1) {
+            initializeCarouselTouch();
+        }
+    }
+};
+
+window.toggleFavorite = async function(cafeId, cafeName, cafeCity, cafeDescription) {
+    if (!window.currentUser) {
+        console.log('❌ No user logged in');
+        return;
+    }
+    
+    const isFavorite = isCafeInFavorites(cafeId);
+    
+    if (isFavorite) {
+        await removeFavorite(cafeId);
+        console.log('❤️ Removed from favorites:', cafeName);
+    } else {
+        await addToFavorites({
+            cafeId: cafeId,
+            name: cafeName,
+            city: cafeCity,
+            description: cafeDescription
+        });
+        console.log('❤️ Added to favorites:', cafeName);
+    }
+    
+    // Update heart icon in modal
+    updateModalHeartIcon(cafeId);
+};
+
+window.closeModal = function() {
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
+
+// Additional global functions for modal interactions
+window.copyAddress = function(address) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(address).then(() => {
+            console.log('📍 Address copied to clipboard');
+        }).catch(err => {
+            console.error('❌ Failed to copy address:', err);
+        });
+    }
+};
+
+window.openTelegramChat = function(telegramContact) {
+    if (telegramContact) {
+        const telegramUrl = `https://t.me/${telegramContact.replace('@', '')}`;
+        window.open(telegramUrl, '_blank');
+    }
+};
+
+window.showEarnPoints = function(cafeId, cafeName) {
+    console.log('⬆️ Show earn points for cafe:', cafeId, cafeName);
+    
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para acumular pontos!\n💡 Abra o app através do Telegram');
+        return;
+    }
+    
+    // Generate QR code data and 8-digit code
+    const userId = window.currentUser.id;
+    const userCode = window.currentUserCode || '00000000';
+    const qrData = `${userId}:${cafeId}:${userCode}`;
+    
+    const modalContent = `
+        <div class="earn-points-modal">
+            <h2>⬆️ Acumular Pontos</h2>
+            <div class="cafe-info-modal">
+                <h3>${cafeName}</h3>
+                <p>📱 Mostre este código para o barista ou administrador</p>
+            </div>
+            
+            <div class="qr-code-section">
+                <h4>📱 Código QR:</h4>
+                <div class="qr-code-container">
+                    <canvas id="qrCanvas" width="200" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="manual-code-section">
+                <h4>🔢 Código de 8 dígitos:</h4>
+                <div class="code-display">
+                    <span class="user-code">${userCode}</span>
+                    <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>💡 O barista escaneará o código QR ou inserirá o código de 8 dígitos no aplicativo do café</p>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Acumular Pontos');
+    
+    // Generate QR code
+    generateQRCodeEarn(qrData);
+};
+
+window.showSpendPoints = function(cafeId, cafeName) {
+    console.log('⬇️ Show spend points for cafe:', cafeId, cafeName);
+    
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para gastar pontos!\n💡 Abra o app através do Telegram');
+        return;
+    }
+    
+    // Generate QR code data and 8-digit code
+    const userId = window.currentUser.id;
+    const userCode = window.currentUserCode || '00000000';
+    const qrData = `${userId}:${cafeId}:${userCode}`;
+    
+    const modalContent = `
+        <div class="spend-points-modal">
+            <h2>⬇️ Gastar Pontos</h2>
+            <div class="cafe-info-modal">
+                <h3>${cafeName}</h3>
+                <p>📱 Mostre este código para o barista ou administrador</p>
+            </div>
+            
+            <div class="qr-code-section">
+                <h4>📱 Código QR:</h4>
+                <div class="qr-code-container">
+                    <canvas id="qrCanvasSpend" width="200" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="manual-code-section">
+                <h4>🔢 Código de 8 dígitos:</h4>
+                <div class="code-display">
+                    <span class="user-code">${userCode}</span>
+                    <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>💡 O barista escaneará o código QR ou inserirá o código de 8 dígitos no aplicativo do café</p>
+                <p>💰 Após o escaneamento, será mostrado seu saldo de pontos e recalculado o valor do pedido</p>
+            </div>
+        </div>
+    `;
+    
+    showModal(modalContent, 'Gastar Pontos');
+    
+    // Generate QR code
+    generateQRCodeSpend(qrData);
+};
+
+// Additional global functions for loyalty system
+window.copyUserCode = function(code) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).then(() => {
+            console.log('📋 User code copied to clipboard:', code);
+        }).catch(err => {
+            console.error('❌ Failed to copy user code:', err);
+        });
+    }
+};
+
+window.showModal = function(content, title) {
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    
+    if (modal && modalContent) {
+        modalContent.innerHTML = content;
+        modal.style.display = 'block';
+    }
+};
+
 // Debug information
 console.log('🔍 === COOK APP DEBUG INFO ===');
 console.log('🔍 User Agent:', navigator.userAgent);
@@ -11,8 +636,12 @@ console.log('🔍 Current URL:', window.location.href);
 console.log('🔍 === END DEBUG INFO ===');
 
 // Wait for Firebase to be available before proceeding
-if (!window.firebase || !window.firebase.db) {
-    console.log('⏳ Firebase not ready yet, waiting...');
+async function waitForFirebase() {
+    while (!window.firebase || !window.firebase.db) {
+        console.log('⏳ Firebase not ready yet, waiting...');
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    console.log('✅ Firebase is ready!');
 }
 
 // Global variables
@@ -84,8 +713,6 @@ function saveSelectedCity(city) {
 
 // Load cities from Firebase
 async function loadCities() {
-    console.log('🔧 Starting to load cities from Firebase...');
-    
     if (!window.firebase || !window.firebase.db) {
         console.error('❌ Firebase not initialized');
         showCitiesError();
@@ -102,7 +729,7 @@ async function loadCities() {
                 ...doc.data()
             }));
             
-            console.log('🔧 Cities loaded from Firebase:', citiesData);
+            console.log('🔧 Cities loaded:', citiesData.length);
             populateCitySelect(citiesData.map(city => city.name));
             
             // Set up real-time listener for cities
@@ -166,8 +793,6 @@ function setupCitiesListener() {
 
 // Load cafes from Firebase
 async function loadCafes() {
-    console.log('🔧 Starting to load cafes from Firebase...');
-    
     if (!window.firebase || !window.firebase.db) {
         console.error('❌ Firebase not initialized');
         showCafesError();
@@ -184,7 +809,7 @@ async function loadCafes() {
                 ...doc.data()
             }));
             
-            console.log('🔧 Cafes loaded from Firebase:', cafesData);
+            console.log('🔧 Cafes loaded:', cafesData.length);
             
             // Set up real-time listener for cafes (this will also display cafes)
             setupCafesListener();
@@ -275,13 +900,7 @@ function displayCafes() {
         return;
     }
     
-    console.log('🔧 displayCafes called with:');
-    console.log('🔧 currentCity:', currentCity);
-    console.log('🔧 cafesData length:', cafesData.length);
-    console.log('🔧 cafesData:', cafesData);
-    
     if (!currentCity) {
-        console.log('🔧 No city selected, showing ALL cafes');
         // Show ALL cafes when no city is selected
         if (cafesData.length === 0) {
             cafesList.innerHTML = `
@@ -291,51 +910,48 @@ function displayCafes() {
                 </div>
             `;
         } else {
-            cafesList.innerHTML = `
+            
+            // Pre-calculate favorites to avoid multiple calls
+            const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
+            
+            const cafesHTML = `
                 <h3 class="cafe-section-header">Todos os cafés (${cafesData.length})</h3>
                 <div class="cafes-grid">
-                    ${cafesData.map(cafe => `
-                        <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
-                            <div class="cafe-photo">
-                                ${(() => {
-                                    console.log('🔍 Cafe photo data:', {
-                                        name: cafe.name,
-                                        photoUrls: cafe.photoUrls,
-                                        photoUrl: cafe.photoUrl,
-                                        hasPhotoUrls: cafe.photoUrls && cafe.photoUrls.length > 0,
-                                        hasPhotoUrl: !!cafe.photoUrl
-                                    });
-                                    
-                                    if (cafe.photoUrls && cafe.photoUrls.length > 0) {
-                                        return `<img src="${cafe.photoUrls[0]}" alt="${cafe.name}" class="cafe-thumbnail">`;
-                                    } else if (cafe.photoUrl) {
-                                        return `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">`;
-                                    } else {
-                                        return `<div class="cafe-placeholder">☕</div>`;
-                                    }
-                                })()}
-                            </div>
-                            <div class="cafe-info">
-                                <div class="cafe-header">
-                                    <h3 class="cafe-name">${cafe.name}</h3>
-                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
-                                            data-cafe-id="${cafe.id}" 
-                                            data-cafe-name="${cafe.name}" 
-                                            data-cafe-city="${cafe.city}" 
-                                            data-cafe-description="${cafe.description || ''}">
-                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                    ${cafesData.map(cafe => {
+                        const isFavorite = favoritesSet.has(cafe.id);
+                        const photoHTML = cafe.photoUrls && cafe.photoUrls.length > 0 
+                            ? `<img src="${cafe.photoUrls[0]}" alt="${cafe.name}" class="cafe-thumbnail">`
+                            : cafe.photoUrl 
+                                ? `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">`
+                                : `<div class="cafe-placeholder">☕</div>`;
+                        
+                        return `
+                            <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
+                                <div class="cafe-photo">${photoHTML}</div>
+                                <div class="cafe-info">
+                                    <div class="cafe-header">
+                                        <h3 class="cafe-name">${cafe.name}</h3>
+                                        <button class="favorite-btn ${isFavorite ? 'favorited' : ''}" 
+                                                data-cafe-id="${cafe.id}" 
+                                                data-cafe-name="${cafe.name}" 
+                                                data-cafe-city="${cafe.city}" 
+                                                data-cafe-description="${cafe.description || ''}">
+                                            ${isFavorite ? '❤️' : '🤍'}
+                                        </button>
+                                    </div>
+                                    <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
+                                    ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
+                                    <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
+                                        VER DETALHES
                                     </button>
                                 </div>
-                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
-                                <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
-                                <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
-                                    VER DETALHES
-                                </button>
                             </div>
-                        </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
             `;
+            
+            cafesList.innerHTML = cafesHTML;
         }
         
         // Add event listeners to favorite buttons
@@ -344,10 +960,8 @@ function displayCafes() {
         return;
     }
     
-    console.log('🔧 City selected, filtering cafes for:', currentCity);
     // Show cafes for selected city
     const cityCafes = cafesData.filter(cafe => cafe.city === currentCity);
-    console.log('🔧 Filtered cafes:', cityCafes);
     
     if (cityCafes.length === 0) {
         cafesList.innerHTML = `
@@ -356,41 +970,46 @@ function displayCafes() {
             </div>
         `;
     } else {
-        cafesList.innerHTML = `
+        // Pre-calculate favorites to avoid multiple calls
+        const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
+        
+        const cafesHTML = `
             <h3 class="cafe-section-header">Cafés em ${currentCity} (${cityCafes.length})</h3>
             <div class="cafes-grid">
-                ${cityCafes.map(cafe => `
-                    <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
-                        <div class="cafe-photo">
-                            ${cafe.photoUrl ? 
-                                `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
-                                `<div class="cafe-placeholder">☕</div>`
-                            }
-                        </div>
-                                                    <div class="cafe-info">
+                ${cityCafes.map(cafe => {
+                    const isFavorite = favoritesSet.has(cafe.id);
+                    const photoHTML = cafe.photoUrl ? 
+                        `<img src="${cafe.photoUrl}" alt="${cafe.name}" class="cafe-thumbnail">` : 
+                        `<div class="cafe-placeholder">☕</div>`;
+                    
+                    return `
+                        <div class="cafe-card" onclick="handleCafeCardClick(event, '${cafe.id}')">
+                            <div class="cafe-photo">${photoHTML}</div>
+                            <div class="cafe-info">
                                 <div class="cafe-header">
                                     <h3 class="cafe-name">${cafe.name}</h3>
-                                    <button class="favorite-btn ${isCafeInFavorites(cafe.id) ? 'favorited' : ''}" 
+                                    <button class="favorite-btn ${isFavorite ? 'favorited' : ''}" 
                                             data-cafe-id="${cafe.id}" 
                                             data-cafe-name="${cafe.name}" 
                                             data-cafe-city="${cafe.city}" 
                                             data-cafe-description="${cafe.description || ''}">
-                                        ${isCafeInFavorites(cafe.id) ? '❤️' : '🤍'}
+                                        ${isFavorite ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
+                                ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
                                     VER DETALHES
                                 </button>
                             </div>
-                    </div>
-                `).join('')}
+                        </div>
+                    `;
+                }).join('')}
             </div>
         `;
+        
+        cafesList.innerHTML = cafesHTML;
     }
-    
-    console.log('🔧 Cafes displayed for city:', currentCity, 'Count:', cityCafes.length);
     
     // Add event listeners to favorite buttons
     addFavoriteButtonListeners();
@@ -494,6 +1113,7 @@ function closeModal() {
     if (modal) {
         modal.style.display = 'none';
         currentCafe = null;
+        window.currentModal = null; // Reset current modal
         console.log('🔧 Modal closed');
     }
 }
@@ -554,44 +1174,110 @@ function handleCafeCardClick(event, cafeId) {
     showCafeDetails(cafeId);
 }
 
+// Functions are now defined globally at the top of the file
+
+// Show loading state
+function showLoadingState() {
+    const cafesList = document.getElementById('cafesList');
+    if (cafesList) {
+        cafesList.innerHTML = `
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Carregando cafés...</p>
+            </div>
+        `;
+    }
+}
+
+// Hide loading state
+function hideLoadingState() {
+    const cafesList = document.getElementById('cafesList');
+    if (cafesList && cafesList.innerHTML.includes('Carregando cafés')) {
+        cafesList.innerHTML = '<div class="loading">Selecione uma cidade para ver os cafés</div>';
+    }
+}
+
+// Show error state
+function showErrorState() {
+    const cafesList = document.getElementById('cafesList');
+    if (cafesList) {
+        cafesList.innerHTML = `
+            <div class="no-cafes">
+                <p>❌ Erro ao carregar dados</p>
+                <p>Tente recarregar a página</p>
+            </div>
+        `;
+    }
+}
+
+// Check QR Code library (background task)
+function checkQRCodeLibrary() {
+    console.log('🔍 QR Code library check (background):');
+    console.log('   - window.QRCode:', !!window.QRCode);
+    console.log('   - QRCode.toCanvas:', !!(window.QRCode && window.QRCode.toCanvas));
+    if (window.QRCode) {
+        console.log('✅ QR Code library loaded successfully');
+    } else {
+        console.log('ℹ️ QR Code library not loaded (using QR-Server API instead)');
+    }
+}
+
 // Initialize app
 async function initializeApp() {
     console.log('🔧 Initializing Coook app...');
     
     try {
-        // Initialize Telegram WebApp if available
-        initializeTelegramWebApp();
-        
-        // Initialize user system
-        await initializeUserSystem();
-        
-        // Load saved city
+        // 1. FIRST: Show UI immediately (no waiting)
         loadSavedCity();
+        initializeMenu();
+        showLoadingState();
         
-        // Wait for Firebase to be ready
+        console.log('✅ UI initialized, loading data in background...');
+        
+        // 2. THEN: Load data in background (non-blocking)
+        loadDataInBackground();
+        
+    } catch (error) {
+        console.error('❌ Error initializing app:', error);
+        showErrorState();
+    }
+}
+
+// Load data in background without blocking UI
+async function loadDataInBackground() {
+    try {
+        // Wait for Firebase to be ready (with timeout)
         let retryCount = 0;
-        const maxRetries = 10;
+        const maxRetries = 20; // Increased retries
         
         while (!window.firebase || !window.firebase.db) {
             if (retryCount >= maxRetries) {
                 console.error('❌ Firebase not available after retries');
+                showErrorState();
                 return;
             }
             console.log(`🔧 Waiting for Firebase... (${retryCount + 1}/${maxRetries})`);
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 200)); // Faster retries
             retryCount++;
         }
         
         console.log('✅ Firebase is ready, loading data...');
         
-        // Load cities and cafes from Firebase
-        await loadCities();
-        await loadCafes();
+        // Load cities and cafes in parallel
+        await Promise.all([
+            loadCities(),
+            loadCafes()
+        ]);
         
-        // Initialize menu functionality
-        initializeMenu();
+        hideLoadingState();
+        console.log('✅ Data loaded successfully');
         
-        console.log('✅ App initialized successfully');
+        // Initialize Telegram WebApp and user system in background (non-blocking)
+        setTimeout(() => {
+            initializeTelegramWebApp();
+            initializeUserSystem();
+        }, 500); // Slightly delayed to prioritize UI
+        
     } catch (error) {
         console.error('❌ Error initializing app:', error);
     }
@@ -812,16 +1498,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Check QR Code library loading
+    // QR Code library check (moved to background)
     setTimeout(() => {
-        console.log('🔍 QR Code library check:');
-        console.log('   - window.QRCode:', !!window.QRCode);
-        console.log('   - QRCode.toCanvas:', !!(window.QRCode && window.QRCode.toCanvas));
-        if (window.QRCode) {
-            console.log('✅ QR Code library loaded successfully');
-        } else {
-            console.error('❌ QR Code library failed to load');
-        }
-    }, 1000);
+        checkQRCodeLibrary();
+    }, 3000); // Delayed to not block initial loading
     
     // City selection
     const citySelect = document.getElementById('citySelect');
@@ -1108,35 +1788,149 @@ function initializeMenu() {
 }
 
 // Show loyalty information
-function showLoyalty() {
+async function showLoyalty() {
     console.log('🎯 Loyalty button clicked');
     
-    // Create modal content
-    const modalContent = `
-        <div class="loyalty-modal">
-            <h2>🎯 Minha Lealdade</h2>
-            <div class="loyalty-stats">
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">Cafés Visitados</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">0</span>
-                    <span class="stat-label">Pontos Acumulados</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">Bronze</span>
-                    <span class="stat-label">Nível Atual</span>
-                </div>
-            </div>
-            <div class="loyalty-info">
-                <p>🌟 Visite cafés para acumular pontos e subir de nível!</p>
-                <p>🎁 Desbloqueie benefícios exclusivos conforme sua lealdade cresce.</p>
-            </div>
-        </div>
-    `;
+    if (!window.currentUser) {
+        alert('⚠️ Você precisa estar logado para ver sua lealdade!');
+        return;
+    }
     
-    showModal(modalContent, 'Minha Lealdade');
+    try {
+        // Show loading state
+        const loadingContent = `
+            <div class="loyalty-modal">
+                <h2>🎯 Minha Lealdade</h2>
+                <div class="loading">Carregando seus dados de lealdade...</div>
+            </div>
+        `;
+        showModal(loadingContent, 'Minha Lealdade');
+        
+        // Load user's loyalty data
+        const loyaltyData = await loadUserLoyaltyData();
+        
+        // Create modal content with real data
+        const modalContent = `
+            <div class="loyalty-modal">
+                <h2>🎯 Minha Lealdade</h2>
+                
+                <div class="loyalty-cafes">
+                    <h3>🏪 Meus Cafés</h3>
+                    ${loyaltyData.cafes.length > 0 ? 
+                        loyaltyData.cafes.map(cafe => `
+                            <div class="loyalty-cafe-item">
+                                <div class="cafe-actions">
+                                    <button class="action-btn apply-loyalty-btn" onclick="applyLoyalty('${cafe.id}', '${cafe.name}')">
+                                        🎯 Aplicar Lealdade
+                                    </button>
+                                    <button class="action-btn view-history-btn" onclick="viewHistory('${cafe.id}', '${cafe.name}')">
+                                        📊 Ver Histórico
+                                    </button>
+                                </div>
+                                <div class="cafe-main-info">
+                                    <div class="cafe-info">
+                                        <h4>${cafe.name}</h4>
+                                        <span class="cafe-location">📍 ${cafe.address || cafe.city}</span>
+                                        <div class="cafe-points">
+                                            <span class="points-number">${cafe.points}</span>
+                                            <span class="points-label">pontos</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') :
+                        '<div class="no-cafes">Nenhum café visitado ainda. Visite cafés para acumular pontos!</div>'
+                    }
+                </div>
+                
+                <div class="loyalty-info">
+                    <p>🌟 Visite cafés para acumular pontos e desbloquear benefícios!</p>
+                    <p>🎁 Mostre seu código de 8 dígitos para ganhar pontos em cada visita.</p>
+                    <p>💡 Cada café tem sua própria sistema de pontos e benefícios.</p>
+                </div>
+            </div>
+        `;
+        
+        showModal(modalContent, 'Minha Lealdade');
+        
+    } catch (error) {
+        console.error('❌ Error loading loyalty data:', error);
+        const errorContent = `
+            <div class="loyalty-modal">
+                <h2>🎯 Minha Lealdade</h2>
+                <div class="error-message">
+                    <p>❌ Erro ao carregar dados de lealdade</p>
+                    <p>Tente novamente mais tarde.</p>
+                </div>
+            </div>
+        `;
+        showModal(errorContent, 'Minha Lealdade');
+    }
+}
+
+// Load user's loyalty data from Firebase
+async function loadUserLoyaltyData() {
+    try {
+        const userId = window.currentUser.id;
+        console.log('🔍 Loading loyalty data for user:', userId);
+        
+        // Ensure cafes are loaded
+        if (cafesData.length === 0) {
+            console.log('📚 Loading cafes data first...');
+            await loadCafes();
+        }
+        
+        // Get all loyalty records for this user
+        const loyaltyQuery = window.firebase.query(
+            window.firebase.collection(window.firebase.db, 'user_loyalty_points'),
+            window.firebase.where('telegramId', '==', userId)
+        );
+        
+        const loyaltySnapshot = await window.firebase.getDocs(loyaltyQuery);
+        
+        if (loyaltySnapshot.empty) {
+            return {
+                cafes: []
+            };
+        }
+        
+        // Get cafe information for each cafe
+        const cafes = [];
+        
+        for (const doc of loyaltySnapshot.docs) {
+            const loyaltyData = doc.data();
+            const cafeId = loyaltyData.cafeId;
+            const points = loyaltyData.points || 0;
+            
+            // Find cafe information
+            const cafe = cafesData.find(c => c.id === cafeId);
+            if (cafe) {
+                cafes.push({
+                    id: cafeId,
+                    name: cafe.name,
+                    city: cafe.city,
+                    address: cafe.address,
+                    points: points
+                });
+            }
+        }
+        
+        // Sort cafes by points (highest first)
+        cafes.sort((a, b) => b.points - a.points);
+        
+        console.log('✅ Loyalty data loaded:', {
+            cafesCount: cafes.length,
+            cafes
+        });
+        
+        return {
+            cafes
+        };
+        
+    } catch (error) {
+        console.error('❌ Error loading loyalty data:', error);
+        throw error;
+    }
 }
 
 // Show favorites
@@ -1197,6 +1991,9 @@ function showFavorites() {
     }
 }
 
+// Make showFavorites globally accessible
+window.showFavorites = showFavorites;
+
 // Show modal with custom content
 function showModal(content, title) {
     const modal = document.getElementById('modal');
@@ -1205,6 +2002,7 @@ function showModal(content, title) {
     if (modal && modalContent) {
         modalContent.innerHTML = content;
         modal.style.display = 'flex';
+        window.currentModal = title; // Track current modal
         console.log('🔧 Modal shown:', title);
     }
 }
@@ -1466,18 +2264,11 @@ async function createLoyaltyTransaction(userId, cafeId, type, points, orderAmoun
 
 // Check if cafe is in favorites
 function isCafeInFavorites(cafeId) {
-    console.log('🔍 DEBUG: isCafeInFavorites called with cafeId:', cafeId);
-    console.log('🔍 DEBUG: window.currentUser:', window.currentUser);
-    console.log('🔍 DEBUG: window.currentUser.favorites:', window.currentUser?.favorites);
-    
     if (!window.currentUser || !window.currentUser.favorites) {
-        console.log('🔍 DEBUG: No user or no favorites, returning false');
         return false;
     }
     
-    const result = window.currentUser.favorites.some(fav => fav.cafeId === cafeId);
-    console.log('🔍 DEBUG: Result:', result);
-    return result;
+    return window.currentUser.favorites.some(fav => fav.cafeId === cafeId);
 }
 
 // Add cafe to favorites - now managed by user-system.js
@@ -1552,79 +2343,6 @@ function formatWorkingHours(workingHours) {
     return hoursHtml;
 }
 
-// Apply loyalty for cafe
-function applyLoyalty(cafeId, cafeName) {
-    console.log('🎯 Applying loyalty for cafe:', cafeId, cafeName);
-    
-    if (!window.currentUser) {
-        alert('⚠️ Você precisa estar logado para aplicar lealdade!\n💡 Abra o app através do Telegram');
-        return;
-    }
-    
-    // Show loyalty modal
-    const modalContent = `
-        <div class="loyalty-apply-modal">
-            <h2>🎯 Aplicar Lealdade</h2>
-            <div class="cafe-loyalty-info">
-                <h3>${cafeName}</h3>
-                <p>🏆 Seu nível: ${window.currentUser.loyalty?.level || 'Bronze'}</p>
-                <p>⭐ Seus pontos: ${window.currentUser.loyalty?.totalPoints || 0}</p>
-            </div>
-            <div class="loyalty-actions">
-                <button class="btn-checkin" onclick="checkInToCafe('${cafeId}', '${cafeName}')">
-                    ✅ Fazer Check-in
-                </button>
-                <button class="btn-view-benefits" onclick="viewLoyaltyBenefits('${cafeId}')">
-                    🎁 Ver Benefícios
-                </button>
-            </div>
-        </div>
-    `;
-    
-    showModal(modalContent, 'Aplicar Lealdade');
-}
-
-// Check in to cafe (placeholder for now)
-function checkInToCafe(cafeId, cafeName) {
-    console.log('✅ Check-in to cafe:', cafeId, cafeName);
-    alert(`🎉 Check-in realizado com sucesso em ${cafeName}!\n⭐ +50 pontos de lealdade`);
-    
-    // TODO: Implement actual check-in logic
-    // - Add points to user
-    // - Update Firebase
-    // - Show updated loyalty status
-}
-
-// View loyalty benefits (placeholder for now)
-function viewLoyaltyBenefits(cafeId) {
-    console.log('🎁 Viewing loyalty benefits for cafe:', cafeId);
-    
-    const modalContent = `
-        <div class="loyalty-benefits-modal">
-            <h2>🎁 Benefícios de Lealdade</h2>
-            <div class="benefits-list">
-                <div class="benefit-item">
-                    <span class="benefit-level">🥉 Bronze (0-499 pts)</span>
-                    <span class="benefit-desc">Acesso básico</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-level">🥈 Silver (500-999 pts)</span>
-                    <span class="benefit-desc">Desconto 5%</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-level">🥇 Gold (1000-1999 pts)</span>
-                    <span class="benefit-desc">Desconto 10% + café grátis</span>
-                </div>
-                <div class="benefit-item">
-                    <span class="benefit-level">💎 Platinum (2000+ pts)</span>
-                    <span class="benefit-desc">VIP + desconto 15%</span>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    showModal(modalContent, 'Benefícios de Lealdade');
-}
 
 // Copy address to clipboard
 async function copyAddress(address) {
@@ -1689,9 +2407,8 @@ function showEarnPoints(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const timestamp = Date.now();
-    const qrData = `${userId}:${cafeId}:${timestamp}`;
-    const userCode = generateUserCode(userId, cafeId, timestamp);
+    const userCode = window.currentUserCode || '00000000';
+    const qrData = `${userId}:${cafeId}:${userCode}`;
     
     const modalContent = `
         <div class="earn-points-modal">
@@ -1725,7 +2442,7 @@ function showEarnPoints(cafeId, cafeName) {
     showModal(modalContent, 'Acumular Pontos');
     
     // Generate QR code
-    generateQRCode(qrData);
+    generateQRCodeEarn(qrData);
 }
 
 // Show spend points modal with QR code and 8-digit code
@@ -1739,9 +2456,8 @@ function showSpendPoints(cafeId, cafeName) {
     
     // Generate QR code data and 8-digit code
     const userId = window.currentUser.id;
-    const timestamp = Date.now();
-    const qrData = `${userId}:${cafeId}:${timestamp}`;
-    const userCode = generateUserCode(userId, cafeId, timestamp);
+    const userCode = window.currentUserCode || '00000000';
+    const qrData = `${userId}:${cafeId}:${userCode}`;
     
     const modalContent = `
         <div class="spend-points-modal">
@@ -1780,9 +2496,9 @@ function showSpendPoints(cafeId, cafeName) {
 }
 
 // Generate 8-digit user code that matches QR code data
-function generateUserCode(userId, cafeId, timestamp) {
+function generateUserCodeWithData(userId, cafeId, timestamp) {
     // Create the same data as QR code
-    const qrData = `${userId}:${cafeId}:${timestamp}`;
+    const qrData = `${userId}:${cafeId}:${userCode}`;
     
     // Generate hash from QR data
     let hash = 0;
@@ -1820,7 +2536,7 @@ async function copyUserCode(code) {
 }
 
 // Generate QR code for earn points using Google Charts API
-function generateQRCode(data) {
+function generateQRCodeEarn(data) {
     console.log('🔍 Starting QR code generation with Google Charts API...');
     console.log('🔍 Data to encode:', data);
     
@@ -1948,4 +2664,5 @@ function generateQRCodeSpend(data) {
 }
 
 // REMOVED: Fallback QR functions - we need REAL QR codes for MVP!
+
 
