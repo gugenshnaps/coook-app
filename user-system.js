@@ -291,6 +291,17 @@ async function removeFavorite(cafeId) {
                 }
             }
         }
+        
+        // Update the main cafe list to refresh heart icons
+        if (typeof window.displayCafes === 'function') {
+            console.log('🔄 Refreshing main cafe list after removing favorite');
+            window.displayCafes();
+        }
+        
+        // Update event listeners for favorite buttons
+        if (typeof window.addFavoriteButtonListeners === 'function') {
+            window.addFavoriteButtonListeners();
+        }
     } catch (error) {
         console.error('❌ Error removing from favorites:', error);
     }

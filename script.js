@@ -1942,8 +1942,10 @@ function showFavorites() {
     }
 }
 
-// Make showFavorites globally accessible
+// Make functions globally accessible
 window.showFavorites = showFavorites;
+window.displayCafes = displayCafes;
+window.addFavoriteButtonListeners = addFavoriteButtonListeners;
 
 // Show modal with custom content
 function showModal(content, title) {
