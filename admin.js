@@ -256,6 +256,8 @@ async function generateUniqueLogin(cafeName) {
             .replace(/[^a-z0-9]/g, '') // Remove special chars and spaces
             .substring(0, 20); // Limit length
         
+        console.log('🔧 Generating login for cafe:', cafeName, '→ base:', baseLogin);
+        
         // Get all existing cafes to check for duplicates
         const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
         const cafesSnapshot = await window.firebase.getDocs(cafesRef);
@@ -268,22 +270,37 @@ async function generateUniqueLogin(cafeName) {
             }
         });
         
-        // Find next available number
+        console.log('📋 Existing logins:', existingLogins);
+        
+        // Find next available number starting from 1
         let loginNumber = 1;
         let uniqueLogin = baseLogin + loginNumber;
         
+        // Keep incrementing until we find a unique login
         while (existingLogins.includes(uniqueLogin)) {
             loginNumber++;
             uniqueLogin = baseLogin + loginNumber;
+            console.log('🔄 Trying login number:', loginNumber, '→', uniqueLogin);
         }
         
-        console.log('🔑 Generated unique login:', uniqueLogin, 'for cafe:', cafeName);
+        console.log('✅ Generated unique login:', uniqueLogin, 'for cafe:', cafeName);
+        console.log('📊 Login stats:', {
+            cafeName: cafeName,
+            baseLogin: baseLogin,
+            finalLogin: uniqueLogin,
+            attemptNumber: loginNumber,
+            existingCount: existingLogins.length
+        });
+        
         return uniqueLogin;
         
     } catch (error) {
         console.error('❌ Error generating unique login:', error);
-        // Fallback to simple method
-        return cafeName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 15) + Date.now().toString().slice(-3);
+        // Enhanced fallback with timestamp
+        const timestamp = Date.now().toString().slice(-4);
+        const fallbackLogin = cafeName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 15) + timestamp;
+        console.log('🆘 Using fallback login:', fallbackLogin);
+        return fallbackLogin;
     }
 }
 
@@ -1339,6 +1356,69 @@ async function copyPasswordToClipboard() {
     }
 }
 
+// Fix duplicate logins in existing cafes
+async function fixDuplicateLogins() {
+    try {
+        console.log('🔧 Starting fix for duplicate logins...');
+        
+        // Get all cafes
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
+        const cafesSnapshot = await window.firebase.getDocs(cafesRef);
+        
+        // Group cafes by login to find duplicates
+        const loginGroups = {};
+        const cafesToUpdate = [];
+        
+        cafesSnapshot.forEach(doc => {
+            const cafe = { id: doc.id, ref: doc.ref, ...doc.data() };
+            
+            if (cafe.login) {
+                if (!loginGroups[cafe.login]) {
+                    loginGroups[cafe.login] = [];
+                }
+                loginGroups[cafe.login].push(cafe);
+            }
+        });
+        
+        // Find duplicates and mark for update (keep first one, regenerate others)
+        let fixedCount = 0;
+        for (const [login, cafes] of Object.entries(loginGroups)) {
+            if (cafes.length > 1) {
+                console.log(`🚨 Found ${cafes.length} cafes with duplicate login "${login}":`, cafes.map(c => c.name));
+                
+                // Keep the first one, regenerate logins for the rest
+                for (let i = 1; i < cafes.length; i++) {
+                    const cafe = cafes[i];
+                    const newLogin = await generateUniqueLogin(cafe.name);
+                    
+                    await window.firebase.updateDoc(cafe.ref, {
+                        login: newLogin
+                    });
+                    
+                    console.log(`✅ Fixed: "${cafe.name}" → old: "${login}" → new: "${newLogin}"`);
+                    fixedCount++;
+                }
+            }
+        }
+        
+        console.log('🎉 Duplicate fix completed!');
+        console.log('📊 Results:', {
+            duplicateGroups: Object.values(loginGroups).filter(g => g.length > 1).length,
+            cafesFixed: fixedCount
+        });
+        
+        alert(`✅ Correção de duplicatas concluída!\n\n📊 Resultados:\n• ${fixedCount} cafés corrigidos\n• Duplicatas resolvidas com sucesso`);
+        
+        // Refresh cafes list
+        await loadCafes();
+        displayCafes();
+        
+    } catch (error) {
+        console.error('❌ Fix duplicates error:', error);
+        alert('❌ Erro na correção: ' + error.message);
+    }
+}
+
 // Migrate existing cafes to add login field
 async function migrateCafesToAddLogins() {
     try {
@@ -1392,8 +1472,9 @@ async function migrateCafesToAddLogins() {
     }
 }
 
-// Make migration function globally available
+// Make migration and fix functions globally available
 window.migrateCafesToAddLogins = migrateCafesToAddLogins;
+window.fixDuplicateLogins = fixDuplicateLogins;
 
 // Start initialization when page loads
 document.addEventListener('DOMContentLoaded', () => {
