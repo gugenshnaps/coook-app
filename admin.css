@@ -180,6 +180,43 @@ body {
     box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
+/* Migration section */
+.migration-section {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid rgba(255, 193, 7, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.migration-btn {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.migration-btn:hover {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+}
+
+.migration-help {
+    color: #856404;
+    font-size: 14px;
+    margin: 0;
+    font-style: italic;
+}
+
 .btn-small {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;

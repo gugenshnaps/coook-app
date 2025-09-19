@@ -1339,6 +1339,62 @@ async function copyPasswordToClipboard() {
     }
 }
 
+// Migrate existing cafes to add login field
+async function migrateCafesToAddLogins() {
+    try {
+        console.log('🔧 Starting migration to add logins to existing cafes...');
+        
+        // Get all cafes that don't have login field
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
+        const cafesSnapshot = await window.firebase.getDocs(cafesRef);
+        
+        let migratedCount = 0;
+        let skippedCount = 0;
+        
+        for (const cafeDoc of cafesSnapshot.docs) {
+            const cafe = cafeDoc.data();
+            
+            // Skip if cafe already has a login
+            if (cafe.login) {
+                console.log('⏭️ Skipping cafe with existing login:', cafe.name, '→', cafe.login);
+                skippedCount++;
+                continue;
+            }
+            
+            // Generate unique login for this cafe
+            const uniqueLogin = await generateUniqueLogin(cafe.name);
+            
+            // Update the cafe document
+            await window.firebase.updateDoc(cafeDoc.ref, {
+                login: uniqueLogin
+            });
+            
+            console.log('✅ Migrated:', cafe.name, '→', uniqueLogin);
+            migratedCount++;
+        }
+        
+        console.log('🎉 Migration completed!');
+        console.log('📊 Results:', {
+            migrated: migratedCount,
+            skipped: skippedCount,
+            total: cafesSnapshot.docs.length
+        });
+        
+        alert(`✅ Migração concluída!\n\n📊 Resultados:\n• ${migratedCount} cafés migrados\n• ${skippedCount} cafés já tinham login\n• ${cafesSnapshot.docs.length} total de cafés`);
+        
+        // Refresh cafes list to show new logins
+        await loadCafes();
+        displayCafes();
+        
+    } catch (error) {
+        console.error('❌ Migration error:', error);
+        alert('❌ Erro na migração: ' + error.message);
+    }
+}
+
+// Make migration function globally available
+window.migrateCafesToAddLogins = migrateCafesToAddLogins;
+
 // Start initialization when page loads
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Admin panel DOM loaded, waiting for Firebase...');
