@@ -164,9 +164,6 @@ async function initializeCafeTMA() {
         // Load cafes from Firebase
         await loadCafes();
         
-        // Setup cafe search
-        setupCafeSearch();
-        
         // Set up real-time listeners
         setupCafesListener();
         
@@ -224,10 +221,8 @@ function setupCafesListener() {
                 });
             });
             
-            // Update cafe search if not logged in
-            if (!currentCafe) {
-                setupCafeSearch();
-            }
+            // Cafes updated in real-time
+            console.log('✅ Cafes updated:', cafes.length);
         });
         
         console.log('✅ Cafes listener set up');
@@ -236,97 +231,39 @@ function setupCafesListener() {
     }
 }
 
-// Setup cafe search functionality
-function setupCafeSearch() {
-    const cafeSearch = document.getElementById('cafeSearch');
-    const cafeResults = document.getElementById('cafeResults');
-    
-    if (!cafeSearch || !cafeResults) return;
-    
-    // Add input event listener for search
-    cafeSearch.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase().trim();
-        
-        if (searchTerm.length < 2) {
-            cafeResults.style.display = 'none';
-            return;
-        }
-        
-        // Filter cafes based on search term (name, city, or login)
-        const filteredCafes = cafes.filter(cafe => 
-            cafe.name.toLowerCase().includes(searchTerm) ||
-            cafe.city.toLowerCase().includes(searchTerm) ||
-            (cafe.login && cafe.login.toLowerCase().includes(searchTerm))
-        );
-        
-        if (filteredCafes.length === 0) {
-            cafeResults.innerHTML = '<div class="search-result-item">Nenhum café encontrado</div>';
-        } else {
-            cafeResults.innerHTML = filteredCafes.map(cafe => `
-                <div class="search-result-item" data-cafe-id="${cafe.id}" onclick="selectCafe('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.login}')">
-                    <div class="search-result-name">${cafe.name}</div>
-                    <div class="search-result-details">${cafe.city} ${cafe.login ? '• Login: ' + cafe.login : ''}</div>
-                </div>
-            `).join('');
-        }
-        
-        cafeResults.style.display = 'block';
-    });
-    
-    // Hide results when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!cafeSearch.contains(e.target) && !cafeResults.contains(e.target)) {
-            cafeResults.style.display = 'none';
-        }
-    });
-    
-    console.log('✅ Cafe search setup completed with', cafes.length, 'cafes');
-}
-
-// Select cafe from search results
-function selectCafe(cafeId, cafeName, cafeCity, cafeLogin) {
-    const cafeSearch = document.getElementById('cafeSearch');
-    const cafeResults = document.getElementById('cafeResults');
-    
-    if (cafeSearch) {
-        cafeSearch.value = `${cafeName} - ${cafeCity}${cafeLogin ? ' (' + cafeLogin + ')' : ''}`;
-        cafeSearch.dataset.selectedCafeId = cafeId;
-        cafeSearch.dataset.selectedCafeLogin = cafeLogin || '';
-    }
-    
-    if (cafeResults) {
-        cafeResults.style.display = 'none';
-    }
-    
-    console.log('✅ Cafe selected:', cafeName, 'Login:', cafeLogin, 'ID:', cafeId);
-}
+// Functions removed - now using direct login input
 
 // Login cafe owner
 async function loginCafe() {
-    const cafeSearch = document.getElementById('cafeSearch');
+    const cafeLogin = document.getElementById('cafeLogin').value.trim();
     const password = document.getElementById('cafePassword').value;
-    const cafeId = cafeSearch?.dataset.selectedCafeId;
     
-    if (!cafeId || !password) {
-        showError('Por favor, selecione um café e digite a senha!');
+    if (!cafeLogin || !password) {
+        showError('Por favor, digite o login do café e a senha!');
         return;
     }
     
     try {
-        const cafeLogin = cafeSearch?.dataset.selectedCafeLogin;
-        console.log('🔐 Attempting login for cafe:', cafeId, 'with login:', cafeLogin);
+        console.log('🔐 Attempting login with login:', cafeLogin);
+        
+        // Find cafe by login
+        const cafe = cafes.find(c => c.login === cafeLogin);
+        
+        if (!cafe) {
+            showError('Café não encontrado! Verifique se o login está correto.');
+            return;
+        }
+        
+        console.log('✅ Found cafe:', cafe.name, 'ID:', cafe.id);
         
         // Verify password
-        const isPasswordValid = await verifyCafePassword(cafeId, password);
+        const isPasswordValid = await verifyCafePassword(cafe.id, password);
         
         if (isPasswordValid) {
-            // Get cafe info
-            const cafe = cafes.find(c => c.id === cafeId);
-            if (cafe) {
-                currentCafe = cafe;
-                
-                // Load loyalty settings
-                await loadLoyaltySettings(cafeId);
+            currentCafe = cafe;
+            
+            // Load loyalty settings
+            await loadLoyaltySettings(cafe.id);
                 
                 // Show dashboard
                 await showDashboard();
@@ -1234,7 +1171,6 @@ document.addEventListener('DOMContentLoaded', function() {
 window.loginCafe = loginCafe;
 window.logout = logout;
 window.closeModal = closeModal;
-window.selectCafe = selectCafe;
 window.startQRScanner = startQRScanner;
 window.stopQRScanner = stopQRScanner;
 window.startQRScannerSpend = startQRScannerSpend;
