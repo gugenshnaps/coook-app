@@ -164,8 +164,8 @@ async function initializeCafeTMA() {
         // Load cafes from Firebase
         await loadCafes();
         
-        // Populate cafe selector
-        populateCafeSelector();
+        // Setup cafe search
+        setupCafeSearch();
         
         // Set up real-time listeners
         setupCafesListener();
@@ -224,9 +224,9 @@ function setupCafesListener() {
                 });
             });
             
-            // Update cafe selector if not logged in
+            // Update cafe search if not logged in
             if (!currentCafe) {
-                populateCafeSelector();
+                setupCafeSearch();
             }
         });
         
@@ -236,32 +236,77 @@ function setupCafesListener() {
     }
 }
 
-// Populate cafe selector
-function populateCafeSelector() {
-    const cafeSelect = document.getElementById('cafeSelect');
-    if (!cafeSelect) return;
+// Setup cafe search functionality
+function setupCafeSearch() {
+    const cafeSearch = document.getElementById('cafeSearch');
+    const cafeResults = document.getElementById('cafeResults');
     
-    // Clear existing options
-    cafeSelect.innerHTML = '<option value="">Escolha um café...</option>';
+    if (!cafeSearch || !cafeResults) return;
     
-    // Add cafe options
-    cafes.forEach(cafe => {
-        const option = document.createElement('option');
-        option.value = cafe.id;
-        option.textContent = `${cafe.name} - ${cafe.city}`;
-        cafeSelect.appendChild(option);
+    // Add input event listener for search
+    cafeSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        if (searchTerm.length < 2) {
+            cafeResults.style.display = 'none';
+            return;
+        }
+        
+        // Filter cafes based on search term
+        const filteredCafes = cafes.filter(cafe => 
+            cafe.name.toLowerCase().includes(searchTerm) ||
+            cafe.city.toLowerCase().includes(searchTerm)
+        );
+        
+        if (filteredCafes.length === 0) {
+            cafeResults.innerHTML = '<div class="search-result-item">Nenhum café encontrado</div>';
+        } else {
+            cafeResults.innerHTML = filteredCafes.map(cafe => `
+                <div class="search-result-item" data-cafe-id="${cafe.id}" onclick="selectCafe('${cafe.id}', '${cafe.name}', '${cafe.city}')">
+                    <div class="search-result-name">${cafe.name}</div>
+                    <div class="search-result-details">${cafe.city} ${cafe.address ? '• ' + cafe.address : ''}</div>
+                </div>
+            `).join('');
+        }
+        
+        cafeResults.style.display = 'block';
     });
     
-    console.log('✅ Cafe selector populated with', cafes.length, 'cafes');
+    // Hide results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!cafeSearch.contains(e.target) && !cafeResults.contains(e.target)) {
+            cafeResults.style.display = 'none';
+        }
+    });
+    
+    console.log('✅ Cafe search setup completed with', cafes.length, 'cafes');
+}
+
+// Select cafe from search results
+function selectCafe(cafeId, cafeName, cafeCity) {
+    const cafeSearch = document.getElementById('cafeSearch');
+    const cafeResults = document.getElementById('cafeResults');
+    
+    if (cafeSearch) {
+        cafeSearch.value = `${cafeName} - ${cafeCity}`;
+        cafeSearch.dataset.selectedCafeId = cafeId;
+    }
+    
+    if (cafeResults) {
+        cafeResults.style.display = 'none';
+    }
+    
+    console.log('✅ Cafe selected:', cafeName, 'ID:', cafeId);
 }
 
 // Login cafe owner
 async function loginCafe() {
-    const cafeId = document.getElementById('cafeSelect').value;
+    const cafeSearch = document.getElementById('cafeSearch');
     const password = document.getElementById('cafePassword').value;
+    const cafeId = cafeSearch?.dataset.selectedCafeId;
     
     if (!cafeId || !password) {
-        showError('Por favor, preencha todos os campos!');
+        showError('Por favor, selecione um café e digite a senha!');
         return;
     }
     
@@ -1186,6 +1231,7 @@ document.addEventListener('DOMContentLoaded', function() {
 window.loginCafe = loginCafe;
 window.logout = logout;
 window.closeModal = closeModal;
+window.selectCafe = selectCafe;
 window.startQRScanner = startQRScanner;
 window.stopQRScanner = stopQRScanner;
 window.startQRScannerSpend = startQRScannerSpend;

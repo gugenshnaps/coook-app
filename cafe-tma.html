@@ -38,10 +38,9 @@
             
             <div class="login-form">
                 <div class="form-group">
-                    <label for="cafeSelect">Selecione seu café:</label>
-                    <select id="cafeSelect" required>
-                        <option value="">Escolha um café...</option>
-                    </select>
+                    <label for="cafeSearch">Digite o nome do seu café:</label>
+                    <input type="text" id="cafeSearch" placeholder="Ex: Starbucks, Café Central..." required autocomplete="off">
+                    <div id="cafeResults" class="search-results" style="display: none;"></div>
                 </div>
                 
                 <div class="form-group">
