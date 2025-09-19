@@ -32,6 +32,22 @@ window.firebase = {
     arrayUnion
 };
 
+// Export Firebase functions for ES6 imports
+export { 
+    db,
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    query,
+    where,
+    orderBy,
+    arrayUnion
+};
+
 console.log('🔥 Firebase functions available:', Object.keys(window.firebase));
 
 // Loyalty System Functions
