@@ -177,6 +177,7 @@ function displayCafes() {
         <div class="cafe-item">
             <div class="cafe-info">
                 <h3>${cafe.name}</h3>
+                <p><strong>Login TMA:</strong> <code>${cafe.login || 'Não definido'}</code></p>
                 <p><strong>Cidade:</strong> ${cafe.city}</p>
                 <p><strong>Descrição:</strong> ${cafe.description || 'Sem descrição'}</p>
                 <p><strong>Horário:</strong> ${cafe.hours || 'Não informado'}</p>
@@ -244,6 +245,48 @@ async function addCity() {
     }
 }
 
+// Generate unique login for cafe
+async function generateUniqueLogin(cafeName) {
+    try {
+        // Normalize cafe name for login (remove spaces, accents, special chars)
+        let baseLogin = cafeName
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remove accents
+            .replace(/[^a-z0-9]/g, '') // Remove special chars and spaces
+            .substring(0, 20); // Limit length
+        
+        // Get all existing cafes to check for duplicates
+        const cafesRef = window.firebase.collection(window.firebase.db, 'cafes');
+        const cafesSnapshot = await window.firebase.getDocs(cafesRef);
+        
+        const existingLogins = [];
+        cafesSnapshot.forEach(doc => {
+            const cafe = doc.data();
+            if (cafe.login) {
+                existingLogins.push(cafe.login);
+            }
+        });
+        
+        // Find next available number
+        let loginNumber = 1;
+        let uniqueLogin = baseLogin + loginNumber;
+        
+        while (existingLogins.includes(uniqueLogin)) {
+            loginNumber++;
+            uniqueLogin = baseLogin + loginNumber;
+        }
+        
+        console.log('🔑 Generated unique login:', uniqueLogin, 'for cafe:', cafeName);
+        return uniqueLogin;
+        
+    } catch (error) {
+        console.error('❌ Error generating unique login:', error);
+        // Fallback to simple method
+        return cafeName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 15) + Date.now().toString().slice(-3);
+    }
+}
+
 // Add new cafe
 async function addCafe() {
     const cafeName = document.getElementById('cafeName').value.trim();
@@ -305,6 +348,9 @@ async function addCafe() {
         // Generate password for cafe
         const cafePassword = generateSecurePassword();
         
+        // Generate unique login for cafe
+        const cafeLogin = await generateUniqueLogin(cafeName);
+        
         const newCafe = {
             name: cafeName,
             city: cafeCity,
@@ -312,6 +358,7 @@ async function addCafe() {
             description: cafeDescription,
             categories: cafeCategories, // Categories of the establishment
             telegram: cafeTelegram, // Telegram contact
+            login: cafeLogin, // Unique login for TMA access
             workingHours: workingHours,
             photoUrls: photoUrls, // Array of photos
             photoUrl: photoUrls.length > 0 ? photoUrls[0] : null, // First photo for backward compatibility
@@ -340,7 +387,7 @@ async function addCafe() {
         console.log('✅ Password created:', cafePassword);
         
         // Show success message with login credentials
-        showCafeCredentials(cafeName, cafePassword);
+        showCafeCredentials(cafeName, cafeLogin, cafePassword);
         
         // Clear form
         clearCafeForm();
@@ -377,7 +424,7 @@ async function hashPassword(password) {
 }
 
 // Show cafe credentials after creation
-function showCafeCredentials(cafeName, password) {
+function showCafeCredentials(cafeName, login, password) {
     const modal = document.createElement('div');
     modal.className = 'credentials-modal';
     modal.innerHTML = `
@@ -388,14 +435,21 @@ function showCafeCredentials(cafeName, password) {
                 <h3>🔐 DADOS PARA ENTRAR NO TMA:</h3>
                 
                 <div class="credential-row">
-                    <strong>Login:</strong> <span class="credential-value">${cafeName}</span>
-                    <button onclick="copyToClipboard('${cafeName}')" class="copy-btn">📋</button>
+                    <strong>Login:</strong> <span class="credential-value">${login}</span>
+                    <button onclick="copyToClipboard('${login}')" class="copy-btn">📋</button>
                 </div>
                 
                 <div class="credential-row">
                     <strong>Senha:</strong> <span class="credential-value">${password}</span>
                     <button onclick="copyToClipboard('${password}')" class="copy-btn">📋</button>
                 </div>
+            </div>
+            
+            <div class="credentials-info">
+                <h4>📝 Примеры логинов:</h4>
+                <p><strong>Starbucks</strong> → <code>starbucks1</code></p>
+                <p><strong>Café Central</strong> → <code>cafecentral1</code></p>
+                <p><strong>McDonald's</strong> → <code>mcdonalds1</code></p>
             </div>
             
             <div class="credentials-warning">

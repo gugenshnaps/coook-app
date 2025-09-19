@@ -252,19 +252,20 @@ function setupCafeSearch() {
             return;
         }
         
-        // Filter cafes based on search term
+        // Filter cafes based on search term (name, city, or login)
         const filteredCafes = cafes.filter(cafe => 
             cafe.name.toLowerCase().includes(searchTerm) ||
-            cafe.city.toLowerCase().includes(searchTerm)
+            cafe.city.toLowerCase().includes(searchTerm) ||
+            (cafe.login && cafe.login.toLowerCase().includes(searchTerm))
         );
         
         if (filteredCafes.length === 0) {
             cafeResults.innerHTML = '<div class="search-result-item">Nenhum café encontrado</div>';
         } else {
             cafeResults.innerHTML = filteredCafes.map(cafe => `
-                <div class="search-result-item" data-cafe-id="${cafe.id}" onclick="selectCafe('${cafe.id}', '${cafe.name}', '${cafe.city}')">
+                <div class="search-result-item" data-cafe-id="${cafe.id}" onclick="selectCafe('${cafe.id}', '${cafe.name}', '${cafe.city}', '${cafe.login}')">
                     <div class="search-result-name">${cafe.name}</div>
-                    <div class="search-result-details">${cafe.city} ${cafe.address ? '• ' + cafe.address : ''}</div>
+                    <div class="search-result-details">${cafe.city} ${cafe.login ? '• Login: ' + cafe.login : ''}</div>
                 </div>
             `).join('');
         }
@@ -283,20 +284,21 @@ function setupCafeSearch() {
 }
 
 // Select cafe from search results
-function selectCafe(cafeId, cafeName, cafeCity) {
+function selectCafe(cafeId, cafeName, cafeCity, cafeLogin) {
     const cafeSearch = document.getElementById('cafeSearch');
     const cafeResults = document.getElementById('cafeResults');
     
     if (cafeSearch) {
-        cafeSearch.value = `${cafeName} - ${cafeCity}`;
+        cafeSearch.value = `${cafeName} - ${cafeCity}${cafeLogin ? ' (' + cafeLogin + ')' : ''}`;
         cafeSearch.dataset.selectedCafeId = cafeId;
+        cafeSearch.dataset.selectedCafeLogin = cafeLogin || '';
     }
     
     if (cafeResults) {
         cafeResults.style.display = 'none';
     }
     
-    console.log('✅ Cafe selected:', cafeName, 'ID:', cafeId);
+    console.log('✅ Cafe selected:', cafeName, 'Login:', cafeLogin, 'ID:', cafeId);
 }
 
 // Login cafe owner
@@ -311,7 +313,8 @@ async function loginCafe() {
     }
     
     try {
-        console.log('🔐 Attempting login for cafe:', cafeId);
+        const cafeLogin = cafeSearch?.dataset.selectedCafeLogin;
+        console.log('🔐 Attempting login for cafe:', cafeId, 'with login:', cafeLogin);
         
         // Verify password
         const isPasswordValid = await verifyCafePassword(cafeId, password);
