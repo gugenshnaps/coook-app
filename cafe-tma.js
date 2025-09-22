@@ -449,13 +449,11 @@ async function loadDailyStats() {
         console.log('📊 Loading daily stats for:', currentCafe.id);
         console.log('📅 Date range:', startOfDay.toISOString(), 'to', endOfDay.toISOString());
         
-        // Get today's loyalty transactions for this cafe
+        // Get all loyalty transactions for this cafe (simplified query)
         const loyaltyHistoryRef = collection(db, 'loyaltyHistory');
         const q = query(
             loyaltyHistoryRef,
-            where('cafeId', '==', currentCafe.id),
-            where('timestamp', '>=', startOfDay),
-            where('timestamp', '<', endOfDay)
+            where('cafeId', '==', currentCafe.id)
         );
         
         const querySnapshot = await getDocs(q);
@@ -466,6 +464,14 @@ async function loadDailyStats() {
         
         querySnapshot.forEach(doc => {
             const data = doc.data();
+            
+            // Filter to today's transactions on client side
+            const transactionDate = data.timestamp?.toDate();
+            if (!transactionDate || 
+                transactionDate < startOfDay || 
+                transactionDate >= endOfDay) {
+                return; // Skip if not today
+            }
             
             // Count unique visitors
             if (data.userCode) {
