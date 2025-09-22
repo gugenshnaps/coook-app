@@ -264,12 +264,11 @@ async function loginCafe() {
             
             // Load loyalty settings
             await loadLoyaltySettings(cafe.id);
-                
-                // Show dashboard
-                await showDashboard();
-                
-                console.log('✅ Login successful for cafe:', cafe.name);
-            }
+            
+            // Show dashboard
+            await showDashboard();
+            
+            console.log('✅ Login successful for cafe:', cafe.name);
         } else {
             showError('Senha incorreta!');
         }
