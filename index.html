@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coook - Cafés Brasileiros</title>
+    <title>Coook - Кафе и рестораны</title>
     <!-- Force CSS reload with version parameter -->
     <link rel="stylesheet" href="styles.css?v=2.1">
     
@@ -29,15 +29,15 @@
                 <img id="userAvatar" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM0QTkwRTIiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiBmaWxsPSJub25lIj4KPHBhdGggZD0iTTggMTJDMTAuMjA5MSAxMiAxMiAxMC4yMDkxIDEyIDhDMTIgNS43OTA5IDEwLjIwOTEgNCA4IDRDNS43OTA5IDQgNCA1Ljc5MDkgNCA4QzQgMTAuMjA5MSA1Ljc5MDkgNCA4IDRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOCAxNEMxMC4yMDkxIDE0IDEyIDEyLjIwOTEgMTIgMTBDMTIgOS43OTA5IDEwLjIwOTEgOCA4IDhDNi4yMDkxIDggNCA5Ljc5MDkgNCAxMkM0IDEyLjIwOTEgNi4yMDkxIDE0IDggMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+" alt="Avatar">
             </div>
             <div class="user-details">
-                <div id="userName" class="user-name">Carregando...</div>
-                <div class="user-status">Online</div>
+                <div id="userName" class="user-name">Загрузка...</div>
+                <div class="user-status">Онлайн</div>
             </div>
         </div>
         
         <!-- Правая часть - выбор города -->
         <div class="city-selector">
             <select id="citySelect" class="city-select">
-                <option value="">Carregando cidades...</option>
+                <option value="">Загрузка городов...</option>
             </select>
         </div>
     </header>
@@ -48,22 +48,22 @@
         <div class="app-menu">
             <button class="menu-item loyalty-btn">
                 <span class="menu-icon">🎯</span>
-                <span class="menu-text">Minha Lealdade</span>
+                <span class="menu-text">Моя лояльность</span>
             </button>
             <button class="menu-item favorites-btn">
                 <span class="menu-icon">❤️</span>
-                <span class="menu-text">Favoritos</span>
+                <span class="menu-text">Избранное</span>
             </button>
         </div>
         
         <!-- Список кафе -->
         <div id="cafesList" class="cafes-list">
-            <div class="loading">Selecione uma cidade para ver os cafés</div>
+            <div class="loading">Выберите город, чтобы увидеть кафе</div>
         </div>
         
         <!-- Сообщение об отсутствии кафе -->
         <div id="noCafes" class="no-cafes" style="display: none;">
-            <p>Nenhum café encontrado nesta cidade</p>
+            <p>В этом городе пока нет кафе</p>
         </div>
     </main>
 

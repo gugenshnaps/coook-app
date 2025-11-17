@@ -35,8 +35,8 @@ async function initializeUserSystem() {
             window.currentUser = {
                 id: 'test-user-001',
                 telegramId: 'test-001',
-                firstName: 'Usuário Teste',
-                lastName: 'Local',
+                firstName: 'Тестовый пользователь',
+                lastName: 'Локальный',
                 username: 'testuser',
                 photoUrl: '',
                 favorites: [],
@@ -281,7 +281,7 @@ async function removeFavorite(cafeId) {
         console.log('✅ Cafe removed from favorites');
         
         // Update the favorites modal if it's currently open
-        if (window.currentModal && window.currentModal.includes('Favoritos')) {
+        if (window.currentModal && (window.currentModal.includes('Favoritos') || window.currentModal.includes('Избранное'))) {
             // Check if modal is actually visible
             const modal = document.getElementById('modal');
             if (modal && modal.style.display === 'flex') {
