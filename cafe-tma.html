@@ -124,7 +124,7 @@
                     <div class="manual-code-section">
                         <h4>⌨️ Или введите код вручную</h4>
                         <div class="code-input-group">
-                            <input type="text" id="manualCodeInput" maxlength="8" placeholder="12345678" pattern="[0-9]{8}">
+                            <input type="text" id="manualCodeInput" maxlength="8" placeholder="12345678" pattern="[0-9]{8}" inputmode="numeric" enterkeyhint="done">
                             <button class="apply-code-btn" onclick="applyManualCode()">Применить</button>
                         </div>
                         <small class="code-hint">Введите 8-значный код клиента</small>
@@ -145,7 +145,7 @@
                         <h4>📋 Данные заказа</h4>
                         <div class="form-group">
                             <label for="orderAmount">Сумма заказа (₽):</label>
-                            <input type="number" id="orderAmount" min="1" step="0.01" placeholder="0.00">
+                            <input type="number" id="orderAmount" min="1" step="0.01" placeholder="0.00" inputmode="decimal" enterkeyhint="done">
                         </div>
                         <div class="points-preview">
                             <span>Баллов будет начислено:</span>
@@ -185,7 +185,7 @@
                     <div class="manual-code-section">
                         <h4>⌨️ Или введите код вручную</h4>
                         <div class="code-input-group">
-                            <input type="text" id="manualCodeInputSpend" maxlength="8" placeholder="12345678" pattern="[0-9]{8}">
+                            <input type="text" id="manualCodeInputSpend" maxlength="8" placeholder="12345678" pattern="[0-9]{8}" inputmode="numeric" enterkeyhint="done">
                             <button class="apply-code-btn" onclick="applyManualCodeSpend()">Применить</button>
                         </div>
                         <small class="code-hint">Введите 8-значный код клиента</small>
@@ -204,7 +204,7 @@
                         <h4>📋 Данные заказа</h4>
                         <div class="form-group">
                             <label for="spendOrderAmount">Сумма заказа (₽):</label>
-                            <input type="number" id="spendOrderAmount" min="1" step="0.01" placeholder="0.00">
+                            <input type="number" id="spendOrderAmount" min="1" step="0.01" placeholder="0.00" inputmode="decimal" enterkeyhint="done">
                         </div>
                         <div class="final-amount">
                             <span>Итоговая сумма со скидкой:</span>
@@ -235,19 +235,19 @@
                             <h4>Основные настройки</h4>
                             <div class="form-group">
                                 <label for="basePointsPerReal">Коэффициент баллов:</label>
-                                <input type="number" id="basePointsPerReal" value="1.0" min="0.1" max="10.0" step="0.1">
+                                <input type="number" id="basePointsPerReal" value="1.0" min="0.1" max="10.0" step="0.1" inputmode="decimal" enterkeyhint="done">
                                 <span class="input-hint">баллов за 1 рубль</span>
                             </div>
                             
                             <div class="form-group">
                                 <label for="minOrderAmount">Минимальная сумма заказа:</label>
-                                <input type="number" id="minOrderAmount" value="10" min="1" max="1000">
+                                <input type="number" id="minOrderAmount" value="10" min="1" max="1000" inputmode="numeric" enterkeyhint="done">
                                 <span class="input-hint">рублей для получения баллов</span>
                             </div>
                             
                             <div class="form-group">
                                 <label for="maxPointsPerOrder">Максимум баллов за заказ:</label>
-                                <input type="number" id="maxPointsPerOrder" value="100" min="10" max="10000">
+                                <input type="number" id="maxPointsPerOrder" value="100" min="10" max="10000" inputmode="numeric" enterkeyhint="done">
                                 <span class="input-hint">защита от злоупотреблений</span>
                             </div>
                         </div>

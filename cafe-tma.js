@@ -1168,9 +1168,44 @@ document.addEventListener('DOMContentLoaded', function() {
         spendOrderAmountInput.addEventListener('input', calculateFinalAmount);
     }
     
+    // Add keyboard dismiss handlers for all number inputs
+    setupKeyboardDismiss();
+    
     // Initialize
     waitForFirebase();
 });
+
+// Setup keyboard dismiss functionality
+function setupKeyboardDismiss() {
+    // Close keyboard when clicking outside input fields
+    document.addEventListener('click', function(event) {
+        if (!event.target.matches('input, textarea')) {
+            // Remove focus from any active input
+            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+                document.activeElement.blur();
+            }
+        }
+    });
+    
+    // Close keyboard when pressing Enter
+    document.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter' && (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA')) {
+            event.preventDefault();
+            event.target.blur();
+        }
+    });
+    
+    // Add blur on all number inputs after a short delay (for mobile)
+    const numberInputs = document.querySelectorAll('input[type="number"]');
+    numberInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            // Ensure keyboard is hidden
+            window.scrollTo(0, 0);
+        });
+    });
+    
+    console.log('⌨️ Keyboard dismiss handlers added');
+}
 
 // Make functions globally available for onclick attributes
 window.loginCafe = loginCafe;
