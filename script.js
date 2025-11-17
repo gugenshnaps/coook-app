@@ -843,7 +843,7 @@ function populateCitySelect(cities) {
         return;
     }
     
-    citySelect.innerHTML = '<option value="">Selecione uma cidade</option>';
+    citySelect.innerHTML = '<option value="">Выберите город</option>';
     
     cities.forEach(city => {
         const option = document.createElement('option');
@@ -881,7 +881,7 @@ function displayCafes() {
         if (cafesData.length === 0) {
             cafesList.innerHTML = `
                 <div class="no-cafes">
-                    <p>Carregando cafés...</p>
+                    <p>Загрузка кафе...</p>
                     <div class="loading"></div>
                 </div>
             `;
@@ -891,7 +891,7 @@ function displayCafes() {
             const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
             
             const cafesHTML = `
-                <h3 class="cafe-section-header">Todos os cafés (${cafesData.length})</h3>
+                <h3 class="cafe-section-header">Все кафе (${cafesData.length})</h3>
                 <div class="cafes-grid">
                     ${cafesData.map(cafe => {
                         const isFavorite = favoritesSet.has(cafe.id);
@@ -915,11 +915,11 @@ function displayCafes() {
                                             ${isFavorite ? '❤️' : '🤍'}
                                         </button>
                                     </div>
-                                    <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
+                                    <p class="cafe-categories">${cafe.categories || 'Заведение'}</p>
                                     ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
-                                    <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
-                                        VER DETALHES
-                                    </button>
+                                        <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
+                                            ПОДРОБНЕЕ
+                                        </button>
                                 </div>
                             </div>
                         `;
@@ -950,7 +950,7 @@ function displayCafes() {
         const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
         
         const cafesHTML = `
-            <h3 class="cafe-section-header">Cafés em ${currentCity} (${cityCafes.length})</h3>
+            <h3 class="cafe-section-header">Кафе в городе ${currentCity} (${cityCafes.length})</h3>
             <div class="cafes-grid">
                 ${cityCafes.map(cafe => {
                     const isFavorite = favoritesSet.has(cafe.id);
@@ -972,10 +972,10 @@ function displayCafes() {
                                         ${isFavorite ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                <p class="cafe-categories">${cafe.categories || 'Estabelecimento'}</p>
+                                <p class="cafe-categories">${cafe.categories || 'Заведение'}</p>
                                 ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
-                                    VER DETALHES
+                                    ПОДРОБНЕЕ
                                 </button>
                             </div>
                         </div>
