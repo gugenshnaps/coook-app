@@ -144,7 +144,7 @@ function displayCities() {
     const citiesList = document.getElementById('citiesList');
     
     if (cities.length === 0) {
-        citiesList.innerHTML = '<div class="no-items">Nenhuma cidade cadastrada</div>';
+        citiesList.innerHTML = '<div class="no-items">Нет зарегистрированных городов</div>';
         return;
     }
     
@@ -169,7 +169,7 @@ function displayCafes() {
     const cafesList = document.getElementById('cafesList');
     
     if (cafes.length === 0) {
-        cafesList.innerHTML = '<div class="no-items">Nenhum café cadastrado</div>';
+        cafesList.innerHTML = '<div class="no-items">Нет зарегистрированных кафе</div>';
         return;
     }
     
@@ -195,7 +195,7 @@ function displayCafes() {
 function populateCitySelector() {
     const citySelect = document.getElementById('cafeCity');
     
-    citySelect.innerHTML = '<option value="">Selecione uma cidade</option>' +
+    citySelect.innerHTML = '<option value="">Выберите город</option>' +
         cities.map(city => `<option value="${city.name}">${city.name}</option>`).join('');
 }
 
@@ -347,14 +347,14 @@ async function addCafe() {
     
     // Validate required fields
     if (!cafeName || !cafeCity || !cafeAddress) {
-        alert('Por favor, preencha todos os campos obrigatórios!');
+        alert('Пожалуйста, заполните все обязательные поля!');
         return;
     }
     
     // Validate working hours (at least one day should have hours)
     const hasWorkingHours = Object.values(workingHours).some(day => day.open && day.close);
     if (!hasWorkingHours) {
-        alert('Por favor, preencha pelo menos um dia de funcionamento!');
+        alert('Пожалуйста, заполните хотя бы один день работы!');
         return;
     }
     
@@ -414,7 +414,7 @@ async function addCafe() {
         
     } catch (error) {
         console.error('❌ Error adding cafe:', error);
-        alert('Erro ao adicionar café: ' + error.message);
+        alert('Ошибка добавления кафе: ' + error.message);
     }
 }
 
@@ -506,7 +506,7 @@ function closeCredentialsModal() {
 
 // Delete city
 async function deleteCity(cityId) {
-    if (!confirm('Tem certeza que deseja excluir esta cidade?')) {
+    if (!confirm('Вы уверены, что хотите удалить этот город?')) {
         return;
     }
     
@@ -527,7 +527,7 @@ async function deleteCity(cityId) {
 
 // Delete cafe
 async function deleteCafe(cafeId) {
-    if (!confirm('Tem certeza que deseja excluir este café?')) {
+    if (!confirm('Вы уверены, что хотите удалить это кафе?')) {
         return;
     }
     
@@ -849,13 +849,13 @@ function handlePhotoUpload(event) {
     if (file) {
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            alert('Por favor, selecione apenas arquivos de imagem!');
+            alert('Пожалуйста, выберите только файлы изображений!');
             return;
         }
         
         // Validate file size (max 500KB)
         if (file.size > 500 * 1024) {
-            alert('A imagem deve ter menos de 500KB! Será comprimida automaticamente.');
+            alert('Изображение должно быть менее 500KB! Будет автоматически сжато.');
         }
         
         // Compress and preview image
@@ -1407,7 +1407,7 @@ async function fixDuplicateLogins() {
             cafesFixed: fixedCount
         });
         
-        alert(`✅ Correção de duplicatas concluída!\n\n📊 Resultados:\n• ${fixedCount} cafés corrigidos\n• Duplicatas resolvidas com sucesso`);
+        alert(`✅ Исправление дубликатов завершено!\n\n📊 Результаты:\n• ${fixedCount} кафе исправлено\n• Дубликаты успешно устранены`);
         
         // Refresh cafes list
         await loadCafes();
@@ -1415,7 +1415,7 @@ async function fixDuplicateLogins() {
         
     } catch (error) {
         console.error('❌ Fix duplicates error:', error);
-        alert('❌ Erro na correção: ' + error.message);
+        alert('❌ Ошибка исправления: ' + error.message);
     }
 }
 
@@ -1460,7 +1460,7 @@ async function migrateCafesToAddLogins() {
             total: cafesSnapshot.docs.length
         });
         
-        alert(`✅ Migração concluída!\n\n📊 Resultados:\n• ${migratedCount} cafés migrados\n• ${skippedCount} cafés já tinham login\n• ${cafesSnapshot.docs.length} total de cafés`);
+        alert(`✅ Миграция завершена!\n\n📊 Результаты:\n• ${migratedCount} кафе мигрировано\n• ${skippedCount} кафе уже имели логин\n• ${cafesSnapshot.docs.length} всего кафе`);
         
         // Refresh cafes list to show new logins
         await loadCafes();
@@ -1468,7 +1468,7 @@ async function migrateCafesToAddLogins() {
         
     } catch (error) {
         console.error('❌ Migration error:', error);
-        alert('❌ Erro na migração: ' + error.message);
+        alert('❌ Ошибка миграции: ' + error.message);
     }
 }
 
