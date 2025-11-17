@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cafe TMA - Sistema de Lealdade</title>
+    <title>Cafe TMA - Система лояльности</title>
     <link rel="stylesheet" href="cafe-tma.css">
     
     <!-- Firebase SDK -->
@@ -32,26 +32,26 @@
         <!-- Login Screen -->
         <div id="loginScreen" class="screen active">
             <div class="login-header">
-                <h1>☕ Sistema de Lealdade</h1>
-                <p>Faça login para gerenciar seu café</p>
+                <h1>☕ Система лояльности</h1>
+                <p>Войдите, чтобы управлять своим кафе</p>
             </div>
             
             <div class="login-form">
                 <div class="form-group">
-                    <label for="cafeLogin">Login do café:</label>
-                    <input type="text" id="cafeLogin" placeholder="Ex: starbucks1, cafecentral2..." required autocomplete="off">
+                    <label for="cafeLogin">Логин кафе:</label>
+                    <input type="text" id="cafeLogin" placeholder="Например: starbucks1, cafecentral2..." required autocomplete="off">
                 </div>
                 
                 <div class="form-group">
-                    <label for="cafePassword">Senha:</label>
-                    <input type="password" id="cafePassword" placeholder="Digite sua senha" required>
+                    <label for="cafePassword">Пароль:</label>
+                    <input type="password" id="cafePassword" placeholder="Введите пароль" required>
                 </div>
                 
-                <button onclick="loginCafe()" class="login-btn">Entrar</button>
+                <button onclick="loginCafe()" class="login-btn">Войти</button>
             </div>
             
             <div class="login-help">
-                <p>❓ Precisa de ajuda? Entre em contato com o administrador</p>
+                <p>❓ Нужна помощь? Обратитесь к администратору</p>
             </div>
         </div>
 
@@ -59,25 +59,25 @@
         <div id="dashboardScreen" class="screen">
             <div class="dashboard-header">
                 <div class="cafe-info">
-                    <h2 id="cafeName">Nome do Café</h2>
-                    <p id="cafeLocation">Localização</p>
+                    <h2 id="cafeName">Название кафе</h2>
+                    <p id="cafeLocation">Местоположение</p>
                 </div>
-                <button onclick="logout()" class="logout-btn">Sair</button>
+                <button onclick="logout()" class="logout-btn">Выйти</button>
             </div>
             
             <div class="dashboard-stats">
                 <div class="stat-card">
-                    <h3>📊 Estatísticas do Dia</h3>
+                    <h3>📊 Статистика дня</h3>
                     <div class="stat-item">
-                        <span>Visitantes:</span>
+                        <span>Посетители:</span>
                         <strong id="dailyVisitors">0</strong>
                     </div>
                     <div class="stat-item">
-                        <span>Transações:</span>
+                        <span>Транзакции:</span>
                         <strong id="dailyTransactions">0</strong>
                     </div>
                     <div class="stat-item">
-                        <span>Pontos distribuídos:</span>
+                        <span>Баллов выдано:</span>
                         <strong id="dailyPoints">0</strong>
                     </div>
                 </div>
@@ -85,13 +85,13 @@
             
             <div class="dashboard-actions">
                 <button onclick="showEarnPoints()" class="action-btn earn-btn">
-                    💰 Acumular Pontos
+                    💰 Начислить баллы
                 </button>
                 <button onclick="showSpendPoints()" class="action-btn spend-btn">
-                    🎯 Aplicar Desconto
+                    🎯 Применить скидку
                 </button>
                 <button onclick="showLoyaltySettings()" class="action-btn settings-btn">
-                    ⚙️ Configurações
+                    ⚙️ Настройки
                 </button>
             </div>
         </div>
@@ -100,58 +100,58 @@
         <div id="earnPointsModal" class="modal">
             <div class="modal-content large-modal">
                 <div class="modal-header">
-                    <h3>💰 Acumular Pontos</h3>
+                    <h3>💰 Начислить баллы</h3>
                     <button onclick="closeModal('earnPointsModal')" class="close-btn">×</button>
                 </div>
                 
                 <div class="modal-body">
                     <!-- QR Scanner Section -->
                     <div class="qr-section">
-                        <h4>📱 Escanear QR Code do Cliente</h4>
-                        <button class="qr-scan-btn" onclick="startQRScanner()">📱 Scan QR Code</button>
+                        <h4>📱 Сканировать QR-код клиента</h4>
+                        <button class="qr-scan-btn" onclick="startQRScanner()">📱 Сканировать QR-код</button>
                         <div id="qrScannerContainer" class="qr-scanner-container" style="display: none;">
                             <video id="qrVideo" autoplay muted></video>
                             <canvas id="qrCanvas" style="display: none;"></canvas>
                             <div class="scanner-overlay">
                                 <div class="scanner-frame"></div>
-                                <p class="scanner-hint">Posicione o QR code dentro da moldura</p>
+                                <p class="scanner-hint">Расположите QR-код в рамке</p>
                             </div>
-                            <button class="stop-scan-btn" onclick="stopQRScanner()">❌ Parar Scanner</button>
+                            <button class="stop-scan-btn" onclick="stopQRScanner()">❌ Остановить сканер</button>
                         </div>
                     </div>
 
                     <!-- Manual Code Input Section -->
                     <div class="manual-code-section">
-                        <h4>⌨️ Ou digite o código manualmente</h4>
+                        <h4>⌨️ Или введите код вручную</h4>
                         <div class="code-input-group">
                             <input type="text" id="manualCodeInput" maxlength="8" placeholder="12345678" pattern="[0-9]{8}">
-                            <button class="apply-code-btn" onclick="applyManualCode()">Apply</button>
+                            <button class="apply-code-btn" onclick="applyManualCode()">Применить</button>
                         </div>
-                        <small class="code-hint">Digite o código de 8 dígitos do cliente</small>
+                        <small class="code-hint">Введите 8-значный код клиента</small>
                     </div>
 
                     <!-- Customer Info Display -->
                     <div id="customerInfoEarn" class="customer-info" style="display: none;">
-                        <h4>📋 Informações do Cliente</h4>
+                        <h4>📋 Информация о клиенте</h4>
                         <div class="customer-details">
-                            <p><strong>Nome:</strong> <span id="customerNameEarn">-</span></p>
-                            <p><strong>Pontos atuais:</strong> <span id="customerPointsEarn">-</span></p>
-                            <p><strong>Status:</strong> <span id="customerStatusEarn">-</span></p>
+                            <p><strong>Имя:</strong> <span id="customerNameEarn">-</span></p>
+                            <p><strong>Текущие баллы:</strong> <span id="customerPointsEarn">-</span></p>
+                            <p><strong>Статус:</strong> <span id="customerStatusEarn">-</span></p>
                         </div>
                     </div>
                     
                     <!-- Order Section -->
                     <div class="order-section">
-                        <h4>📋 Dados do Pedido</h4>
+                        <h4>📋 Данные заказа</h4>
                         <div class="form-group">
-                            <label for="orderAmount">Valor do pedido (R$):</label>
+                            <label for="orderAmount">Сумма заказа (₽):</label>
                             <input type="number" id="orderAmount" min="1" step="0.01" placeholder="0.00">
                         </div>
                         <div class="points-preview">
-                            <span>Pontos a serem ganhos:</span>
+                            <span>Баллов будет начислено:</span>
                             <strong id="pointsToEarn">0</strong>
                         </div>
-                        <button onclick="confirmEarnPoints()" class="confirm-btn" disabled id="confirmEarnBtn">Confirmar Pontos</button>
+                        <button onclick="confirmEarnPoints()" class="confirm-btn" disabled id="confirmEarnBtn">Подтвердить баллы</button>
                     </div>
                 </div>
             </div>
@@ -161,56 +161,56 @@
         <div id="spendPointsModal" class="modal">
             <div class="modal-content large-modal">
                 <div class="modal-header">
-                    <h3>🎯 Aplicar Desconto</h3>
+                    <h3>🎯 Применить скидку</h3>
                     <button onclick="closeModal('spendPointsModal')" class="close-btn">×</button>
                 </div>
                 
                 <div class="modal-body">
                     <!-- QR Scanner Section -->
                     <div class="qr-section">
-                        <h4>📱 Escanear QR Code do Cliente</h4>
-                        <button class="qr-scan-btn" onclick="startQRScannerSpend()">📱 Scan QR Code</button>
+                        <h4>📱 Сканировать QR-код клиента</h4>
+                        <button class="qr-scan-btn" onclick="startQRScannerSpend()">📱 Сканировать QR-код</button>
                         <div id="qrScannerContainerSpend" class="qr-scanner-container" style="display: none;">
                             <video id="qrVideoSpend" autoplay muted></video>
                             <canvas id="qrCanvasSpend" style="display: none;"></canvas>
                             <div class="scanner-overlay">
                                 <div class="scanner-frame"></div>
-                                <p class="scanner-hint">Posicione o QR code dentro da moldura</p>
+                                <p class="scanner-hint">Расположите QR-код в рамке</p>
                             </div>
-                            <button class="stop-scan-btn" onclick="stopQRScannerSpend()">❌ Parar Scanner</button>
+                            <button class="stop-scan-btn" onclick="stopQRScannerSpend()">❌ Остановить сканер</button>
                         </div>
                     </div>
 
                     <!-- Manual Code Input Section -->
                     <div class="manual-code-section">
-                        <h4>⌨️ Ou digite o código manualmente</h4>
+                        <h4>⌨️ Или введите код вручную</h4>
                         <div class="code-input-group">
                             <input type="text" id="manualCodeInputSpend" maxlength="8" placeholder="12345678" pattern="[0-9]{8}">
-                            <button class="apply-code-btn" onclick="applyManualCodeSpend()">Apply</button>
+                            <button class="apply-code-btn" onclick="applyManualCodeSpend()">Применить</button>
                         </div>
-                        <small class="code-hint">Digite o código de 8 dígitos do cliente</small>
+                        <small class="code-hint">Введите 8-значный код клиента</small>
                     </div>
                     
                     <div class="customer-info" id="customerInfo" style="display: none;">
-                        <h4>👤 Informações do Cliente</h4>
+                        <h4>👤 Информация о клиенте</h4>
                         <div class="customer-details">
-                            <p><strong>Nome:</strong> <span id="customerName">-</span></p>
-                            <p><strong>Pontos disponíveis:</strong> <span id="customerPoints">0</span></p>
-                            <p><strong>Valor do desconto:</strong> <span id="discountValue">R$ 0,00</span></p>
+                            <p><strong>Имя:</strong> <span id="customerName">-</span></p>
+                            <p><strong>Доступные баллы:</strong> <span id="customerPoints">0</span></p>
+                            <p><strong>Сумма скидки:</strong> <span id="discountValue">₽ 0,00</span></p>
                         </div>
                     </div>
                     
                     <div class="order-section">
-                        <h4>📋 Dados do Pedido</h4>
+                        <h4>📋 Данные заказа</h4>
                         <div class="form-group">
-                            <label for="spendOrderAmount">Valor do pedido (R$):</label>
+                            <label for="spendOrderAmount">Сумма заказа (₽):</label>
                             <input type="number" id="spendOrderAmount" min="1" step="0.01" placeholder="0.00">
                         </div>
                         <div class="final-amount">
-                            <span>Valor final com desconto:</span>
-                            <strong id="finalAmount">R$ 0,00</strong>
+                            <span>Итоговая сумма со скидкой:</span>
+                            <strong id="finalAmount">₽ 0,00</strong>
                         </div>
-                        <button onclick="confirmSpendPoints()" class="confirm-btn" disabled id="confirmSpendBtn">Aplicar Desconto</button>
+                        <button onclick="confirmSpendPoints()" class="confirm-btn" disabled id="confirmSpendBtn">Применить скидку</button>
                     </div>
                 </div>
             </div>
@@ -220,7 +220,7 @@
         <div id="loyaltySettingsModal" class="modal">
             <div class="modal-content large-modal">
                 <div class="modal-header">
-                    <h3>⚙️ Configurações de Lealdade</h3>
+                    <h3>⚙️ Настройки лояльности</h3>
                     <button onclick="closeModal('loyaltySettingsModal')" class="close-btn">×</button>
                 </div>
                 
@@ -228,122 +228,122 @@
                     <div class="loyalty-settings">
                         <div class="loyalty-toggle">
                             <input type="checkbox" id="loyaltyEnabled" checked>
-                            <label for="loyaltyEnabled">Ativar sistema de lealdade</label>
+                            <label for="loyaltyEnabled">Активировать систему лояльности</label>
                         </div>
                         
                         <div class="loyalty-basic-settings">
-                            <h4>Configurações Básicas</h4>
+                            <h4>Основные настройки</h4>
                             <div class="form-group">
-                                <label for="basePointsPerReal">Coeficiente de pontos:</label>
+                                <label for="basePointsPerReal">Коэффициент баллов:</label>
                                 <input type="number" id="basePointsPerReal" value="1.0" min="0.1" max="10.0" step="0.1">
-                                <span class="input-hint">pontos por 1 real</span>
+                                <span class="input-hint">баллов за 1 рубль</span>
                             </div>
                             
                             <div class="form-group">
-                                <label for="minOrderAmount">Valor mínimo do pedido:</label>
+                                <label for="minOrderAmount">Минимальная сумма заказа:</label>
                                 <input type="number" id="minOrderAmount" value="10" min="1" max="1000">
-                                <span class="input-hint">reais para ganhar pontos</span>
+                                <span class="input-hint">рублей для получения баллов</span>
                             </div>
                             
                             <div class="form-group">
-                                <label for="maxPointsPerOrder">Máximo de pontos por pedido:</label>
+                                <label for="maxPointsPerOrder">Максимум баллов за заказ:</label>
                                 <input type="number" id="maxPointsPerOrder" value="100" min="10" max="10000">
-                                <span class="input-hint">proteção contra abusos</span>
+                                <span class="input-hint">защита от злоупотреблений</span>
                             </div>
                         </div>
                         
                         <div class="loyalty-advanced-settings">
                             <div class="loyalty-toggle">
                                 <input type="checkbox" id="specialDaysEnabled">
-                                <label for="specialDaysEnabled">Ativar dias especiais</label>
+                                <label for="specialDaysEnabled">Активировать специальные дни</label>
                             </div>
                             
                             <div class="special-days-grid" id="specialDaysGrid">
                                 <div class="day-row">
-                                    <span class="day-label">Segunda-feira:</span>
+                                    <span class="day-label">Понедельник:</span>
                                     <input type="number" id="mondayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="day-row">
-                                    <span class="day-label">Terça-feira:</span>
+                                    <span class="day-label">Вторник:</span>
                                     <input type="number" id="tuesdayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="day-row">
-                                    <span class="day-label">Quarta-feira:</span>
+                                    <span class="day-label">Среда:</span>
                                     <input type="number" id="wednesdayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="day-row">
-                                    <span class="day-label">Quinta-feira:</span>
+                                    <span class="day-label">Четверг:</span>
                                     <input type="number" id="thursdayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="day-row">
-                                    <span class="day-label">Sexta-feira:</span>
+                                    <span class="day-label">Пятница:</span>
                                     <input type="number" id="fridayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="day-row">
-                                    <span class="day-label">Sábado:</span>
+                                    <span class="day-label">Суббота:</span>
                                     <input type="number" id="saturdayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="day-row">
-                                    <span class="day-label">Domingo:</span>
+                                    <span class="day-label">Воскресенье:</span>
                                     <input type="number" id="sundayMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                             </div>
                             
                             <div class="loyalty-toggle">
                                 <input type="checkbox" id="timePeriodsEnabled">
-                                <label for="timePeriodsEnabled">Ativar períodos especiais</label>
+                                <label for="timePeriodsEnabled">Активировать специальные периоды</label>
                             </div>
                             
                             <div class="time-periods-grid" id="timePeriodsGrid">
                                 <div class="time-row">
-                                    <span class="time-label">Manhã (9:00-12:00):</span>
+                                    <span class="time-label">Утро (9:00-12:00):</span>
                                     <input type="number" id="morningMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="time-row">
-                                    <span class="time-label">Tarde (12:00-18:00):</span>
+                                    <span class="time-label">День (12:00-18:00):</span>
                                     <input type="number" id="afternoonMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="time-row">
-                                    <span class="time-label">Noite (18:00-22:00):</span>
+                                    <span class="time-label">Вечер (18:00-22:00):</span>
                                     <input type="number" id="eveningMultiplier" value="1.0" min="0.1" max="5.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                             </div>
                             
                             <div class="loyalty-toggle">
                                 <input type="checkbox" id="personalConditionsEnabled">
-                                <label for="personalConditionsEnabled">Ativar condições especiais</label>
+                                <label for="personalConditionsEnabled">Активировать специальные условия</label>
                             </div>
                             
                             <div class="personal-conditions-grid" id="personalConditionsGrid">
                                 <div class="condition-row">
-                                    <span class="condition-label">Clientes VIP:</span>
+                                    <span class="condition-label">VIP-клиенты:</span>
                                     <input type="number" id="vipMultiplier" value="2.0" min="0.1" max="10.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="condition-row">
-                                    <span class="condition-label">Aniversariantes:</span>
+                                    <span class="condition-label">Именинники:</span>
                                     <input type="number" id="birthdayMultiplier" value="3.0" min="0.1" max="10.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                                 <div class="condition-row">
-                                    <span class="condition-label">Primeira compra:</span>
+                                    <span class="condition-label">Первая покупка:</span>
                                     <input type="number" id="firstOrderMultiplier" value="2.0" min="0.1" max="10.0" step="0.1">
-                                    <span class="multiplier-hint">x pontos</span>
+                                    <span class="multiplier-hint">x баллов</span>
                                 </div>
                             </div>
                         </div>
                         
-                        <button onclick="saveLoyaltySettings()" class="save-btn">💾 Salvar Configurações</button>
+                        <button onclick="saveLoyaltySettings()" class="save-btn">💾 Сохранить настройки</button>
                     </div>
                 </div>
             </div>
