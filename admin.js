@@ -38,7 +38,7 @@ async function initializeAdminPanel() {
         console.log('Admin panel initialized successfully!');
     } catch (error) {
         console.error('Error initializing admin panel:', error);
-        showError('Erro ao inicializar painel admin: ' + error.message);
+        showError('Ошибка инициализации админ-панели: ' + error.message);
     }
 }
 
@@ -63,7 +63,7 @@ async function loadCities() {
         displayCities();
     } catch (error) {
         console.error('Error loading cities:', error);
-        showError('Erro ao carregar cidades: ' + error.message);
+        showError('Ошибка загрузки городов: ' + error.message);
     }
 }
 
@@ -86,7 +86,7 @@ async function loadCafes() {
         displayCafes();
     } catch (error) {
         console.error('Error loading cafes:', error);
-        showError('Erro ao carregar cafés: ' + error.message);
+        showError('Ошибка загрузки кафе: ' + error.message);
     }
 }
 
@@ -237,11 +237,11 @@ async function addCity() {
         // Clear input
         cityNameInput.value = '';
         
-        showSuccess('Cidade adicionada com sucesso!');
+        showSuccess('Город успешно добавлен!');
         console.log('City added successfully');
     } catch (error) {
         console.error('Error adding city:', error);
-        showError('Erro ao adicionar cidade: ' + error.message);
+        showError('Ошибка добавления города: ' + error.message);
     }
 }
 
@@ -446,18 +446,18 @@ function showCafeCredentials(cafeName, login, password) {
     modal.className = 'credentials-modal';
     modal.innerHTML = `
         <div class="credentials-content">
-            <h2>✅ Café "${cafeName}" criado com sucesso!</h2>
+            <h2>✅ Кафе "${cafeName}" успешно создано!</h2>
             
             <div class="credentials-info">
-                <h3>🔐 DADOS PARA ENTRAR NO TMA:</h3>
+                <h3>🔐 ДАННЫЕ ДЛЯ ВХОДА В TMA:</h3>
                 
                 <div class="credential-row">
-                    <strong>Login:</strong> <span class="credential-value">${login}</span>
+                    <strong>Логин:</strong> <span class="credential-value">${login}</span>
                     <button onclick="copyToClipboard('${login}')" class="copy-btn">📋</button>
                 </div>
                 
                 <div class="credential-row">
-                    <strong>Senha:</strong> <span class="credential-value">${password}</span>
+                    <strong>Пароль:</strong> <span class="credential-value">${password}</span>
                     <button onclick="copyToClipboard('${password}')" class="copy-btn">📋</button>
                 </div>
             </div>
@@ -470,11 +470,11 @@ function showCafeCredentials(cafeName, login, password) {
             </div>
             
             <div class="credentials-warning">
-                ⚠️ <strong>ATENÇÃO:</strong> A senha é mostrada apenas uma vez!
-                <br>📋 Copie e entregue ao proprietário do café.
+                ⚠️ <strong>ВНИМАНИЕ:</strong> Пароль показывается только один раз!
+                <br>📋 Скопируйте и передайте владельцу кафе.
             </div>
             
-            <button onclick="closeCredentialsModal()" class="close-btn">Fechar</button>
+            <button onclick="closeCredentialsModal()" class="close-btn">Закрыть</button>
         </div>
     `;
     
@@ -517,11 +517,11 @@ async function deleteCity(cityId) {
         const cityRef = window.firebase.doc(window.firebase.db, 'cities', cityId);
         await window.firebase.deleteDoc(cityRef);
         
-        showSuccess('Cidade excluída com sucesso!');
+        showSuccess('Город успешно удален!');
         console.log('City deleted successfully');
     } catch (error) {
         console.error('Error deleting city:', error);
-        showError('Erro ao excluir cidade: ' + error.message);
+        showError('Ошибка удаления города: ' + error.message);
     }
 }
 
@@ -538,11 +538,11 @@ async function deleteCafe(cafeId) {
         const cafeRef = window.firebase.doc(window.firebase.db, 'cafes', cafeId);
         await window.firebase.deleteDoc(cafeRef);
         
-        showSuccess('Café excluído com sucesso!');
+        showSuccess('Кафе успешно удалено!');
         console.log('Cafe deleted successfully');
     } catch (error) {
         console.error('Error deleting cafe:', error);
-        showError('Erro ao excluir café: ' + error.message);
+        showError('Ошибка удаления кафе: ' + error.message);
     }
 }
 
@@ -568,7 +568,7 @@ async function editCafe(cafeId) {
         
     } catch (error) {
         console.error('❌ Error loading edit form:', error);
-        showError('Erro ao carregar formulário de edição: ' + error.message);
+        showError('Ошибка загрузки формы редактирования: ' + error.message);
     }
 }
 
@@ -1139,7 +1139,7 @@ async function handleEditCafeSubmit(event) {
         await updateCafeInFirebase(cafeId, updatedCafe);
         
         // Show success and close modal
-        showSuccess('Café atualizado com sucesso!');
+        showSuccess('Кафе успешно обновлено!');
         closeEditCafeModal();
         
         // Refresh cafes list
@@ -1147,7 +1147,7 @@ async function handleEditCafeSubmit(event) {
         
     } catch (error) {
         console.error('❌ Error updating cafe:', error);
-        showError('Erro ao atualizar café: ' + error.message);
+        showError('Ошибка обновления кафе: ' + error.message);
     }
 }
 
@@ -1254,7 +1254,7 @@ async function handleEditPhotoUpload(event) {
         }
     } catch (error) {
         console.error('❌ Error processing edit photo:', error);
-        showError('Erro ao processar foto: ' + error.message);
+        showError('Ошибка обработки фото: ' + error.message);
     }
 }
 
@@ -1300,7 +1300,7 @@ async function viewCafePassword(cafeId) {
         
     } catch (error) {
         console.error('❌ Error loading password:', error);
-        showError('Erro ao carregar senha: ' + error.message);
+        showError('Ошибка загрузки пароля: ' + error.message);
     }
 }
 
@@ -1344,15 +1344,15 @@ async function copyPasswordToClipboard() {
         
         if (password && password !== 'N/A') {
             await navigator.clipboard.writeText(password);
-            showSuccess('Senha copiada para a área de transferência!');
+            showSuccess('Пароль скопирован в буфер обмена!');
             console.log('✅ Password copied to clipboard');
         } else {
-            showError('Nenhuma senha para copiar!');
+            showError('Нет пароля для копирования!');
         }
         
     } catch (error) {
         console.error('❌ Error copying password:', error);
-        showError('Erro ao copiar senha: ' + error.message);
+        showError('Ошибка копирования пароля: ' + error.message);
     }
 }
 
