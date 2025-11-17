@@ -2269,7 +2269,9 @@ function formatWorkingHours(workingHours) {
         return '<p class="cafe-hours">Режим работы не указан</p>';
     }
     
-    const days = {
+    // Определяем порядок дней недели (Пн -> Вс)
+    const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const daysNames = {
         monday: 'Пн',
         tuesday: 'Вт',
         wednesday: 'Ср',
@@ -2281,11 +2283,13 @@ function formatWorkingHours(workingHours) {
     
     let hoursHtml = '<div class="working-hours-list">';
     
-    Object.entries(workingHours).forEach(([day, hours]) => {
-        if (hours.open && hours.close) {
+    // Перебираем дни в правильном порядке
+    daysOrder.forEach(day => {
+        const hours = workingHours[day];
+        if (hours && hours.open && hours.close) {
             hoursHtml += `
                 <div class="working-hour-item">
-                    <span class="day-name">${days[day]}:</span>
+                    <span class="day-name">${daysNames[day]}:</span>
                     <span class="time-range">${hours.open} - ${hours.close}</span>
                 </div>
             `;
