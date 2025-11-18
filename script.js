@@ -995,9 +995,9 @@ window.showCafeDetails = function(cafeId) {
                 <div class="cafe-detail-working-hours">
                     <h3 class="working-hours-header" onclick="toggleWorkingHours()">
                         🕒 Режим работы
-                        <span class="toggle-arrow">▼</span>
+                        <span class="toggle-arrow">▶</span>
                     </h3>
-                    <div class="working-hours-content" id="workingHoursContent">
+                    <div class="working-hours-content" id="workingHoursContent" style="display: none;">
                         ${formatWorkingHours(cafe.workingHours)}
                     </div>
                 </div>
