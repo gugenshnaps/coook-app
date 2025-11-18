@@ -993,8 +993,13 @@ window.showCafeDetails = function(cafeId) {
                 
                 <!-- Working hours for all days -->
                 <div class="cafe-detail-working-hours">
-                    <h3>🕒 Режим работы</h3>
-                    ${formatWorkingHours(cafe.workingHours)}
+                    <h3 class="working-hours-header" onclick="toggleWorkingHours()">
+                        🕒 Режим работы
+                        <span class="toggle-arrow">▼</span>
+                    </h3>
+                    <div class="working-hours-content" id="workingHoursContent">
+                        ${formatWorkingHours(cafe.workingHours)}
+                    </div>
                 </div>
                 
                 <!-- Loyalty buttons -->
@@ -1032,6 +1037,22 @@ function closeModal() {
         console.log('🔧 Modal closed');
     }
 }
+
+// Toggle working hours visibility
+window.toggleWorkingHours = function() {
+    const content = document.getElementById('workingHoursContent');
+    const arrow = document.querySelector('.toggle-arrow');
+    
+    if (content && arrow) {
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            arrow.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            arrow.textContent = '▶';
+        }
+    }
+};
 
 // Show all cafes regardless of city selection
 // Function removed - no longer using "Show all cafes" button

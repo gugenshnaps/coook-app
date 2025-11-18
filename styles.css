@@ -2305,6 +2305,54 @@ button, .carousel-dot, .carousel-prev, .carousel-next, .photo-carousel, .carouse
     margin-bottom: 24px;
 }
 
+.working-hours-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: rgba(74, 144, 226, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.working-hours-header:hover {
+    background: rgba(74, 144, 226, 0.1);
+}
+
+.working-hours-header:active {
+    transform: scale(0.98);
+}
+
+.toggle-arrow {
+    font-size: 14px;
+    color: #4A90E2;
+    transition: transform 0.3s ease;
+    font-weight: bold;
+}
+
+.working-hours-content {
+    display: none;
+    padding: 8px 12px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .cafe-detail-working-hours h3 {
     font-size: 16px;
     font-weight: 600;
