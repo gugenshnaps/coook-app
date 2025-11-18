@@ -983,10 +983,11 @@ window.showCafeDetails = function(cafeId) {
             <div class="cafe-detail-info">
                 <h2 class="cafe-detail-name">${cafe.name}</h2>
                 ${cafe.categories ? `<p class="cafe-detail-categories">${cafe.categories}</p>` : ''}
+                
+                <p class="cafe-detail-city-tag">${cafe.city}</p>
+                
                 ${cafe.address ? `<p class="cafe-detail-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
                 ${cafe.telegram ? `<p class="cafe-detail-telegram" onclick="openTelegramChat('${cafe.telegram}')">💬 Написать в Telegram</p>` : ''}
-                
-                <p class="cafe-detail-city-tag">📍 ${cafe.city}</p>
                 
                 <p class="cafe-detail-description">${cafe.description || 'Без описания'}</p>
                 
