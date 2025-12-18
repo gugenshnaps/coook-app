@@ -35,8 +35,8 @@ async function initializeUserSystem() {
             window.currentUser = {
                 id: 'test-user-001',
                 telegramId: 'test-001',
-                firstName: 'Тестовый пользователь',
-                lastName: 'Локальный',
+                firstName: 'Test User',
+                lastName: 'Local',
                 username: 'testuser',
                 photoUrl: '',
                 favorites: [],

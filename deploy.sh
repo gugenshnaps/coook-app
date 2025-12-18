@@ -2,20 +2,20 @@
 
 echo "🚀 Starting automatic deployment..."
 
-# Переходим в папку проекта
+# Navigate to project directory
 cd /Users/yuraokhapkin/Desktop/Caaafe
 
 echo "📁 Changed to project directory"
 
-# Добавляем все изменения
+# Add all changes
 echo "📝 Adding all changes..."
 git add .
 
-# Коммитим изменения
+# Commit changes
 echo "💾 Committing changes..."
-git commit -m "Rebrand: Change name from Caaafe to Coook - $(date)"
+git commit -m "Translation: Full English translation - $(date)"
 
-# Пушим в GitHub
+# Push to GitHub
 echo "🚀 Pushing to GitHub..."
 git push origin main
 

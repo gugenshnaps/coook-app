@@ -170,7 +170,7 @@ async function initializeCafeTMA() {
         console.log('✅ Cafe TMA initialized successfully!');
     } catch (error) {
         console.error('❌ Error initializing cafe TMA:', error);
-        showError('Ошибка инициализации TMA: ' + error.message);
+        showError('TMA initialization error: ' + error.message);
     }
 }
 
@@ -239,7 +239,7 @@ async function loginCafe() {
     const password = document.getElementById('cafePassword').value;
     
     if (!cafeLogin || !password) {
-        showError('Пожалуйста, введите логин кафе и пароль!');
+        showError('Please enter cafe login and password!');
         return;
     }
     
@@ -250,7 +250,7 @@ async function loginCafe() {
         const cafe = cafes.find(c => c.login === cafeLogin);
         
         if (!cafe) {
-            showError('Кафе не найдено! Проверьте правильность логина.');
+            showError('Cafe not found! Please check the login.');
             return;
         }
         
@@ -270,11 +270,11 @@ async function loginCafe() {
             
             console.log('✅ Login successful for cafe:', cafe.name);
         } else {
-            showError('Неверный пароль!');
+            showError('Incorrect password!');
         }
     } catch (error) {
         console.error('❌ Login error:', error);
-        showError('Ошибка входа: ' + error.message);
+        showError('Login error: ' + error.message);
     }
 }
 
@@ -576,7 +576,7 @@ async function startQRScanner() {
         
     } catch (error) {
         console.error('❌ Error starting QR scanner:', error);
-        showError('Ошибка доступа к камере: ' + error.message);
+        showError('Camera access error: ' + error.message);
     }
 }
 
@@ -608,7 +608,7 @@ async function startQRScannerSpend() {
         
     } catch (error) {
         console.error('❌ Error starting QR scanner:', error);
-        showError('Ошибка доступа к камере: ' + error.message);
+        showError('Camera access error: ' + error.message);
     }
 }
 
@@ -684,7 +684,7 @@ async function processQRData(qrData, mode) {
         const parts = qrData.split(':');
         
         if (parts.length !== 3) {
-            showError('Недействительный QR-код!');
+            showError('Invalid QR code!');
             return;
         }
         
@@ -694,7 +694,7 @@ async function processQRData(qrData, mode) {
         
         // Verify cafe ID matches current cafe
         if (cafeId !== currentCafe.id) {
-            showError('QR-код не для этого кафе!');
+            showError('QR code is not for this cafe!');
             return;
         }
         
@@ -703,7 +703,7 @@ async function processQRData(qrData, mode) {
         
     } catch (error) {
         console.error('❌ Error processing QR data:', error);
-        showError('Ошибка обработки QR-кода: ' + error.message);
+        showError('QR code processing error: ' + error.message);
     }
 }
 
@@ -713,12 +713,12 @@ async function applyManualCode() {
     const code = codeInput.value.trim();
     
     if (!code || code.length !== 8) {
-        showError('Пожалуйста, введите 8-значный код!');
+        showError('Please enter an 8-digit code!');
         return;
     }
     
     if (!/^\d{8}$/.test(code)) {
-        showError('Код должен содержать только цифры!');
+        showError('Code must contain only digits!');
         return;
     }
     
@@ -731,12 +731,12 @@ async function applyManualCode() {
         if (userData) {
             await loadCustomerData(userData.telegramId, 'earn');
         } else {
-            showError('Недействительный код! Клиент не найден.');
+            showError('Invalid code! Customer not found.');
         }
         
     } catch (error) {
         console.error('❌ Error processing manual code:', error);
-        showError('Ошибка обработки кода: ' + error.message);
+        showError('Code processing error: ' + error.message);
     }
 }
 
@@ -745,12 +745,12 @@ async function applyManualCodeSpend() {
     const code = codeInput.value.trim();
     
     if (!code || code.length !== 8) {
-        showError('Пожалуйста, введите 8-значный код!');
+        showError('Please enter an 8-digit code!');
         return;
     }
     
     if (!/^\d{8}$/.test(code)) {
-        showError('Код должен содержать только цифры!');
+        showError('Code must contain only digits!');
         return;
     }
     
@@ -763,12 +763,12 @@ async function applyManualCodeSpend() {
         if (userData) {
             await loadCustomerData(userData.telegramId, 'spend');
         } else {
-            showError('Недействительный код! Клиент не найден.');
+            showError('Invalid code! Customer not found.');
         }
         
     } catch (error) {
         console.error('❌ Error processing manual code:', error);
-        showError('Ошибка обработки кода: ' + error.message);
+        showError('Code processing error: ' + error.message);
     }
 }
 
@@ -820,7 +820,7 @@ async function loadCustomerData(userId, mode) {
             userId: userId,
             name: `${userData.firstName || 'Unknown'} ${userData.lastName || ''}`.trim(),
             points: points,
-            status: 'Активен',
+            status: 'Active',
             qrCode: null, // QR code not available in manual mode
             manualCode: null // Manual code not available in manual mode
         };
@@ -845,7 +845,7 @@ async function loadCustomerData(userId, mode) {
         
     } catch (error) {
         console.error('❌ Error loading customer data:', error);
-        showError('Ошибка загрузки данных клиента: ' + error.message);
+        showError('Error loading customer data: ' + error.message);
     }
 }
 
@@ -875,7 +875,7 @@ function displayCustomerInfoSpend(customer) {
     
     // Calculate discount value (1 point = R$ 0.10, but should be configurable)
     const pointsToMoneyRate = 0.10; // This should come from loyalty settings
-    discountValue.textContent = `₽ ${(customer.points * pointsToMoneyRate).toFixed(2)}`;
+    discountValue.textContent = `$ ${(customer.points * pointsToMoneyRate).toFixed(2)}`;
     
     customerInfo.style.display = 'block';
 }
@@ -929,7 +929,7 @@ function calculatePointsToEarn() {
 // Confirm earn points
 async function confirmEarnPoints() {
     if (!currentCustomer) {
-        showError('Пожалуйста, сначала отсканируйте QR-код или введите код клиента!');
+        showError('Please scan QR code or enter customer code first!');
         return;
     }
     
@@ -937,12 +937,12 @@ async function confirmEarnPoints() {
     const pointsToEarn = parseInt(document.getElementById('pointsToEarn').textContent);
     
     if (!orderAmount || orderAmount <= 0) {
-        showError('Пожалуйста, введите действительную сумму заказа!');
+        showError('Please enter a valid order amount!');
         return;
     }
     
     if (pointsToEarn <= 0) {
-        showError('Заказ слишком мал для получения баллов!');
+        showError('Order too small to earn points!');
         return;
     }
     
@@ -958,9 +958,9 @@ async function confirmEarnPoints() {
         );
         
         if (result.success) {
-            showSuccess(`✅ ${pointsToEarn} баллов подтверждено для ${currentCustomer.name} (заказ на ₽ ${orderAmount.toFixed(2)})!\n🎯 Всего: ${result.totalPoints} баллов`);
+            showSuccess(`✅ ${pointsToEarn} points confirmed for ${currentCustomer.name} (order $ ${orderAmount.toFixed(2)})!\n🎯 Total: ${result.totalPoints} points`);
         } else {
-            showError('Ошибка добавления баллов: ' + result.error);
+            showError('Error adding points: ' + result.error);
             return;
         }
         
@@ -981,7 +981,7 @@ async function confirmEarnPoints() {
         
     } catch (error) {
         console.error('❌ Error confirming points:', error);
-        showError('Ошибка подтверждения баллов: ' + error.message);
+        showError('Error confirming points: ' + error.message);
     }
 }
 
@@ -991,7 +991,7 @@ function calculateFinalAmount() {
     const customerPoints = parseInt(document.getElementById('customerPoints').textContent) || 0;
     
     if (orderAmount <= 0) {
-        document.getElementById('finalAmount').textContent = '₽ 0,00';
+        document.getElementById('finalAmount').textContent = '$ 0.00';
         return;
     }
     
@@ -1000,21 +1000,21 @@ function calculateFinalAmount() {
     const discountAmount = Math.min(customerPoints * pointsToMoneyRate, orderAmount * 0.5); // Max 50% discount
     const finalAmount = Math.max(orderAmount - discountAmount, 0);
     
-    document.getElementById('finalAmount').textContent = `₽ ${finalAmount.toFixed(2)}`;
+    document.getElementById('finalAmount').textContent = `$ ${finalAmount.toFixed(2)}`;
 }
 
 // Confirm spend points
 async function confirmSpendPoints() {
     if (!currentCustomer) {
-        showError('Пожалуйста, сначала отсканируйте QR-код или введите код клиента!');
+        showError('Please scan QR code or enter customer code first!');
         return;
     }
     
     const orderAmount = parseFloat(document.getElementById('spendOrderAmount').value);
-    const finalAmount = parseFloat(document.getElementById('finalAmount').textContent.replace('₽ ', '').replace(',', '.'));
+    const finalAmount = parseFloat(document.getElementById('finalAmount').textContent.replace('$ ', '').replace(',', '.'));
     
     if (!orderAmount || orderAmount <= 0) {
-        showError('Пожалуйста, введите действительную сумму заказа!');
+        showError('Please enter a valid order amount!');
         return;
     }
     
@@ -1035,9 +1035,9 @@ async function confirmSpendPoints() {
         );
         
         if (result.success) {
-            showSuccess(`✅ Скидка применена для ${currentCustomer.name}! Итоговая сумма: ₽ ${finalAmount.toFixed(2)} (скидка: ₽ ${discountAmount.toFixed(2)})\n🎯 Остаток: ${result.totalPoints} баллов`);
+            showSuccess(`✅ Discount applied for ${currentCustomer.name}! Final amount: $ ${finalAmount.toFixed(2)} (discount: $ ${discountAmount.toFixed(2)})\n🎯 Remaining: ${result.totalPoints} points`);
         } else {
-            showError('Ошибка списания баллов: ' + result.error);
+            showError('Error spending points: ' + result.error);
             return;
         }
         
@@ -1046,7 +1046,7 @@ async function confirmSpendPoints() {
         
         // Clear form and reset
         document.getElementById('spendOrderAmount').value = '';
-        document.getElementById('finalAmount').textContent = '₽ 0,00';
+        document.getElementById('finalAmount').textContent = '$ 0.00';
         document.getElementById('customerInfo').style.display = 'none';
         document.getElementById('confirmSpendBtn').disabled = true;
         currentCustomer = null;
@@ -1058,7 +1058,7 @@ async function confirmSpendPoints() {
         
     } catch (error) {
         console.error('❌ Error confirming discount:', error);
-        showError('Ошибка применения скидки: ' + error.message);
+        showError('Error applying discount: ' + error.message);
     }
 }
 
@@ -1066,7 +1066,7 @@ async function confirmSpendPoints() {
 async function saveLoyaltySettings() {
     try {
         if (!currentCafe || !loyaltySettings) {
-            showError('Ошибка: настройки не загружены!');
+            showError('Error: settings not loaded!');
             return;
         }
         
@@ -1113,12 +1113,12 @@ async function saveLoyaltySettings() {
         // Update local settings
         loyaltySettings = { ...loyaltySettings, ...newSettings };
         
-        showSuccess('✅ Настройки успешно сохранены!');
+        showSuccess('✅ Settings saved successfully!');
         console.log('✅ Loyalty settings saved:', newSettings);
         
     } catch (error) {
         console.error('❌ Error saving loyalty settings:', error);
-        showError('Ошибка сохранения настроек: ' + error.message);
+        showError('Error saving settings: ' + error.message);
     }
 }
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coook - Кафе и рестораны</title>
+    <title>Coook - Cafes & Restaurants</title>
     <!-- Force CSS reload with version parameter -->
     <link rel="stylesheet" href="styles.css?v=2.1">
     
@@ -21,53 +21,53 @@
 
 </head>
 <body>
-    <!-- Header с аватаром и выбором города -->
+    <!-- Header with avatar and city selection -->
     <header class="app-header">
-        <!-- Левая часть - аватар и никнейм -->
+        <!-- Left side - avatar and nickname -->
         <div class="user-info">
             <div class="user-avatar">
                 <img id="userAvatar" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM0QTkwRTIiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiBmaWxsPSJub25lIj4KPHBhdGggZD0iTTggMTJDMTAuMjA5MSAxMiAxMiAxMC4yMDkxIDEyIDhDMTIgNS43OTA5IDEwLjIwOTEgNCA4IDRDNS43OTA5IDQgNCA1Ljc5MDkgNCA4QzQgMTAuMjA5MSA1Ljc5MDkgNCA4IDRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOCAxNEMxMC4yMDkxIDE0IDEyIDEyLjIwOTEgMTIgMTBDMTIgOS43OTA5IDEwLjIwOTEgOCA4IDhDNi4yMDkxIDggNCA5Ljc5MDkgNCAxMkM0IDEyLjIwOTEgNi4yMDkxIDE0IDggMTRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4KPC9zdmc+" alt="Avatar">
             </div>
             <div class="user-details">
-                <div id="userName" class="user-name">Загрузка...</div>
-                <div class="user-status">Онлайн</div>
+                <div id="userName" class="user-name">Loading...</div>
+                <div class="user-status">Online</div>
             </div>
         </div>
         
-        <!-- Правая часть - выбор города -->
+        <!-- Right side - city selection -->
         <div class="city-selector">
             <select id="citySelect" class="city-select">
-                <option value="">Загрузка городов...</option>
+                <option value="">Loading cities...</option>
             </select>
         </div>
     </header>
 
-            <!-- Основной контент -->
+            <!-- Main content -->
         <main class="main-content">
-                    <!-- Меню приложения -->
+                    <!-- App menu -->
         <div class="app-menu">
             <button class="menu-item loyalty-btn">
                 <span class="menu-icon">🎯</span>
-                <span class="menu-text">Моя лояльность</span>
+                <span class="menu-text">My Loyalty</span>
             </button>
             <button class="menu-item favorites-btn">
                 <span class="menu-icon">❤️</span>
-                <span class="menu-text">Избранное</span>
+                <span class="menu-text">Favorites</span>
             </button>
         </div>
         
-        <!-- Список кафе -->
+        <!-- Cafe list -->
         <div id="cafesList" class="cafes-list">
-            <div class="loading">Выберите город, чтобы увидеть кафе</div>
+            <div class="loading">Select a city to see cafes</div>
         </div>
         
-        <!-- Сообщение об отсутствии кафе -->
+        <!-- No cafes message -->
         <div id="noCafes" class="no-cafes" style="display: none;">
-            <p>В этом городе пока нет кафе</p>
+            <p>No cafes in this city yet</p>
         </div>
     </main>
 
-    <!-- Модальное окно с деталями кафе -->
+    <!-- Cafe details modal -->
     <div id="modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close">&times;</span>

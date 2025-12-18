@@ -38,7 +38,7 @@ async function initializeAdminPanel() {
         console.log('Admin panel initialized successfully!');
     } catch (error) {
         console.error('Error initializing admin panel:', error);
-        showError('Ошибка инициализации админ-панели: ' + error.message);
+        showError('Admin panel initialization error: ' + error.message);
     }
 }
 
@@ -63,7 +63,7 @@ async function loadCities() {
         displayCities();
     } catch (error) {
         console.error('Error loading cities:', error);
-        showError('Ошибка загрузки городов: ' + error.message);
+        showError('Error loading cities: ' + error.message);
     }
 }
 
@@ -86,7 +86,7 @@ async function loadCafes() {
         displayCafes();
     } catch (error) {
         console.error('Error loading cafes:', error);
-        showError('Ошибка загрузки кафе: ' + error.message);
+        showError('Error loading cafes: ' + error.message);
     }
 }
 
@@ -144,7 +144,7 @@ function displayCities() {
     const citiesList = document.getElementById('citiesList');
     
     if (cities.length === 0) {
-        citiesList.innerHTML = '<div class="no-items">Нет зарегистрированных городов</div>';
+        citiesList.innerHTML = '<div class="no-items">No registered cities</div>';
         return;
     }
     
@@ -169,7 +169,7 @@ function displayCafes() {
     const cafesList = document.getElementById('cafesList');
     
     if (cafes.length === 0) {
-        cafesList.innerHTML = '<div class="no-items">Нет зарегистрированных кафе</div>';
+        cafesList.innerHTML = '<div class="no-items">No registered cafes</div>';
         return;
     }
     
@@ -195,7 +195,7 @@ function displayCafes() {
 function populateCitySelector() {
     const citySelect = document.getElementById('cafeCity');
     
-    citySelect.innerHTML = '<option value="">Выберите город</option>' +
+    citySelect.innerHTML = '<option value="">Select a city</option>' +
         cities.map(city => `<option value="${city.name}">${city.name}</option>`).join('');
 }
 
@@ -237,11 +237,11 @@ async function addCity() {
         // Clear input
         cityNameInput.value = '';
         
-        showSuccess('Город успешно добавлен!');
+        showSuccess('City added successfully!');
         console.log('City added successfully');
     } catch (error) {
         console.error('Error adding city:', error);
-        showError('Ошибка добавления города: ' + error.message);
+        showError('Error adding city: ' + error.message);
     }
 }
 
@@ -347,14 +347,14 @@ async function addCafe() {
     
     // Validate required fields
     if (!cafeName || !cafeCity || !cafeAddress) {
-        alert('Пожалуйста, заполните все обязательные поля!');
+        alert('Please fill in all required fields!');
         return;
     }
     
     // Validate working hours (at least one day should have hours)
     const hasWorkingHours = Object.values(workingHours).some(day => day.open && day.close);
     if (!hasWorkingHours) {
-        alert('Пожалуйста, заполните хотя бы один день работы!');
+        alert('Please fill in at least one working day!');
         return;
     }
     
@@ -414,7 +414,7 @@ async function addCafe() {
         
     } catch (error) {
         console.error('❌ Error adding cafe:', error);
-        alert('Ошибка добавления кафе: ' + error.message);
+        alert('Error adding cafe: ' + error.message);
     }
 }
 
@@ -446,35 +446,35 @@ function showCafeCredentials(cafeName, login, password) {
     modal.className = 'credentials-modal';
     modal.innerHTML = `
         <div class="credentials-content">
-            <h2>✅ Кафе "${cafeName}" успешно создано!</h2>
+            <h2>✅ Cafe "${cafeName}" created successfully!</h2>
             
             <div class="credentials-info">
-                <h3>🔐 ДАННЫЕ ДЛЯ ВХОДА В TMA:</h3>
+                <h3>🔐 TMA LOGIN CREDENTIALS:</h3>
                 
                 <div class="credential-row">
-                    <strong>Логин:</strong> <span class="credential-value">${login}</span>
+                    <strong>Login:</strong> <span class="credential-value">${login}</span>
                     <button onclick="copyToClipboard('${login}')" class="copy-btn">📋</button>
                 </div>
                 
                 <div class="credential-row">
-                    <strong>Пароль:</strong> <span class="credential-value">${password}</span>
+                    <strong>Password:</strong> <span class="credential-value">${password}</span>
                     <button onclick="copyToClipboard('${password}')" class="copy-btn">📋</button>
                 </div>
             </div>
             
             <div class="credentials-info">
-                <h4>📝 Примеры логинов:</h4>
+                <h4>📝 Login examples:</h4>
                 <p><strong>Starbucks</strong> → <code>starbucks1</code></p>
                 <p><strong>Café Central</strong> → <code>cafecentral1</code></p>
                 <p><strong>McDonald's</strong> → <code>mcdonalds1</code></p>
             </div>
             
             <div class="credentials-warning">
-                ⚠️ <strong>ВНИМАНИЕ:</strong> Пароль показывается только один раз!
-                <br>📋 Скопируйте и передайте владельцу кафе.
+                ⚠️ <strong>WARNING:</strong> Password is shown only once!
+                <br>📋 Copy and share with the cafe owner.
             </div>
             
-            <button onclick="closeCredentialsModal()" class="close-btn">Закрыть</button>
+            <button onclick="closeCredentialsModal()" class="close-btn">Close</button>
         </div>
     `;
     
@@ -506,7 +506,7 @@ function closeCredentialsModal() {
 
 // Delete city
 async function deleteCity(cityId) {
-    if (!confirm('Вы уверены, что хотите удалить этот город?')) {
+    if (!confirm('Are you sure you want to delete this city?')) {
         return;
     }
     
@@ -517,17 +517,17 @@ async function deleteCity(cityId) {
         const cityRef = window.firebase.doc(window.firebase.db, 'cities', cityId);
         await window.firebase.deleteDoc(cityRef);
         
-        showSuccess('Город успешно удален!');
+        showSuccess('City deleted successfully!');
         console.log('City deleted successfully');
     } catch (error) {
         console.error('Error deleting city:', error);
-        showError('Ошибка удаления города: ' + error.message);
+        showError('Error deleting city: ' + error.message);
     }
 }
 
 // Delete cafe
 async function deleteCafe(cafeId) {
-    if (!confirm('Вы уверены, что хотите удалить это кафе?')) {
+    if (!confirm('Are you sure you want to delete this cafe?')) {
         return;
     }
     
@@ -538,11 +538,11 @@ async function deleteCafe(cafeId) {
         const cafeRef = window.firebase.doc(window.firebase.db, 'cafes', cafeId);
         await window.firebase.deleteDoc(cafeRef);
         
-        showSuccess('Кафе успешно удалено!');
+        showSuccess('Cafe deleted successfully!');
         console.log('Cafe deleted successfully');
     } catch (error) {
         console.error('Error deleting cafe:', error);
-        showError('Ошибка удаления кафе: ' + error.message);
+        showError('Error deleting cafe: ' + error.message);
     }
 }
 
@@ -568,7 +568,7 @@ async function editCafe(cafeId) {
         
     } catch (error) {
         console.error('❌ Error loading edit form:', error);
-        showError('Ошибка загрузки формы редактирования: ' + error.message);
+        showError('Error loading edit form: ' + error.message);
     }
 }
 
@@ -849,13 +849,13 @@ function handlePhotoUpload(event) {
     if (file) {
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            alert('Пожалуйста, выберите только файлы изображений!');
+            alert('Please select only image files!');
             return;
         }
         
         // Validate file size (max 500KB)
         if (file.size > 500 * 1024) {
-            alert('Изображение должно быть менее 500KB! Будет автоматически сжато.');
+            alert('Image must be under 500KB! It will be automatically compressed.');
         }
         
         // Compress and preview image
@@ -1139,7 +1139,7 @@ async function handleEditCafeSubmit(event) {
         await updateCafeInFirebase(cafeId, updatedCafe);
         
         // Show success and close modal
-        showSuccess('Кафе успешно обновлено!');
+        showSuccess('Cafe updated successfully!');
         closeEditCafeModal();
         
         // Refresh cafes list
@@ -1147,7 +1147,7 @@ async function handleEditCafeSubmit(event) {
         
     } catch (error) {
         console.error('❌ Error updating cafe:', error);
-        showError('Ошибка обновления кафе: ' + error.message);
+        showError('Error updating cafe: ' + error.message);
     }
 }
 
@@ -1254,7 +1254,7 @@ async function handleEditPhotoUpload(event) {
         }
     } catch (error) {
         console.error('❌ Error processing edit photo:', error);
-        showError('Ошибка обработки фото: ' + error.message);
+        showError('Error processing photo: ' + error.message);
     }
 }
 
@@ -1300,7 +1300,7 @@ async function viewCafePassword(cafeId) {
         
     } catch (error) {
         console.error('❌ Error loading password:', error);
-        showError('Ошибка загрузки пароля: ' + error.message);
+        showError('Error loading password: ' + error.message);
     }
 }
 
@@ -1344,15 +1344,15 @@ async function copyPasswordToClipboard() {
         
         if (password && password !== 'N/A') {
             await navigator.clipboard.writeText(password);
-            showSuccess('Пароль скопирован в буфер обмена!');
+            showSuccess('Password copied to clipboard!');
             console.log('✅ Password copied to clipboard');
         } else {
-            showError('Нет пароля для копирования!');
+            showError('No password to copy!');
         }
         
     } catch (error) {
         console.error('❌ Error copying password:', error);
-        showError('Ошибка копирования пароля: ' + error.message);
+        showError('Error copying password: ' + error.message);
     }
 }
 
@@ -1407,7 +1407,7 @@ async function fixDuplicateLogins() {
             cafesFixed: fixedCount
         });
         
-        alert(`✅ Исправление дубликатов завершено!\n\n📊 Результаты:\n• ${fixedCount} кафе исправлено\n• Дубликаты успешно устранены`);
+        alert(`✅ Duplicate fix completed!\n\n📊 Results:\n• ${fixedCount} cafes fixed\n• Duplicates successfully resolved`);
         
         // Refresh cafes list
         await loadCafes();
@@ -1415,7 +1415,7 @@ async function fixDuplicateLogins() {
         
     } catch (error) {
         console.error('❌ Fix duplicates error:', error);
-        alert('❌ Ошибка исправления: ' + error.message);
+        alert('❌ Fix error: ' + error.message);
     }
 }
 
@@ -1460,7 +1460,7 @@ async function migrateCafesToAddLogins() {
             total: cafesSnapshot.docs.length
         });
         
-        alert(`✅ Миграция завершена!\n\n📊 Результаты:\n• ${migratedCount} кафе мигрировано\n• ${skippedCount} кафе уже имели логин\n• ${cafesSnapshot.docs.length} всего кафе`);
+        alert(`✅ Migration completed!\n\n📊 Results:\n• ${migratedCount} cafes migrated\n• ${skippedCount} cafes already had login\n• ${cafesSnapshot.docs.length} total cafes`);
         
         // Refresh cafes list to show new logins
         await loadCafes();
@@ -1468,7 +1468,7 @@ async function migrateCafesToAddLogins() {
         
     } catch (error) {
         console.error('❌ Migration error:', error);
-        alert('❌ Ошибка миграции: ' + error.message);
+        alert('❌ Migration error: ' + error.message);
     }
 }
 

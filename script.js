@@ -69,7 +69,7 @@ window.showEarnPointsModal = function(cafe) {
     // Create modal content
     const modalContent = `
         <div class="earn-points-modal">
-            <h2>💰 Накопить баллы</h2>
+            <h2>💰 Earn Points</h2>
             
             <div class="cafe-info-modal">
                 <h3>${cafe.name}</h3>
@@ -77,14 +77,14 @@ window.showEarnPointsModal = function(cafe) {
             </div>
             
             <div class="qr-code-section">
-                <h4>📱 QR-код</h4>
+                <h4>📱 QR Code</h4>
                 <div class="qr-code-container">
                     <canvas id="qrCanvas" width="200" height="200"></canvas>
                 </div>
             </div>
             
             <div class="manual-code-section">
-                <h4>⌨️ Код вручную</h4>
+                <h4>⌨️ Manual Code</h4>
                 <div class="code-display">
                     <span class="user-code">${userCode}</span>
                     <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
@@ -92,8 +92,8 @@ window.showEarnPointsModal = function(cafe) {
             </div>
             
             <div class="instructions">
-                <p>🌟 Покажите этот код или QR-код, чтобы получить баллы!</p>
-                <p>💡 Каждое посещение = разное количество баллов в зависимости от кафе</p>
+                <p>🌟 Show this code or QR code to earn points!</p>
+                <p>💡 Each visit = different points depending on the cafe</p>
             </div>
         </div>
     `;
@@ -119,9 +119,9 @@ function generateUserCode() {
 // Copy user code to clipboard
 window.copyUserCode = function(code) {
     navigator.clipboard.writeText(code).then(() => {
-        alert('✅ Код скопирован в буфер обмена!');
+        alert('✅ Code copied to clipboard!');
     }).catch(() => {
-        alert('❌ Ошибка при копировании кода');
+        alert('❌ Error copying code');
     });
 };
 
@@ -158,7 +158,7 @@ function generateQRCode(text, canvasId) {
 window.showCafeModal = function(cafe) {
     console.log('🎯 Opening cafe modal for:', cafe.name);
     // For now, just show an alert
-    alert(`🎯 Применить программу лояльности в ${cafe.name}\n💡 Эта функция будет реализована в ближайшее время!`);
+    alert(`🎯 Apply loyalty program at ${cafe.name}\n💡 This feature will be implemented soon!`);
 };
 
 // Load cafe history
@@ -166,7 +166,7 @@ window.loadCafeHistory = async function(cafeId, cafeName) {
     try {
         const userCode = window.currentUserCode || '00000000';
         if (!userCode || userCode === '00000000') {
-            showError('Код пользователя не найден');
+            showError('User code not found');
             return;
         }
 
@@ -175,7 +175,7 @@ window.loadCafeHistory = async function(cafeId, cafeName) {
         
         if (!collection || !query || !where || !orderBy || !getDocs) {
             console.error('❌ Firebase functions not available');
-            showError('Firebase недоступен');
+            showError('Firebase unavailable');
             return;
         }
 
@@ -228,7 +228,7 @@ window.loadCafeHistory = async function(cafeId, cafeName) {
                         points: 50,
                         orderAmount: 25.00,
                         timestamp: { seconds: Date.now() / 1000 - 86400 },
-                        description: 'Посещение кафе - заказ кофе и пирога'
+                        description: 'Cafe visit - coffee and pastry order'
                     },
                     {
                         id: 'sample2',
@@ -236,7 +236,7 @@ window.loadCafeHistory = async function(cafeId, cafeName) {
                         points: 30,
                         orderAmount: 15.00,
                         timestamp: { seconds: Date.now() / 1000 - 172800 },
-                        description: 'Посещение кафе - заказ капучино'
+                        description: 'Cafe visit - cappuccino order'
                     }
                 ];
                 showHistoryModal(cafeName, sampleHistory);
@@ -246,7 +246,7 @@ window.loadCafeHistory = async function(cafeId, cafeName) {
         }
     } catch (error) {
         console.error('Error loading cafe history:', error);
-        showError('Ошибка при загрузке истории');
+        showError('Error loading history');
     }
 };
 
@@ -297,13 +297,13 @@ function generateHistoryFromPoints(cafeName, currentPoints) {
         
         // Generate description
         const descriptions = [
-            'Посещение кафе - заказ кофе и пирога',
-            'Посещение кафе - заказ капучино',
-            'Посещение кафе - заказ эспрессо',
-            'Посещение кафе - заказ завтрака',
-            'Посещение кафе - заказ перекуса',
-            'Посещение кафе - заказ горячего напитка',
-            'Посещение кафе - заказ десерта'
+            'Cafe visit - coffee and pastry order',
+            'Cafe visit - cappuccino order',
+            'Cafe visit - espresso order',
+            'Cafe visit - breakfast order',
+            'Cafe visit - snack order',
+            'Cafe visit - hot drink order',
+            'Cafe visit - dessert order'
         ];
         
         const description = descriptions[Math.floor(Math.random() * descriptions.length)];
@@ -334,25 +334,25 @@ window.showHistoryModal = function(cafeName, history) {
             
             <div class="history-stats">
                 <div class="stat-item">
-                    <span class="stat-label">Всего заказов:</span>
+                    <span class="stat-label">Total orders:</span>
                     <span class="stat-value">${history.length}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Общая сумма:</span>
+                    <span class="stat-label">Total amount:</span>
                     <span class="stat-value">₽ ${history.reduce((sum, item) => sum + (item.orderAmount || 0), 0).toFixed(2)}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Баллов получено:</span>
+                    <span class="stat-label">Points earned:</span>
                     <span class="stat-value">${history.filter(item => item.type === 'earn').reduce((sum, item) => sum + item.points, 0)}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Баллов потрачено:</span>
+                    <span class="stat-label">Points spent:</span>
                     <span class="stat-value">${history.filter(item => item.type === 'spend').reduce((sum, item) => sum + item.points, 0)}</span>
                 </div>
             </div>
             
             <div class="history-list">
-                <h3>📋 Транзакции</h3>
+                <h3>📋 Transactions</h3>
                 ${history.length > 0 ? 
                     history.map(item => `
                         <div class="history-item ${item.type}">
@@ -361,16 +361,16 @@ window.showHistoryModal = function(cafeName, history) {
                             </div>
                             <div class="history-details">
                                 <div class="history-type">
-                                    ${item.type === 'earn' ? 'Баллы получены' : 'Баллы потрачены'}
+                                    ${item.type === 'earn' ? 'Points earned' : 'Points spent'}
                                 </div>
                                 <div class="history-amount">
                                     ${item.orderAmount ? `₽ ${item.orderAmount.toFixed(2)}` : ''}
                                 </div>
                                 <div class="history-description">
-                                    ${item.description || 'Транзакция лояльности'}
+                                    ${item.description || 'Loyalty transaction'}
                                 </div>
                                 <div class="history-date">
-                                    ${new Date(item.timestamp.seconds * 1000).toLocaleDateString('ru-RU')}
+                                    ${new Date(item.timestamp.seconds * 1000).toLocaleDateString('en-US')}
                                 </div>
                             </div>
                             <div class="history-points ${item.type}">
@@ -378,7 +378,7 @@ window.showHistoryModal = function(cafeName, history) {
                             </div>
                         </div>
                     `).join('') :
-                    '<div class="no-history">Транзакций не найдено</div>'
+                    '<div class="no-history">No transactions found</div>'
                 }
             </div>
         </div>
@@ -447,7 +447,7 @@ window.showEarnPoints = function(cafeId, cafeName) {
     console.log('⬆️ Show earn points for cafe:', cafeId, cafeName);
     
     if (!window.currentUser) {
-        alert('⚠️ Вам нужно войти в систему, чтобы накапливать баллы!\n💡 Откройте приложение через Telegram');
+        alert('⚠️ You need to log in to earn points!\n💡 Open the app via Telegram');
         return;
     }
     
@@ -458,21 +458,21 @@ window.showEarnPoints = function(cafeId, cafeName) {
     
     const modalContent = `
         <div class="earn-points-modal">
-            <h2>⬆️ Накопить баллы</h2>
+            <h2>⬆️ Earn Points</h2>
             <div class="cafe-info-modal">
                 <h3>${cafeName}</h3>
-                <p>📱 Покажите этот код бариста или администратору</p>
+                <p>📱 Show this code to the barista or manager</p>
             </div>
             
             <div class="qr-code-section">
-                <h4>📱 QR-код:</h4>
+                <h4>📱 QR Code:</h4>
                 <div class="qr-code-container">
                     <canvas id="qrCanvas" width="200" height="200"></canvas>
                 </div>
             </div>
             
             <div class="manual-code-section">
-                <h4>🔢 Код из 8 цифр:</h4>
+                <h4>🔢 8-digit code:</h4>
                 <div class="code-display">
                     <span class="user-code">${userCode}</span>
                     <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
@@ -480,12 +480,12 @@ window.showEarnPoints = function(cafeId, cafeName) {
             </div>
             
             <div class="instructions">
-                <p>💡 Бариста отсканирует QR-код или введёт 8-значный код в приложении кафе</p>
+                <p>💡 Barista will scan QR code or enter the 8-digit code in the cafe app</p>
             </div>
         </div>
     `;
     
-    showModal(modalContent, 'Накопить баллы');
+    showModal(modalContent, 'Earn Points');
     
     // Generate QR code
     generateQRCodeEarn(qrData);
@@ -495,7 +495,7 @@ window.showSpendPoints = function(cafeId, cafeName) {
     console.log('⬇️ Show spend points for cafe:', cafeId, cafeName);
     
     if (!window.currentUser) {
-        alert('⚠️ Вам нужно войти в систему, чтобы тратить баллы!\n💡 Откройте приложение через Telegram');
+        alert('⚠️ You need to log in to spend points!\n💡 Open the app via Telegram');
         return;
     }
     
@@ -506,21 +506,21 @@ window.showSpendPoints = function(cafeId, cafeName) {
     
     const modalContent = `
         <div class="spend-points-modal">
-            <h2>⬇️ Потратить баллы</h2>
+            <h2>⬇️ Spend Points</h2>
             <div class="cafe-info-modal">
                 <h3>${cafeName}</h3>
-                <p>📱 Покажите этот код бариста или администратору</p>
+                <p>📱 Show this code to the barista or manager</p>
             </div>
             
             <div class="qr-code-section">
-                <h4>📱 QR-код:</h4>
+                <h4>📱 QR Code:</h4>
                 <div class="qr-code-container">
                     <canvas id="qrCanvasSpend" width="200" height="200"></canvas>
                 </div>
             </div>
             
             <div class="manual-code-section">
-                <h4>🔢 Код из 8 цифр:</h4>
+                <h4>🔢 8-digit code:</h4>
                 <div class="code-display">
                     <span class="user-code">${userCode}</span>
                     <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
@@ -528,13 +528,13 @@ window.showSpendPoints = function(cafeId, cafeName) {
             </div>
             
             <div class="instructions">
-                <p>💡 Бариста отсканирует QR-код или введёт 8-значный код в приложении кафе</p>
-                <p>💰 После сканирования будет показан ваш баланс баллов и пересчитана сумма заказа</p>
+                <p>💡 Barista will scan QR code or enter the 8-digit code in the cafe app</p>
+                <p>💰 After scanning, your points balance will be shown and order amount recalculated</p>
             </div>
         </div>
     `;
     
-    showModal(modalContent, 'Потратить баллы');
+    showModal(modalContent, 'Spend Points');
     
     // Generate QR code
     generateQRCodeSpend(qrData);
@@ -727,7 +727,7 @@ async function createDefaultCafes() {
         {
             name: 'Café Central',
             city: 'São Paulo',
-            description: 'Уютное кафе в центре города',
+            description: 'Cozy cafe in the city center',
             hours: '8:00 - 22:00'
         }
     ];
@@ -778,7 +778,7 @@ function populateCitySelect(cities) {
         return;
     }
     
-    citySelect.innerHTML = '<option value="">Выберите город</option>';
+    citySelect.innerHTML = '<option value="">Select a city</option>';
     
     cities.forEach(city => {
         const option = document.createElement('option');
@@ -816,7 +816,7 @@ function displayCafes() {
         if (cafesData.length === 0) {
             cafesList.innerHTML = `
                 <div class="no-cafes">
-                    <p>Загрузка кафе...</p>
+                    <p>Loading cafes...</p>
                     <div class="loading"></div>
                 </div>
             `;
@@ -826,7 +826,7 @@ function displayCafes() {
             const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
             
             const cafesHTML = `
-                <h3 class="cafe-section-header">Все кафе (${cafesData.length})</h3>
+                <h3 class="cafe-section-header">All Cafes (${cafesData.length})</h3>
                 <div class="cafes-grid">
                     ${cafesData.map(cafe => {
                         const isFavorite = favoritesSet.has(cafe.id);
@@ -850,10 +850,10 @@ function displayCafes() {
                                             ${isFavorite ? '❤️' : '🤍'}
                                         </button>
                                     </div>
-                                    <p class="cafe-categories">${cafe.categories || 'Заведение'}</p>
+                                    <p class="cafe-categories">${cafe.categories || 'Venue'}</p>
                                     ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                         <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
-                                            ПОДРОБНЕЕ
+                                            DETAILS
                                         </button>
                                 </div>
                             </div>
@@ -885,7 +885,7 @@ function displayCafes() {
         const favoritesSet = new Set((window.currentUser?.favorites || []).map(fav => fav.cafeId));
         
         const cafesHTML = `
-            <h3 class="cafe-section-header">Кафе в городе ${currentCity} (${cityCafes.length})</h3>
+            <h3 class="cafe-section-header">Cafes in ${currentCity} (${cityCafes.length})</h3>
             <div class="cafes-grid">
                 ${cityCafes.map(cafe => {
                     const isFavorite = favoritesSet.has(cafe.id);
@@ -907,10 +907,10 @@ function displayCafes() {
                                         ${isFavorite ? '❤️' : '🤍'}
                                     </button>
                                 </div>
-                                <p class="cafe-categories">${cafe.categories || 'Заведение'}</p>
+                                <p class="cafe-categories">${cafe.categories || 'Venue'}</p>
                                 ${cafe.address ? `<p class="cafe-address">📍 ${cafe.address}</p>` : ''}
                                 <button class="btn-details" onclick="event.stopPropagation(); showCafeDetails('${cafe.id}')">
-                                    ПОДРОБНЕЕ
+                                    DETAILS
                                 </button>
                             </div>
                         </div>
@@ -987,14 +987,14 @@ window.showCafeDetails = function(cafeId) {
                 <p class="cafe-detail-city-tag">${cafe.city}</p>
                 
                 ${cafe.address ? `<p class="cafe-detail-address" onclick="copyAddress('${cafe.address}')">📍 ${cafe.address}</p>` : ''}
-                ${cafe.telegram ? `<p class="cafe-detail-telegram" onclick="openTelegramChat('${cafe.telegram}')">💬 Написать в Telegram</p>` : ''}
+                ${cafe.telegram ? `<p class="cafe-detail-telegram" onclick="openTelegramChat('${cafe.telegram}')">💬 Message on Telegram</p>` : ''}
                 
-                <p class="cafe-detail-description">${cafe.description || 'Без описания'}</p>
+                <p class="cafe-detail-description">${cafe.description || 'No description'}</p>
                 
                 <!-- Working hours for all days -->
                 <div class="cafe-detail-working-hours">
                     <h3 class="working-hours-header" onclick="toggleWorkingHours()">
-                        🕒 Режим работы
+                        🕒 Working Hours
                         <span class="toggle-arrow">▼</span>
                     </h3>
                     <div class="working-hours-content" id="workingHoursContent" style="display: none;">
@@ -1005,10 +1005,10 @@ window.showCafeDetails = function(cafeId) {
                 <!-- Loyalty buttons -->
                 <div class="loyalty-buttons">
                     <button class="loyalty-earn-btn" onclick="showEarnPoints('${cafe.id}', '${cafe.name}')">
-                        ⬆️ Накопить баллы
+                        ⬆️ Earn Points
                     </button>
                     <button class="loyalty-spend-btn" onclick="showSpendPoints('${cafe.id}', '${cafe.name}')">
-                        ⬇️ Потратить баллы
+                        ⬇️ Spend Points
                     </button>
                 </div>
             </div>
@@ -1046,10 +1046,10 @@ window.toggleWorkingHours = function() {
     if (content && arrow) {
         if (content.style.display === 'none') {
             content.style.display = 'block';
-            arrow.textContent = '▲'; // Стрелка вверх когда открыто
+            arrow.textContent = '▲'; // Arrow up when open
         } else {
             content.style.display = 'none';
-            arrow.textContent = '▼'; // Стрелка вниз когда закрыто
+            arrow.textContent = '▼'; // Arrow down when closed
         }
     }
 };
@@ -1061,7 +1061,7 @@ window.toggleWorkingHours = function() {
 function showCitiesError() {
     const citySelect = document.getElementById('citySelect');
     if (citySelect) {
-        citySelect.innerHTML = '<option value="">Ошибка при загрузке городов</option>';
+        citySelect.innerHTML = '<option value="">Error loading cities</option>';
     }
     console.error('❌ Cities loading failed');
 }
@@ -1070,7 +1070,7 @@ function showCitiesError() {
 function showCafesError() {
     const cafesList = document.getElementById('cafesList');
     if (cafesList) {
-        cafesList.innerHTML = '<div class="no-cafes"><p>Ошибка при загрузке кафе</p></div>';
+        cafesList.innerHTML = '<div class="no-cafes"><p>Error loading cafes</p></div>';
     }
     console.error('❌ Cafes loading failed');
 }
@@ -1098,7 +1098,7 @@ function showLoadingState() {
         cafesList.innerHTML = `
             <div class="loading">
                 <div class="loading-spinner"></div>
-                <p>Загрузка кафе...</p>
+                <p>Loading cafes...</p>
             </div>
         `;
     }
@@ -1107,8 +1107,8 @@ function showLoadingState() {
 // Hide loading state
 function hideLoadingState() {
     const cafesList = document.getElementById('cafesList');
-    if (cafesList && (cafesList.innerHTML.includes('Загрузка кафе') || cafesList.innerHTML.includes('Carregando cafés'))) {
-        cafesList.innerHTML = '<div class="loading">Выберите город, чтобы увидеть кафе</div>';
+    if (cafesList && (cafesList.innerHTML.includes('Loading cafes') || cafesList.innerHTML.includes('Carregando cafés'))) {
+        cafesList.innerHTML = '<div class="loading">Select a city to see cafes</div>';
     }
 }
 
@@ -1118,8 +1118,8 @@ function showErrorState() {
     if (cafesList) {
         cafesList.innerHTML = `
             <div class="no-cafes">
-                <p>❌ Ошибка при загрузке данных</p>
-                <p>Попробуйте перезагрузить страницу</p>
+                <p>❌ Error loading data</p>
+                <p>Please try refreshing the page</p>
             </div>
         `;
     }
@@ -1387,7 +1387,7 @@ function setFallbackUserInfo() {
     }
     
     if (userName) {
-        userName.textContent = 'Usuário Teste';
+        userName.textContent = 'Test User';
         console.log('✅ Fallback user name set');
     }
 }
@@ -1703,7 +1703,7 @@ async function showLoyalty() {
     console.log('🎯 Loyalty button clicked');
     
     if (!window.currentUser) {
-        alert('⚠️ Вам нужно войти в систему, чтобы увидеть свою программу лояльности!');
+        alert('⚠️ You need to log in to see your loyalty program!');
         return;
     }
     
@@ -1711,11 +1711,11 @@ async function showLoyalty() {
         // Show loading state
         const loadingContent = `
             <div class="loyalty-modal">
-                <h2>🎯 Моя лояльность</h2>
-                <div class="loading">Загрузка данных программы лояльности...</div>
+                <h2>🎯 My Loyalty</h2>
+                <div class="loading">Loading loyalty program data...</div>
             </div>
         `;
-        showModal(loadingContent, 'Моя лояльность');
+        showModal(loadingContent, 'My Loyalty');
         
         // Load user's loyalty data
         const loyaltyData = await loadUserLoyaltyData();
@@ -1723,19 +1723,19 @@ async function showLoyalty() {
         // Create modal content with real data
         const modalContent = `
             <div class="loyalty-modal">
-                <h2>🎯 Моя лояльность</h2>
+                <h2>🎯 My Loyalty</h2>
                 
                 <div class="loyalty-cafes">
-                    <h3>🏪 Мои кафе</h3>
+                    <h3>🏪 My Cafes</h3>
                     ${loyaltyData.cafes.length > 0 ? 
                         loyaltyData.cafes.map(cafe => `
                             <div class="loyalty-cafe-item">
                                 <div class="cafe-actions">
                                     <button class="action-btn apply-loyalty-btn" onclick="applyLoyalty('${cafe.id}', '${cafe.name}')">
-                                        🎯 Применить лояльность
+                                        🎯 Apply Loyalty
                                     </button>
                                     <button class="action-btn view-history-btn" onclick="viewHistory('${cafe.id}', '${cafe.name}')">
-                                        📊 Смотреть историю
+                                        📊 View History
                                     </button>
                                 </div>
                                 <div class="cafe-main-info">
@@ -1744,34 +1744,34 @@ async function showLoyalty() {
                                         <span class="cafe-location">📍 ${cafe.address || cafe.city}</span>
                                         <div class="cafe-points">
                                             <span class="points-number">${cafe.points}</span>
-                                            <span class="points-label">баллов</span>
+                                            <span class="points-label">points</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         `).join('') :
-                        '<div class="no-cafes">Вы ещё не посещали кафе. Посещайте кафе, чтобы накапливать баллы!</div>'
+                        '<div class="no-cafes">You haven\'t visited any cafes yet. Visit cafes to earn points!</div>'
                     }
                 </div>
                 
                 <div class="loyalty-info">
-                    <p>🌟 Посещайте кафе, чтобы накапливать баллы и получать бонусы!</p>
-                    <p>🎁 Показывайте свой 8-значный код, чтобы получать баллы при каждом посещении.</p>
-                    <p>💡 У каждого кафе своя система баллов и бонусов.</p>
+                    <p>🌟 Visit cafes to earn points and get rewards!</p>
+                    <p>🎁 Show your 8-digit code to earn points with every visit.</p>
+                    <p>💡 Each cafe has its own points and rewards system.</p>
                 </div>
             </div>
         `;
         
-        showModal(modalContent, 'Моя лояльность');
+        showModal(modalContent, 'My Loyalty');
         
     } catch (error) {
         console.error('❌ Error loading loyalty data:', error);
         const errorContent = `
             <div class="loyalty-modal">
-                <h2>🎯 Моя лояльность</h2>
+                <h2>🎯 My Loyalty</h2>
                 <div class="error-message">
-                    <p>❌ Ошибка при загрузке данных программы лояльности</p>
-                    <p>Попробуйте снова позже.</p>
+                    <p>❌ Error loading loyalty program data</p>
+                    <p>Please try again later.</p>
                 </div>
             </div>
         `;
@@ -1854,12 +1854,12 @@ function showFavorites() {
             <div class="favorites-modal">
                 <h2>❤️ Избранное</h2>
                 <div class="empty-favorites">
-                    <p>⚠️ Вам нужно войти в систему, чтобы увидеть избранное</p>
-                    <p>💡 Откройте приложение через Telegram</p>
+                    <p>⚠️ You need to log in to see your favorites</p>
+                    <p>💡 Open the app via Telegram</p>
                 </div>
             </div>
         `;
-        showModal(modalContent, 'Избранное');
+        showModal(modalContent, 'Favorites');
         return;
     }
     
@@ -1869,14 +1869,14 @@ function showFavorites() {
     if (favorites.length === 0) {
         const modalContent = `
             <div class="favorites-modal">
-                <h2>❤️ Избранное</h2>
+                <h2>❤️ Favorites</h2>
                 <div class="empty-favorites">
-                    <p>📝 У вас пока нет избранных кафе</p>
-                    <p>💡 Нажмите на сердечко в кафе, чтобы добавить их в избранное!</p>
+                    <p>📝 You don't have any favorite cafes yet</p>
+                    <p>💡 Click the heart on a cafe to add it to favorites!</p>
                 </div>
             </div>
         `;
-        showModal(modalContent, 'Избранное');
+        showModal(modalContent, 'Favorites');
     } else {
         // Show favorites list
         const favoritesList = favorites.map(fav => `
@@ -1885,20 +1885,20 @@ function showFavorites() {
                 <p>${fav.cafeCity}</p>
                 <p>${fav.cafeDescription || ''}</p>
                 <button class="remove-favorite" onclick="removeFavorite('${fav.cafeId}')">
-                    ❌ Удалить из избранного
+                    ❌ Remove from favorites
                 </button>
             </div>
         `).join('');
         
         const modalContent = `
             <div class="favorites-modal">
-                <h2>❤️ Избранное (${favorites.length})</h2>
+                <h2>❤️ Favorites (${favorites.length})</h2>
                 <div class="favorites-list">
                     ${favoritesList}
                 </div>
             </div>
         `;
-        showModal(modalContent, 'Избранное');
+        showModal(modalContent, 'Favorites');
     }
 }
 
@@ -2226,24 +2226,24 @@ function getTelegramUserData() {
 // Format working hours for display
 function formatWorkingHours(workingHours) {
     if (!workingHours) {
-        return '<p class="cafe-hours">Режим работы не указан</p>';
+        return '<p class="cafe-hours">Working hours not specified</p>';
     }
     
-    // Определяем порядок дней недели (Пн -> Вс)
+    // Define weekday order (Mon -> Sun)
     const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const daysNames = {
-        monday: 'Пн',
-        tuesday: 'Вт',
-        wednesday: 'Ср',
-        thursday: 'Чт',
-        friday: 'Пт',
-        saturday: 'Сб',
-        sunday: 'Вс'
+        monday: 'Mon',
+        tuesday: 'Tue',
+        wednesday: 'Wed',
+        thursday: 'Thu',
+        friday: 'Fri',
+        saturday: 'Sat',
+        sunday: 'Sun'
     };
     
     let hoursHtml = '<div class="working-hours-list">';
     
-    // Перебираем дни в правильном порядке
+    // Iterate through days in correct order
     daysOrder.forEach(day => {
         const hours = workingHours[day];
         if (hours && hours.open && hours.close) {
@@ -2270,7 +2270,7 @@ async function copyAddress(address) {
         // Show subtle feedback without alert
         const addressElement = event.target;
         const originalText = addressElement.textContent;
-        addressElement.textContent = '✅ Copiado!';
+        addressElement.textContent = '✅ Copied!';
         addressElement.style.color = '#28A745';
         
         // Restore original text after 2 seconds
@@ -2284,7 +2284,7 @@ async function copyAddress(address) {
         // Show error feedback
         const addressElement = event.target;
         const originalText = addressElement.textContent;
-        addressElement.textContent = '❌ Erro ao copiar';
+        addressElement.textContent = '❌ Copy failed';
         addressElement.style.color = '#DC3545';
         
         setTimeout(() => {
@@ -2318,7 +2318,7 @@ function showEarnPoints(cafeId, cafeName) {
     console.log('⬆️ Show earn points for cafe:', cafeId, cafeName);
     
     if (!window.currentUser) {
-        alert('⚠️ Вам нужно войти в систему, чтобы накапливать баллы!\n💡 Откройте приложение через Telegram');
+        alert('⚠️ You need to log in to earn points!\n💡 Open the app via Telegram');
         return;
     }
     
@@ -2329,21 +2329,21 @@ function showEarnPoints(cafeId, cafeName) {
     
     const modalContent = `
         <div class="earn-points-modal">
-            <h2>⬆️ Накопить баллы</h2>
+            <h2>⬆️ Earn Points</h2>
             <div class="cafe-info-modal">
                 <h3>${cafeName}</h3>
-                <p>📱 Покажите этот код бариста или администратору</p>
+                <p>📱 Show this code to the barista or manager</p>
             </div>
             
             <div class="qr-code-section">
-                <h4>📱 QR-код:</h4>
+                <h4>📱 QR Code:</h4>
                 <div class="qr-code-container">
                     <canvas id="qrCanvas" width="200" height="200"></canvas>
                 </div>
             </div>
             
             <div class="manual-code-section">
-                <h4>🔢 Код из 8 цифр:</h4>
+                <h4>🔢 8-digit code:</h4>
                 <div class="code-display">
                     <span class="user-code">${userCode}</span>
                     <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
@@ -2351,12 +2351,12 @@ function showEarnPoints(cafeId, cafeName) {
             </div>
             
             <div class="instructions">
-                <p>💡 Бариста отсканирует QR-код или введёт 8-значный код в приложении кафе</p>
+                <p>💡 Barista will scan QR code or enter the 8-digit code in the cafe app</p>
             </div>
         </div>
     `;
     
-    showModal(modalContent, 'Накопить баллы');
+    showModal(modalContent, 'Earn Points');
     
     // Generate QR code
     generateQRCodeEarn(qrData);
@@ -2367,7 +2367,7 @@ function showSpendPoints(cafeId, cafeName) {
     console.log('⬇️ Show spend points for cafe:', cafeId, cafeName);
     
     if (!window.currentUser) {
-        alert('⚠️ Вам нужно войти в систему, чтобы тратить баллы!\n💡 Откройте приложение через Telegram');
+        alert('⚠️ You need to log in to spend points!\n💡 Open the app via Telegram');
         return;
     }
     
@@ -2378,21 +2378,21 @@ function showSpendPoints(cafeId, cafeName) {
     
     const modalContent = `
         <div class="spend-points-modal">
-            <h2>⬇️ Потратить баллы</h2>
+            <h2>⬇️ Spend Points</h2>
             <div class="cafe-info-modal">
                 <h3>${cafeName}</h3>
-                <p>📱 Покажите этот код бариста или администратору</p>
+                <p>📱 Show this code to the barista or manager</p>
             </div>
             
             <div class="qr-code-section">
-                <h4>📱 QR-код:</h4>
+                <h4>📱 QR Code:</h4>
                 <div class="qr-code-container">
                     <canvas id="qrCanvasSpend" width="200" height="200"></canvas>
                 </div>
             </div>
             
             <div class="manual-code-section">
-                <h4>🔢 Код из 8 цифр:</h4>
+                <h4>🔢 8-digit code:</h4>
                 <div class="code-display">
                     <span class="user-code">${userCode}</span>
                     <button class="copy-code-btn" onclick="copyUserCode('${userCode}')">📋</button>
@@ -2400,13 +2400,13 @@ function showSpendPoints(cafeId, cafeName) {
             </div>
             
             <div class="instructions">
-                <p>💡 Бариста отсканирует QR-код или введёт 8-значный код в приложении кафе</p>
-                <p>💰 После сканирования будет показан ваш баланс баллов и пересчитана сумма заказа</p>
+                <p>💡 Barista will scan QR code or enter the 8-digit code in the cafe app</p>
+                <p>💰 After scanning, your points balance will be shown and order amount recalculated</p>
             </div>
         </div>
     `;
     
-    showModal(modalContent, 'Потратить баллы');
+    showModal(modalContent, 'Spend Points');
     
     // Generate QR code
     generateQRCodeSpend(qrData);
@@ -2444,11 +2444,11 @@ function recoverDataFromUserCode(userCode, allPossibleData) {
 async function copyUserCode(code) {
     try {
         await navigator.clipboard.writeText(code);
-        alert('📋 Código copiado: ' + code);
+        alert('📋 Code copied: ' + code);
         console.log('✅ User code copied:', code);
     } catch (error) {
         console.error('❌ Error copying user code:', error);
-        alert('❌ Erro ao copiar código');
+        alert('❌ Error copying code');
     }
 }
 
